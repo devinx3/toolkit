@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.b7c4827d.css",
-    "main.js": "/static/js/main.e001c920.js",
-    "static/js/787.67f8ae8e.chunk.js": "/static/js/787.67f8ae8e.chunk.js",
-    "static/media/logo.svg": "/static/media/logo.b6b851225fc9628773d7224ae4735b84.svg",
-    "static/media/encryption.svg": "/static/media/encryption.bd66cab1c4d6a7dec1bd8285eae68aa4.svg",
-    "index.html": "/index.html",
-    "main.b7c4827d.css.map": "/static/css/main.b7c4827d.css.map",
-    "main.e001c920.js.map": "/static/js/main.e001c920.js.map",
-    "787.67f8ae8e.chunk.js.map": "/static/js/787.67f8ae8e.chunk.js.map"
+    "main.css": "/toolit/static/css/main.b7c4827d.css",
+    "main.js": "/toolit/static/js/main.d3cbb032.js",
+    "static/js/787.67f8ae8e.chunk.js": "/toolit/static/js/787.67f8ae8e.chunk.js",
+    "static/media/logo.svg": "/toolit/static/media/logo.b6b851225fc9628773d7224ae4735b84.svg",
+    "static/media/encryption.svg": "/toolit/static/media/encryption.bd66cab1c4d6a7dec1bd8285eae68aa4.svg",
+    "index.html": "/toolit/index.html",
+    "main.b7c4827d.css.map": "/toolit/static/css/main.b7c4827d.css.map",
+    "main.d3cbb032.js.map": "/toolit/static/js/main.d3cbb032.js.map",
+    "787.67f8ae8e.chunk.js.map": "/toolit/static/js/787.67f8ae8e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b7c4827d.css",
-    "static/js/main.e001c920.js"
+    "static/js/main.d3cbb032.js"
   ]
 }
