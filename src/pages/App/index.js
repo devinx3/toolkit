@@ -12,7 +12,7 @@ const { Content, Footer, Sider } = Layout;
 const Logo = (props) => {
   const {collapsed} = props;
   return (<Row className="logo" >
-    <Col span={5}><a href='/home'><Icon component={() => <LogoSvg height="2em" width="2em"/>}/></a></Col>
+    <Col span={5}><a href={process.env.PUBLIC_URL + '/home'}><Icon component={() => <LogoSvg height="2em" width="2em"/>}/></a></Col>
     {collapsed? null : <Col span={12}>工具箱</Col>}
 </Row>)
 }
@@ -77,16 +77,16 @@ const RouterList = () => {
   const list = [];
     routes.forEach(route => {
       if (route.path) {
-        list.push(<Route path={route.path} key={route.key} component={route.component} />);
+        list.push(<Route path={process.env.PUBLIC_URL + route.path} key={route.key} component={route.component} />);
       }else if (route.routes) {
         route.routes.forEach(child => {
-            list.push(<Route path={child.path} key={route.key + "/" + child.key} component={child.component} />);
+            list.push(<Route path={process.env.PUBLIC_URL + child.path} key={route.key + "/" + child.key} component={child.component} />);
         })
       }
     });
   return (<>
     { list }
-    <Redirect from='/' exact to='/home'/>
+    <Redirect from='/' exact to={process.env.PUBLIC_URL + '/home'}/>
   </>)
 }
 
