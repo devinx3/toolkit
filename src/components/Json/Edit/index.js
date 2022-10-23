@@ -241,7 +241,7 @@ const JsonEdit = () => {
                     onClick={e => handleCompressInput(inputCode, setInputCode, setOutputData)}>压缩</Button>
                 <Upload maxCount={1} beforeUpload={(file) => handelInputUpdalod(file, setInputCode)}>
                     <Button size="small" icon={<UploadOutlined />}
-                        style={{marginLeft: '5px'}} >上传</Button>
+                        style={{marginLeft: '5px'}} >导入</Button>
                 </Upload>
                 <Input.TextArea 
                     style={{marginTop: '5px'}} rows={30} placeholder="待处理的JSON片段"
