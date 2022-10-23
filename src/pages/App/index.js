@@ -4,15 +4,15 @@ import { Layout, Menu, Col, Row} from 'antd'
 import React, { useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import routes from '../../configs/router'
-import { BrowserRouter, Route, NavLink, Redirect } from 'react-router-dom'
+import { HashRouter, Route, NavLink } from 'react-router-dom'
 
 const { Content, Footer, Sider } = Layout;
 
 // Logo
 const Logo = (props) => {
-  const {collapsed} = props;
+  const {collapsed, clearItemKey} = props;
   return (<Row className="logo" >
-    <Col span={5}><a href={'/home'}><Icon component={() => <LogoSvg height="2em" width="2em"/>}/></a></Col>
+    <Col span={5}><NavLink to={'/home'} onClick={clearItemKey}><Icon component={() => <LogoSvg height="2em" width="2em"/>}/></NavLink></Col>
     {collapsed? null : <Col span={12}>工具箱</Col>}
 </Row>)
 }
@@ -48,9 +48,12 @@ function generageItems() {
   return list;
 };
 const getPath = () => {
-  let path = window.location.pathname;
+  let path = window.location.hash;
   if (!path) {
     return [];
+  }
+  if (path[0] === '#') {
+    path = path.substring(1);
   }
   if (path[0] === '/') {
     path = path.substring(1);
@@ -86,22 +89,22 @@ const RouterList = () => {
     });
   return (<>
     { list }
-    <Redirect from={'/'} exact to={'/home'}/>
   </>)
 }
 
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [itemSelectKey, setItemSelectKey] = useState();
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Layout
         style={{
           minHeight: '100vh',
         }}
       >
         <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-          <Logo collapsed={collapsed}/>
-          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()} mode="inline" items={generageItems()} />
+          <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])}/>
+          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
         </Sider>
         <Layout className="site-layout">
           <Content
@@ -129,7 +132,7 @@ const App = () => {
           </Footer>
         </Layout>
       </Layout>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 export default App;

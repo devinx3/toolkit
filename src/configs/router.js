@@ -7,6 +7,12 @@ import Encrypt from '../components/Text/Encrypt'
 const routes = [
   {
     menu: false,
+    key: 'index',
+    path: '/',
+    component: Home,
+  },
+  {
+    menu: false,
     key: 'home',
     path: '/home',
     component: Home,
