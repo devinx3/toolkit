@@ -19,7 +19,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:prod": "PUBLIC_URL=/toolkit npm run build --if-present"
   },
   "eslintConfig": {
     "extends": [
