@@ -1,6 +1,13 @@
 import React from 'react';
+import MarkdownPreview from '@uiw/react-markdown-preview';
+
+const source = `
+# 工具箱
+
+收集常用的工具箱功能
+`;
 
 const Home = () => {
-    return (<React.Fragment>欢迎使用工具箱</React.Fragment>);
+    return (<MarkdownPreview source={source} />);
 }
 export default Home;
