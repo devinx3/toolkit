@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/toolkit/static/css/main.b7c4827d.css",
-    "main.js": "/toolkit/static/js/main.db479ad1.js",
+    "main.js": "/toolkit/static/js/main.126625b3.js",
     "static/js/787.67f8ae8e.chunk.js": "/toolkit/static/js/787.67f8ae8e.chunk.js",
     "static/media/logo.svg": "/toolkit/static/media/logo.b6b851225fc9628773d7224ae4735b84.svg",
     "static/media/encryption.svg": "/toolkit/static/media/encryption.bd66cab1c4d6a7dec1bd8285eae68aa4.svg",
     "index.html": "/toolkit/index.html",
     "main.b7c4827d.css.map": "/toolkit/static/css/main.b7c4827d.css.map",
-    "main.db479ad1.js.map": "/toolkit/static/js/main.db479ad1.js.map",
+    "main.126625b3.js.map": "/toolkit/static/js/main.126625b3.js.map",
     "787.67f8ae8e.chunk.js.map": "/toolkit/static/js/787.67f8ae8e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b7c4827d.css",
-    "static/js/main.db479ad1.js"
+    "static/js/main.126625b3.js"
   ]
 }
