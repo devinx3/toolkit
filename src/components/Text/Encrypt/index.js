@@ -1,6 +1,5 @@
-import { Divider, Typography, notification } from 'antd';
 import React from 'react';
-import { Button, Input, Col, Row} from 'antd';
+import { Divider, Typography, notification, Button, Input, Col, Row } from 'antd';
 
 import CryptoJS from 'crypto-js';
 

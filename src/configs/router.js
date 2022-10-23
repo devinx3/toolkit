@@ -3,6 +3,7 @@ import { FileTextOutlined } from '@ant-design/icons'
 
 import Home from '../pages/Home'
 import Encrypt from '../components/Text/Encrypt'
+import JsonEdit from '../components/Json/Edit'
 
 const routes = [
   {
@@ -28,6 +29,20 @@ const routes = [
         icon: <CuszIcons.Encryption />,
         path: '/text/encrypt',
         component: Encrypt,
+      },
+    ],
+  },
+  {
+    key: 'json',
+    name: 'JSON',
+    icon: <CuszIcons.JsonFolder />,
+    routes: [
+      {
+        key: 'edit',
+        name: '编辑',
+        icon: <CuszIcons.JsonEdit />,
+        path: '/json/edit',
+        component: JsonEdit,
       },
     ],
   }
