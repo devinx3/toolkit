@@ -1,7 +1,8 @@
 import React from 'react';
-import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Tooltip } from 'antd';
+import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Tooltip, Upload } from 'antd';
 import StrUtil from '../../../utils/StrUtil'
-import { CopyOutlined } from '@ant-design/icons';
+import FileUtil from '../../../utils/FileUtil'
+import { CopyOutlined, UploadOutlined, DownloadOutlined} from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -169,12 +170,23 @@ const handleCompressInput = (input, setInputCode, setError) => {
     }
 }
 
+// 文件上传
+const handelInputUpdalod = (file, setInputCode) => {
+    FileUtil.readAsText(file, setInputCode)
+    return false;
+}
+
 // 复制按钮点击事件
 const handleCopyClick = (outputData, setCopyStyleClass) => {
     if (StrUtil.copyToClipboard(JSON.stringify(outputData))) {
         setCopyStyleClass(copyStype.after);
         message.info("复制成功")
     }
+}
+
+// 复制按钮点击事件
+const handleDownloadClick = (outputData) => {
+    FileUtil.download(JSON.stringify(outputData), 'output.json')
 }
 
 // 自定义处理逻辑
@@ -227,6 +239,10 @@ const JsonEdit = () => {
                 <Button size="small"
                     style={{marginLeft: '5px', backgroundColor: '#5cb85c', color: '#fff', borderColor: '#4cae4c'}} 
                     onClick={e => handleCompressInput(inputCode, setInputCode, setOutputData)}>压缩</Button>
+                <Upload maxCount={1} beforeUpload={(file) => handelInputUpdalod(file, setInputCode)}>
+                    <Button size="small" icon={<UploadOutlined />}
+                        style={{marginLeft: '5px'}} >上传</Button>
+                </Upload>
                 <Input.TextArea 
                     style={{marginTop: '5px'}} rows={30} placeholder="待处理的JSON片段"
                     value={inputCode} onChange={e => handleInputChange(e, setInputCode, setOutputData)}/>
@@ -236,6 +252,7 @@ const JsonEdit = () => {
                     <Alert message={outputData} type="error" /> :
                      (<>
                         <CopyOutlined style={copyStyleClass} onClick={() => handleCopyClick(outputData, setCopyStyleClass)} />
+                        <DownloadOutlined style={{marginLeft: '8px'}} onClick={() => handleDownloadClick(outputData)}/>
                         <pre>{JSON.stringify(outputData, null, 2)}</pre>
                     </>)) : null}
             </Col>
