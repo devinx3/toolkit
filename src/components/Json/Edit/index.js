@@ -243,7 +243,7 @@ const JsonEdit = () => {
                     <Button size="small" icon={<UploadOutlined />}
                         style={{marginLeft: '5px'}} >导入</Button>
                 </Upload>
-                <Input.TextArea 
+                <Input.TextArea autoSize={{ minRows: 27, maxRows: 90}} mi
                     style={{marginTop: '5px'}} rows={30} placeholder="待处理的JSON片段"
                     value={inputCode} onChange={e => handleInputChange(e, setInputCode, setOutputData)}/>
             </Col>
