@@ -4,7 +4,7 @@ import { Layout, Menu, Col, Row} from 'antd'
 import React, { useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import routes from '../../configs/router'
-import { HashRouter, Route, NavLink } from 'react-router-dom'
+import { HashRouter, Route, NavLink, Switch } from 'react-router-dom'
 
 const { Content, Footer, Sider } = Layout;
 
@@ -80,16 +80,16 @@ const RouterList = () => {
   const list = [];
     routes.forEach(route => {
       if (route.path) {
-        list.push(<Route path={route.path} key={route.key} component={route.component} />);
+        list.push(<Route exact path={route.path} key={route.key} component={route.component} />);
       }else if (route.routes) {
         route.routes.forEach(child => {
-            list.push(<Route path={child.path} key={route.key + "/" + child.key} component={child.component} />);
+            list.push(<Route exact path={child.path} key={route.key + "/" + child.key} component={child.component} />);
         })
       }
     });
-  return (<>
+  return (<Switch>
     { list }
-  </>)
+  </Switch>)
 }
 
 const App = () => {
