@@ -95,6 +95,9 @@ const RouterList = () => {
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [itemSelectKey, setItemSelectKey] = useState();
+  const handleMenuClick = (e) => {
+    setItemSelectKey(e.key);
+  }
   return (
     <HashRouter>
       <Layout
@@ -104,7 +107,8 @@ const App = () => {
       >
         <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
           <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])}/>
-          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
+                onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
         </Sider>
         <Layout className="site-layout">
           <Content
