@@ -35,6 +35,7 @@ function generageItems() {
     if (route.routes) {
       const children = [];
       route.routes.forEach(chlid => {
+        console.log("path:" + process.env.PUBLIC_URL + chlid.path);
         children.push({
           key: chlid.key,
           icon: chlid.icon,
