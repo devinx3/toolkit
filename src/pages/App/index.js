@@ -38,7 +38,7 @@ function generageItems() {
         children.push({
           key: chlid.key,
           icon: chlid.icon,
-          label: <NavLink to={chlid.path}>{chlid.name}</NavLink>,
+          label: <NavLink to={process.env.PUBLIC_URL + chlid.path}>{chlid.name}</NavLink>,
         })
       });
       item.children = children;
@@ -86,7 +86,7 @@ const RouterList = () => {
     });
   return (<>
     { list }
-    <Redirect from='/' exact to={process.env.PUBLIC_URL + '/home'}/>
+    <Redirect from={process.env.PUBLIC_URL + '/'} exact to={process.env.PUBLIC_URL + '/home'}/>
   </>)
 }
 
