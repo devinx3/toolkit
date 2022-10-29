@@ -17,7 +17,7 @@ const ItemView = ({config, refreshView, handleConvertData}) => {
         setVisible(true);
     };
     const handleSaveConfig = () => {
-        const newConfig = {...config, scriptContent:scriptContent};
+        const newConfig = {...config, name: configName || config.name, describe: configDesc || config.describe, scriptContent:scriptContent};
         const updateResult = JsonEditService.updateConfig(newConfig);
         if (updateResult !== true) {
             message.error('更新失败, 失败原因: ' + updateResult);
