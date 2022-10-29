@@ -17,7 +17,11 @@ const ItemView = ({config, refreshView, handleConvertData}) => {
         setVisible(true);
     };
     const handleSaveConfig = () => {
-        const newConfig = {...config, name: configName || config.name, describe: configDesc || config.describe, scriptContent:scriptContent};
+        if (!scriptContent) {
+            message.error('脚本不能为空');
+            return;
+        }
+        const newConfig = {...config, name: configName || config.name, describe: configDesc || config.describe, scriptContent: scriptContent};
         const updateResult = JsonEditService.updateConfig(newConfig);
         if (updateResult !== true) {
             message.error('更新失败, 失败原因: ' + updateResult);
@@ -49,7 +53,7 @@ const ItemView = ({config, refreshView, handleConvertData}) => {
         setScriptContent(config.scriptContent)
     };
     return (<>
-        <Button style={{marginLeft: '15px'}} type="dashed" onClick={e => handleConvertData(config.scriptContent)}>{config.name}</Button>
+        <Tooltip style={{marginLeft: '15px'}} title={config.describe}><Button type="dashed" onClick={e => handleConvertData(config.scriptContent)}>{config.name}</Button></Tooltip>
         <Tooltip title="编辑"><Button shape="circle" type="text" onClick={showModal} icon={<EditOutlined />} size="small" /></Tooltip>
 
         <Modal title={"编辑脚本配置"} open={visible} width='75%' onCancel={handleCancel}

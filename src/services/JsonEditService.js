@@ -16,8 +16,10 @@ const listJsonEditConfig = () => {
     return store.jsonEditConfig.list();
 }
 
+// eg: [{id: 1, name: '名称', describe: '描述', scriptContent: '脚本内容'}]
 // 数据源
 const dataSource = listJsonEditConfig();
+
 
 // 数据方法存储方法
 const JsonEditService = {
@@ -50,6 +52,7 @@ const JsonEditService = {
         for (let index = 0; index < dataSource.length; index++) {
             if (dataSource[index].id === item.id) {
                 dataSource[index].name = item.name;
+                dataSource[index].describe = item.describe;
                 dataSource[index].scriptContent = item.scriptContent;
                 return storeJsonEditConfig(dataSource);
             }

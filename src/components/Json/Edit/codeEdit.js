@@ -33,7 +33,7 @@ const helpDocument = (<>
 const CodeEditView = ({value, onChange}) => {
     return (<>
         <Popover placement="right" content={helpDocument} title={null} trigger="click"><Button type='link'>帮助文档</Button></Popover>
-        <Input.TextArea style={{marginTop: '13px'}} rows={8} value={value} onChange={onChange}/>
+        <Input.TextArea style={{marginTop: '13px'}} placeholder="请输入脚本" rows={8} value={value} onChange={onChange}/>
     </>)
 }
 
