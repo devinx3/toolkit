@@ -1,16 +1,23 @@
 import React from 'react';
-import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Tooltip, Upload } from 'antd';
+import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Upload, Popconfirm } from 'antd';
 import StrUtil from '../../../utils/StrUtil'
 import FileUtil from '../../../utils/FileUtil'
+import CustomView from './customView';
 import { CopyOutlined, UploadOutlined, DownloadOutlined} from '@ant-design/icons';
+import CodeEditView from './codeEdit';
+import JsonEditService from '../../../services/JsonEditService';
+import * as dayjs from 'dayjs'
+
 
 const { Title } = Typography;
 
 // js 执行器
 const JsExector = (source, input) => {
     const Fun = Function;
-    const execFun = new Fun('inputObj', source);
-    return execFun(input);
+    const execFun = new Fun('inputObj', 'Util', source);
+    return execFun(input, {
+        dayjs: dayjs
+    });
 }
 
 // 复制按钮的样式
@@ -140,8 +147,8 @@ const handleKeCamelCase = (input, setOutput, setCopyStyleClass) => {
 }
 
 // 自定义格式转换
-const handleCuszConvert = (input, setOutput, convert, setCopyStyleClass) => {
-    handleOutput(input, setOutput, jsonObj => JsExector(convert, jsonObj), setCopyStyleClass);
+const handleCuszConvert = (input, setOutput, scriptContent, setCopyStyleClass) => {
+    handleOutput(input, setOutput, jsonObj => JsExector(scriptContent, jsonObj), setCopyStyleClass);
 }
 // 格式化输入
 const handleFormatInput = (input, setInputCode, setError) => {
@@ -190,7 +197,7 @@ const handleDownloadClick = (outputData) => {
 }
 
 // 自定义处理逻辑
-const ConvertModal = ({inputCode, setError, handleConvertOutput}) => {
+const ConvertModal = ({inputCode, setError, handleConvertOutput, refreshWholeEditView}) => {
     const [convertDta, setConvertDta] = React.useState('return inputObj;');
     const [visible, setVisible] = React.useState(false);
     const showModal = () => {
@@ -207,20 +214,71 @@ const ConvertModal = ({inputCode, setError, handleConvertOutput}) => {
         handleConvertOutput(convertDta);
         setVisible(false);
     };
+    const handleAddConfigSuccess = () => {
+        // 影藏窗口
+        setVisible(false)
+        // 刷新父级页面
+        refreshWholeEditView();
+    }
     return (<>
         <Button onClick={showModal}>自定义数据处理</Button>
-        <Modal title="自定义数据处理" open={visible} onOk={handleConfirmConvert} onCancel={handleCancelConvert}>
-            <Tooltip title="方法的入参名称为: inputObj, 需要返回转换后的json对象, 仅仅需要实现方法体即可"><Button type='link'>使用帮助</Button></Tooltip>
-            <Input.TextArea style={{marginTop: '13px'}} rows={8} value={convertDta} onChange={e => setConvertDta(e.target.value)}/>
+        <Modal title="自定义数据处理" open={visible} width='75%'
+            onCancel={handleCancelConvert}
+            footer={[
+                <AddConfigView key='add' scriptContent={convertDta} callAddConfigSuccess={handleAddConfigSuccess} />,
+                <Button key="cancel" onClick={handleCancelConvert}>取消</Button>,
+                <Button key="convert" type="primary" onClick={handleConfirmConvert}>转换</Button>
+            ]} >
+            <CodeEditView value={convertDta} onChange={e => setConvertDta(e.target.value)}/>
         </Modal>
     </>);
+}
+
+
+const defaultConfigName = '自定义配置';
+const AddConfigView = ({scriptContent, callAddConfigSuccess}) => {
+    const [configName, setConfigName] = React.useState();
+    const [configDesc, setConfigDesc] = React.useState();
+    const handleAddConfig = () => {
+        if (!scriptContent) {
+            message.warn("脚本内容不能为空");
+            return false;
+        }
+        const config = {
+            name: configName || defaultConfigName,
+            describe: configDesc || configName || defaultConfigName,
+            scriptContent: scriptContent
+        }
+        const addResult = JsonEditService.addConfig(config);
+        if (addResult !== true) {
+            message.error("添加配置失败, 失败原因: " + addResult);
+        }
+        message.success("添加配置成功")
+        callAddConfigSuccess()
+    }
+
+    
+    return (<Popconfirm icon={null} cancelText='取消' okText='确认'
+        onConfirm={handleAddConfig}
+        title={<>
+            <Input addonBefore={'功能名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName} />
+            <Input style={{marginTop: '3px'}} addonBefore={'功能作用'} placeholder={defaultConfigName} value={configDesc} onChange={e => setConfigDesc} />
+            </>} >
+        <Button>添加自定义配置</Button>
+    </Popconfirm>);
 }
 
 const JsonEdit = () => {
     const [inputCode, setInputCode] = React.useState('');
     const [outputData, setOutputData] = React.useState('');
     const [copyStyleClass, setCopyStyleClass] = React.useState(copyStype.before);
-    
+    // 刷新组件
+    const [refreshWhole, setRefreshWhole] = React.useState(false);
+
+    const refreshWholeEditView = () => {
+        setRefreshWhole(!refreshWhole);
+    }
+
     return (<>
         <Title level={3}>编辑JSON</Title>
         <Divider />
@@ -228,9 +286,9 @@ const JsonEdit = () => {
         <Row style={{marginTop: '10px'}}>
             <Col><Button onClick={e => handleDeleteNull(inputCode, setOutputData, setCopyStyleClass)}>删除值为空的字段</Button></Col>
             <Col style={{marginLeft: '10px'}}><Button onClick={e => handleKeCamelCase(inputCode, setOutputData, setCopyStyleClass)}>JSON key 下划线转驼峰</Button></Col>
-            <Col style={{marginLeft: '10px'}}><ConvertModal inputCode={inputCode} setError={setOutputData} handleConvertOutput={(convert) => handleCuszConvert(inputCode, setOutputData, convert, setCopyStyleClass)}/></Col>
+            <Col style={{marginLeft: '10px'}}><ConvertModal inputCode={inputCode} setError={setOutputData} refreshWholeEditView={refreshWholeEditView} handleConvertOutput={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/></Col>
         </Row>
-
+        <CustomView  style={{marginTop: '20px'}} handleConvertData={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/>
         <Row style={{marginTop: '20px'}}>
             <Col span={7}>
                 <Button size="small" 
@@ -243,7 +301,7 @@ const JsonEdit = () => {
                     <Button size="small" icon={<UploadOutlined />}
                         style={{marginLeft: '5px'}} >导入</Button>
                 </Upload>
-                <Input.TextArea autoSize={{ minRows: 27, maxRows: 90}} mi
+                <Input.TextArea autoSize={{ minRows: 27, maxRows: 90}}
                     style={{marginTop: '5px'}} rows={30} placeholder="待处理的JSON片段"
                     value={inputCode} onChange={e => handleInputChange(e, setInputCode, setOutputData)}/>
             </Col>
