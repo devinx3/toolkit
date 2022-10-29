@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/toolkit/static/css/main.d2dbea9e.css",
-    "main.js": "/toolkit/static/js/main.80a77aa4.js",
+    "main.js": "/toolkit/static/js/main.a02d0909.js",
     "static/js/27.5c870bb6.chunk.js": "/toolkit/static/js/27.5c870bb6.chunk.js",
     "static/media/logo.svg": "/toolkit/static/media/logo.b6b851225fc9628773d7224ae4735b84.svg",
     "static/media/json-edit.svg": "/toolkit/static/media/json-edit.b7cd60b09f6122558d5bb8ea481ef1c1.svg",
@@ -11,6 +11,6 @@
   },
   "entrypoints": [
     "static/css/main.d2dbea9e.css",
-    "static/js/main.80a77aa4.js"
+    "static/js/main.a02d0909.js"
   ]
 }
