@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Upload, Popconfirm } from 'antd';
 import StrUtil from '../../../utils/StrUtil'
 import FileUtil from '../../../utils/FileUtil'
-import CustomView from './customView';
+import CustomConfigView from './customConfigView';
 import { CopyOutlined, UploadOutlined, DownloadOutlined} from '@ant-design/icons';
 import CodeEditView from './codeEdit';
 import JsonEditService from '../../../services/JsonEditService';
@@ -293,7 +293,7 @@ const JsonEdit = () => {
             <Col style={{marginLeft: '10px'}}><Button onClick={e => handleKeCamelCase(inputCode, setOutputData, setCopyStyleClass)}>JSON key 下划线转驼峰</Button></Col>
             <Col style={{marginLeft: '10px'}}><ConvertModal inputCode={inputCode} setError={setOutputData} refreshWholeEditView={refreshWholeEditView} handleConvertOutput={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/></Col>
         </Row>
-        <CustomView  style={{marginTop: '20px'}} handleConvertData={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/>
+        <CustomConfigView  style={{marginTop: '20px'}} handleConvertData={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/>
         <Row style={{marginTop: '20px'}}>
             <Col span={7}>
                 <Button size="small" 
@@ -306,7 +306,7 @@ const JsonEdit = () => {
                     <Button size="small" icon={<UploadOutlined />}
                         style={{marginLeft: '5px'}} >导入</Button>
                 </Upload>
-                <Input.TextArea autoSize={{ minRows: 27, maxRows: 90}}
+                <Input.TextArea autoSize={{ minRows: 25, maxRows: 80}}
                     style={{marginTop: '5px'}} rows={30} placeholder="待处理的JSON片段"
                     value={inputCode} onChange={e => handleInputChange(e, setInputCode, setOutputData)}/>
             </Col>

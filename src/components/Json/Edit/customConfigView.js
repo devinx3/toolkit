@@ -7,7 +7,7 @@ import CodeEditView from './codeEdit'
 import { EditOutlined } from '@ant-design/icons';
 
 
-const ItemView = ({config, refreshView, handleConvertData}) => {
+const ConfigItem = ({config, refreshView, handleConvertData}) => {
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
     const [visible, setVisible] = React.useState(false);
     const [configName, setConfigName] = React.useState(config.name);
@@ -71,7 +71,7 @@ const ItemView = ({config, refreshView, handleConvertData}) => {
     </>);
 }
 
-const CustomView = ({style, handleConvertData}) => {
+const CustomConfigView = ({style, handleConvertData}) => {
     const [changeConfig, setChangeConfig ] = React.useState(false);
     const refreshView = () => {
         setChangeConfig(!changeConfig);
@@ -86,10 +86,10 @@ const CustomView = ({style, handleConvertData}) => {
             自定义配置:
         </Col>
         <Col style={{marginLeft: '5px'}}>
-            {dataSource.map(item => <ItemView key={item.id} config={item} refreshView={refreshView} handleConvertData={handleConvertData}/>)}
+            {dataSource.map(item => <ConfigItem key={item.id} config={item} refreshView={refreshView} handleConvertData={handleConvertData}/>)}
         </Col>
     </Row>);
 }
 
-export default CustomView;
+export default CustomConfigView;
 
