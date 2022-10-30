@@ -1,6 +1,6 @@
 import React from 'react';
 import MarkdownPreview from '@uiw/react-markdown-preview';
-import ReadMeSource from '../../README.md'
+import ReadMeSource from './README.md'
 
 const Home = () => {
     const [source, setSource] = React.useState();

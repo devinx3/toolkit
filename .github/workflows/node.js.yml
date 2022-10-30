@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: cp -f README.md build/README.md
       - run: npm run build:prod
+      - run: cp -f README.md build/pages/Home/README.md
 
       - name: deploy pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
