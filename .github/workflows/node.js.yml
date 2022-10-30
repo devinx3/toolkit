@@ -19,8 +19,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
       - run: cp -f README.md src/pages/Home/home.md
+      - run: npm install
       - run: npm run build:prod
 
       - name: deploy pages
