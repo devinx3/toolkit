@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Typography, notification, Button, Input, Col, Row } from 'antd';
+import { Divider, Typography, notification, Button, Input, Col, Row, Tooltip } from 'antd';
 
 import CryptoJS from 'crypto-js';
 
@@ -90,9 +90,8 @@ const Encrypt = () => {
         <Row style={{marginTop: '10px'}}>
             <Col span={2}><Button type="primary" onClick={e => handleEncryptAES(inputData, secret, setOutputData)}>AES加密</Button></Col>
             <Col span={2}><Button type="primary" onClick={e => handleDencryptAES(inputData, secret, setOutputData)}>AES解密</Button></Col>
-            <Col span={6}><Input placeholder="秘钥" value={secret} onChange={e => setSecret(e.target.value)}/></Col>
+            <Col span={8}><Input addonBefore={<Tooltip title='秘钥长度小于32, 会对秘钥加密'>秘钥</Tooltip>} placeholder="secret" value={secret} onChange={e => setSecret(e.target.value)}/></Col>
         </Row>
-        
 
         <Row style={{marginTop: '10px'}}>
             <Text>处理后数据</Text>

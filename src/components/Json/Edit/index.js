@@ -8,16 +8,18 @@ import CodeEditView from './codeEdit';
 import JsonEditService from '../../../services/JsonEditService';
 import * as dayjs from 'dayjs'
 
-
 const { Title } = Typography;
+
+// 执行器参数
+const exectorUtilParam = {
+    dayjs: dayjs,
+}
 
 // js 执行器
 const JsExector = (source, input) => {
     const Fun = Function;
     const execFun = new Fun('inputObj', 'Util', source);
-    return execFun(input, {
-        dayjs: dayjs
-    });
+    return execFun(input, exectorUtilParam);
 }
 
 // 复制按钮的样式
@@ -249,11 +251,14 @@ const AddConfigView = ({scriptContent, callAddConfigSuccess}) => {
             describe: configDesc || configName || defaultConfigName,
             scriptContent: scriptContent
         }
+        console.log(config)
         const addResult = JsonEditService.addConfig(config);
         if (addResult !== true) {
             message.error("添加配置失败, 失败原因: " + addResult);
         }
         message.success("添加配置成功")
+        setConfigName(null)
+        setConfigDesc(null)
         callAddConfigSuccess()
     }
 
@@ -261,8 +266,8 @@ const AddConfigView = ({scriptContent, callAddConfigSuccess}) => {
     return (<Popconfirm icon={null} cancelText='取消' okText='确认'
         onConfirm={handleAddConfig}
         title={<>
-            <Input addonBefore={'功能名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName} />
-            <Input style={{marginTop: '3px'}} addonBefore={'功能作用'} placeholder={defaultConfigName} value={configDesc} onChange={e => setConfigDesc} />
+            <Input addonBefore={'功能名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName(e.target.value)} />
+            <Input style={{marginTop: '3px'}} addonBefore={'功能作用'} placeholder={defaultConfigName} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
             </>} >
         <Button>添加自定义配置</Button>
     </Popconfirm>);
