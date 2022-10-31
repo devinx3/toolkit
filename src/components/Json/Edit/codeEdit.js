@@ -57,7 +57,7 @@ const dateDocument = (<>
 const traverseObjDemo = 
 `/**
  * 遍历对象, 并修改字段和值
- * @param obj           输入对象
+ * @param current       输入对象
  * @param parent        父级对象; 若为空, 则认为是顶级; {key, val, index} 
  * @returns 处理后的对象
  */

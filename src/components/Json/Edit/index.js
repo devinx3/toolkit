@@ -1,9 +1,9 @@
 import React from 'react';
-import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Upload, Popconfirm } from 'antd';
+import { Alert, Divider, Typography, Button, Input, Col, Row, message, Modal, Upload, Popconfirm, Tooltip } from 'antd';
 import StrUtil from '../../../utils/StrUtil'
 import FileUtil from '../../../utils/FileUtil'
 import CustomConfigView from './customConfigView';
-import { CopyOutlined, UploadOutlined, DownloadOutlined} from '@ant-design/icons';
+import { CopyOutlined, LeftOutlined, UploadOutlined, DownloadOutlined} from '@ant-design/icons';
 import CodeEditView from './codeEdit';
 import JsonEditService from '../../../services/JsonEditService';
 import * as dayjs from 'dayjs'
@@ -59,7 +59,7 @@ const handleOutput = (input, setOutput, convert, setCopyStyleClass) => {
         setOutput(e.message);
         return;
     }
-    if (outData.constructor !== Object) {
+    if (outData.constructor !== Object && outData.constructor !== Array) {
         setOutput("请输入正确的JSON字符串");
         return;
     }
@@ -314,6 +314,7 @@ const JsonEdit = () => {
                 {outputData ? (StrUtil.isStr(outputData) ? 
                     <Alert message={outputData} type="error" /> :
                      (<>
+                        <Tooltip title="覆盖输入框"><Button type="text" icon={<LeftOutlined /> } onClick={() => setInputCode(JSON.stringify(outputData))} /></Tooltip>
                         <CopyOutlined style={copyStyleClass} onClick={() => handleCopyClick(outputData, setCopyStyleClass)} />
                         <DownloadOutlined style={{marginLeft: '8px'}} onClick={() => handleDownloadClick(outputData)}/>
                         <pre>{JSON.stringify(outputData, null, 2)}</pre>
