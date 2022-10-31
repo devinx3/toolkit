@@ -74,7 +74,7 @@ const traverseObj = (current, parent) => {
         }
     } else if (current.constructor === Array) {
         for (let index = 0; index < current.length; index++) {
-            current[index] = traverseObj(current[index], {key: parent.key, val: current, index: index});
+            current[index] = traverseObj(current[index], {key: parent && parent.key, val: current, index: index});
         }
     }
     // 逻辑处理 TODO

@@ -109,21 +109,18 @@ const traverseJsonObj = (obj, convert) => {
     //如果发现数组值中有对象，则再次进入迭代
     if (obj.constructor === Array) {
         for (let index = 0; index < obj.length; index++) {
-            traverseJsonObj(obj[index])
+            obj[index] = traverseJsonObj(obj[index], convert)
         }
         return obj;
-    }
-    if (obj.constructor === Object) {
+    } else if (obj.constructor === Object) {
         obj = convert(obj);
         if(obj === undefined || obj === null) {
             return;
         }
         for (let key in obj) {
-            if(obj === undefined || obj === null) {
-                continue;
-            }
-            if (obj[key].constructor === Object) {
-                obj[key] = convert(obj[key]);
+            console.log(key)
+            if (obj[key] && (obj[key].constructor === Object || obj[key].constructor === Array)) {
+                obj[key] = traverseJsonObj(obj[key], convert)
             }
         }
     }
