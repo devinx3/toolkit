@@ -311,9 +311,9 @@ const JsonEdit = () => {
                 {outputData ? (StrUtil.isStr(outputData) ? 
                     <Alert message={outputData} type="error" /> :
                      (<>
-                        <Tooltip title="覆盖输入框"><Button type="text" icon={<LeftOutlined /> } onClick={() => setInputCode(JSON.stringify(outputData))} /></Tooltip>
-                        <CopyOutlined style={copyStyleClass} onClick={() => handleCopyClick(outputData, setCopyStyleClass)} />
-                        <DownloadOutlined style={{marginLeft: '8px'}} onClick={() => handleDownloadClick(outputData)}/>
+                        <Tooltip title="覆盖待处理输入框"><Button type="text" icon={<LeftOutlined /> } onClick={() => setInputCode(JSON.stringify(outputData))} /></Tooltip>
+                        <Tooltip title="复制"><CopyOutlined style={copyStyleClass} onClick={() => handleCopyClick(outputData, setCopyStyleClass)} /></Tooltip>
+                        <Tooltip title="下载"><DownloadOutlined style={{marginLeft: '8px'}} onClick={() => handleDownloadClick(outputData)}/></Tooltip>
                         <pre>{JSON.stringify(outputData, null, 2)}</pre>
                     </>)) : null}
             </Col>

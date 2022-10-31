@@ -81,7 +81,7 @@ const traverseObj = (current, parent) => {
     return current;
 };
 console.log("inputObj", inputObj);
-return traverseObj({... inputObj});`;
+return traverseObj(inputObj);`;
 
 
 // 遍历对象
