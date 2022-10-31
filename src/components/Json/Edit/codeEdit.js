@@ -65,16 +65,16 @@ const traverseObj = (current, parent) => {
     if (current === undefined || current === null) {
         return current;
     }
-    if (current.constructor === Object) {
+    if (current.constructor === Array) {
+        for (let index = 0; index < current.length; index++) {
+            current[index] = traverseObj(current[index], {key: parent && parent.key, val: current, index: index});
+        }
+    } else if (current.constructor === Object) {
         for (let key in current) {
             const newObj = traverseObj(current[key], {key: key, val: current});
             if (parent) {
                 current[key] = newObj;
             }
-        }
-    } else if (current.constructor === Array) {
-        for (let index = 0; index < current.length; index++) {
-            current[index] = traverseObj(current[index], {key: parent && parent.key, val: current, index: index});
         }
     }
     // 逻辑处理 TODO
