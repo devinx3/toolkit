@@ -16,7 +16,7 @@ const listJsonEditConfig = () => {
     return store.jsonEditConfig.list();
 }
 
-// eg: [{id: 1, name: '名称', describe: '描述', scriptContent: '脚本内容'}]
+// eg: [{id: 1, name: '名称', description: '描述', scriptContent: '脚本内容'}]
 // 数据源
 const dataSource = listJsonEditConfig();
 
@@ -52,7 +52,7 @@ const JsonEditService = {
         for (let index = 0; index < dataSource.length; index++) {
             if (dataSource[index].id === item.id) {
                 dataSource[index].name = item.name;
-                dataSource[index].describe = item.describe;
+                dataSource[index].description = item.description;
                 dataSource[index].scriptContent = item.scriptContent;
                 return storeJsonEditConfig(dataSource);
             }
@@ -66,6 +66,25 @@ const JsonEditService = {
                 dataSource.splice(index, 1);
                 return storeJsonEditConfig(dataSource);
             }
+        }
+        return false;
+    },
+    // 删除配置
+    batchDeleteConfig: idList => {
+        if (!(idList && idList.length && idList.length > 0)) {
+            // 传入为空则代表删除成功
+            return true;
+        }
+        let success = false;
+        for (let index = 0; index < dataSource.length; index++) {
+            if (idList.indexOf(dataSource[index].id) >= 0) {
+                dataSource.splice(index, 1);
+                index--;
+                success = true;
+            }
+        }
+        if (success) {
+            return storeJsonEditConfig(dataSource);
         }
         return false;
     }

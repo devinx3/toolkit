@@ -245,7 +245,7 @@ const AddConfigView = ({scriptContent, callAddConfigSuccess}) => {
         }
         const config = {
             name: configName || defaultConfigName,
-            describe: configDesc || configName || defaultConfigName,
+            description: configDesc || configName || defaultConfigName,
             scriptContent: scriptContent
         }
         console.log(config)
