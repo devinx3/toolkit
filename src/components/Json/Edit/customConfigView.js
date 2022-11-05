@@ -6,9 +6,9 @@ import CodeEditView from './codeEdit'
 import CryptoJS from 'crypto-js';
 import * as dayjs from 'dayjs'
 import FileUtil from '../../../utils/FileUtil'
+import StrUtil from '../../../utils/StrUtil'
 
-import { EditOutlined, DeleteOutlined, ImportOutlined, ExportOutlined } from '@ant-design/icons';
-
+import { EditOutlined, DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined } from '@ant-design/icons';
 
 const ConfigItem = ({config, refreshView, handleConvertData}) => {
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
@@ -208,19 +208,11 @@ const DataHandle = {
     }
 }
 
-
 // 设置默认版本
 const VERSION = 101;
 
-
 // 配置管理
 const ConfigManager = ({dataSource, refreshView}) => {
-
-    // const input = DataHandle.convertExportData(JSON.stringify(dataSource), VERSION)
-    // console.log('input', input)
-    // const output = DataHandle.convertImportData(input)
-    // console.log('output', output)
-    // console.log(DataHandle)
 
     const [visible, setVisible] = React.useState(false);
 
@@ -275,7 +267,7 @@ const ConfigManager = ({dataSource, refreshView}) => {
         }
         const result = JsonEditService.batchDeleteConfig(checkedList);
         if (result === true) {
-            message.info("删除成功")
+            message.success("删除成功")
             clearCheckAll();
             refreshView();
             return;
@@ -283,7 +275,7 @@ const ConfigManager = ({dataSource, refreshView}) => {
         message.warn("删除失败, 原因是: " + result)
     }
     // 导出配置
-    const handleExportCOnfig = () => {
+    const handleExportConfig = () => {
         if (checkedList.length === 0) {
             message.info("没有选中任何行, 无需导出")
             return;
@@ -297,6 +289,16 @@ const ConfigManager = ({dataSource, refreshView}) => {
         const exportData = DataHandle.convertExportData(JSON.stringify(dataSource), VERSION);
         const fileName = 'config' + dayjs().format('MMDDHHmmss');
         FileUtil.download(exportData, fileName);
+    }
+    // 复制JSON配置
+    const handleCopyConfig = () => {
+        if (checkedList.length === 0) {
+            message.info("没有选中任何行, 无法复制")
+            return;
+        }
+        if (StrUtil.copyToClipboard(JSON.stringify(dataSource))) {
+            message.success("复制成功")
+        }
     }
     // 导入配置
     const handleImportCOnfig = (file) => {
@@ -346,7 +348,8 @@ const ConfigManager = ({dataSource, refreshView}) => {
                     <Checkbox indeterminate={indeterminate} disabled={dataSource.length === 0} checked={checkAllConfig}
                                 onChange={onCheckAllChangeConfigItem}>全选</Checkbox>
                     <Button type='text' disabled={dataSource.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
-                    <Button type='text' disabled={dataSource.length === 0} icon={<ExportOutlined />} onClick={handleExportCOnfig}>导出</Button>
+                    <Button type='text' disabled={dataSource.length === 0} icon={<ExportOutlined />} onClick={handleExportConfig}>导出</Button>
+                    <Tooltip title="不支持导入"><Button type='text' disabled={dataSource.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON配置</Button></Tooltip>
                 </>)}
                 footer={<Upload maxCount={1} beforeUpload={(file) => handleImportCOnfig(file)} ><Button icon={<ImportOutlined />}>导入</Button></Upload>}
                 renderItem={(item) => (
