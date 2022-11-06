@@ -118,7 +118,6 @@ const traverseJsonObj = (obj, convert) => {
             return;
         }
         for (let key in obj) {
-            console.log(key)
             if (obj[key] && (obj[key].constructor === Object || obj[key].constructor === Array)) {
                 obj[key] = traverseJsonObj(obj[key], convert)
             }
@@ -127,14 +126,17 @@ const traverseJsonObj = (obj, convert) => {
     return obj;
 }
 
-// 删除值为null的对象
-const handleDeleteNull = (input, setOutput, setCopyStyleClass) => {
-    handleOutput(input, setOutput, jsonObj => delNullProperty(jsonObj), setCopyStyleClass);
-}
-
-// key 下划线转驼峰
-const handleKeCamelCase = (input, setOutput, setCopyStyleClass) => {
-    handleOutput(input, setOutput, jsonObj => {
+//系统配置
+const systemConvertConfig = [{
+    id: -1,
+    name: '删除值为空的字段',
+    // 删除值为null的对象
+    configFunction: jsonObj => delNullProperty(jsonObj)
+},{
+    id: -2,
+    name: 'JSON key 下划线转驼峰',
+    // key 下划线转驼峰
+    configFunction: jsonObj => {
         return traverseJsonObj(jsonObj, obj => {
             const result = {};
             for (let key in obj) {
@@ -142,13 +144,49 @@ const handleKeCamelCase = (input, setOutput, setCopyStyleClass) => {
             }
             return result;
         });
-    }, setCopyStyleClass);
+    }
+}];
+
+// 执行方法转换
+const handleConvertFunction = (input, setOutput, configFunction, setCopyStyleClass) => {
+    handleOutput(input, setOutput, configFunction, setCopyStyleClass);
 }
 
 // 自定义格式转换
 const handleCuszConvert = (input, setOutput, scriptContent, setCopyStyleClass) => {
     handleOutput(input, setOutput, jsonObj => JsExector(scriptContent, jsonObj), setCopyStyleClass);
 }
+
+// 执行组合方法
+const handleCombinationConvert = (input, setOutput, setCopyStyleClass, idList) => {
+    const itemList = [];
+    idList.forEach(id => {
+        if (id < 0) {
+            // 系统基本配置
+            for (let config of systemConvertConfig) {
+                if (config.id === id) {
+                    itemList.push({exec: config.configFunction})
+                }
+            }
+        } else {
+            // 自定义配置
+            const config = JsonEditService.queryConfigById(id);
+            if (!config) {
+                message.error("未找到对应的自定义配置, 请检查")
+                return;
+            }
+            itemList.push({exec: jsonObj => JsExector(config.scriptContent, jsonObj)})
+        }
+    })
+    // 批量执行方法
+    handleOutput(input, setOutput, jsonObj => {
+        for (let item of itemList) {
+            jsonObj = item.exec(jsonObj);
+        }
+        return jsonObj;
+    }, setCopyStyleClass);
+}
+
 // 格式化输入
 const handleFormatInput = (input, setInputCode, setError) => {
     if (input === undefined || input === null || input === '' || input.trim() === '') {
@@ -286,11 +324,17 @@ const JsonEdit = () => {
         <Divider />
 
         <Row style={{marginTop: '10px'}}>
-            <Col><Button onClick={e => handleDeleteNull(inputCode, setOutputData, setCopyStyleClass)}>删除值为空的字段</Button></Col>
-            <Col style={{marginLeft: '10px'}}><Button onClick={e => handleKeCamelCase(inputCode, setOutputData, setCopyStyleClass)}>JSON key 下划线转驼峰</Button></Col>
+            {systemConvertConfig.map(convert => {
+                return (<Col style={{marginLeft: '10px'}} key={convert.id} ><Button
+                     onClick={e => handleConvertFunction(inputCode, setOutputData, convert.configFunction, setCopyStyleClass)}>{convert.name}</Button></Col>)
+            })}
             <Col style={{marginLeft: '10px'}}><ConvertModal inputCode={inputCode} setError={setOutputData} refreshWholeEditView={refreshWholeEditView} handleConvertOutput={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/></Col>
         </Row>
-        <CustomConfigView  style={{marginTop: '20px'}} handleConvertData={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}/>
+        <CustomConfigView  style={{marginTop: '20px'}} 
+                            handleConvertData={(scriptContent) => handleCuszConvert(inputCode, setOutputData, scriptContent, setCopyStyleClass)}
+                            handleCombinationConvert={(idList) => handleCombinationConvert(inputCode, setOutputData, setCopyStyleClass, idList)}
+                            systemConvertConfigDataSource={systemConvertConfig}
+                            />
         <Row style={{marginTop: '20px'}}>
             <Col span={7}>
                 <Button size="small" 

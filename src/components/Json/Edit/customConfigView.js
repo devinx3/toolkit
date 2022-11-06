@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Input, Modal, Tooltip, message, Row, Col, List, Skeleton, Checkbox, Popover, Typography, Upload} from 'antd';
+import { Button, Input, Modal, Tooltip, message, Row, Col, List, Skeleton, Checkbox, Popover, Typography, Upload, Timeline, Table, Popconfirm} from 'antd';
 
 import JsonEditService from '../../../services/JsonEditService'
 import CodeEditView from './codeEdit'
@@ -8,7 +8,7 @@ import * as dayjs from 'dayjs'
 import FileUtil from '../../../utils/FileUtil'
 import StrUtil from '../../../utils/StrUtil'
 
-import { EditOutlined, DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, PlusOutlined } from '@ant-design/icons';
 
 const ConfigItem = ({config, refreshView, handleConvertData}) => {
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
@@ -16,9 +16,6 @@ const ConfigItem = ({config, refreshView, handleConvertData}) => {
     const [configName, setConfigName] = React.useState(config.name);
     const [configDesc, setConfigDesc] = React.useState(config.description);
 
-    const showModal = () => {
-        setVisible(true);
-    };
     const handleSaveConfig = () => {
         if (!scriptContent) {
             message.error('脚本不能为空');
@@ -46,9 +43,6 @@ const ConfigItem = ({config, refreshView, handleConvertData}) => {
         // 刷新整个view
         refreshView();
     };
-    const handleCancel = () => {
-        setVisible(false);
-    };
     // 重置
     const handleReset = () => {
         setConfigName(config.name)
@@ -57,11 +51,11 @@ const ConfigItem = ({config, refreshView, handleConvertData}) => {
     };
     return (<>
         <Tooltip style={{marginLeft: '15px'}} title={config.description}><Button type="dashed" onClick={e => handleConvertData(config.scriptContent)}>{config.name}</Button></Tooltip>
-        <Tooltip title="编辑"><Button shape="circle" type="text" onClick={showModal} icon={<EditOutlined />} size="small" /></Tooltip>
+        <Tooltip title="编辑"><Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" /></Tooltip>
 
-        <Modal title={"编辑脚本配置"} open={visible} width='75%' onCancel={handleCancel}
+        <Modal title={"编辑脚本配置"} open={visible} width='75%' onCancel={() => setVisible(false)}
             footer={[
-                <Button key="cancel" onClick={handleCancel}>取消</Button>,
+                <Button key="cancel" onClick={() => setVisible(false)}>取消</Button>,
                 <Button key="reset" onClick={handleReset}>重置</Button>,
                 <Button key="remove" onClick={handleRemoveConfig}>删除配置</Button>,
                 <Button key="update" type="primary" onClick={handleSaveConfig}>更新配置</Button>
@@ -375,25 +369,282 @@ const ConfigManager = ({dataSource, refreshView}) => {
     </>)
 }
 
+
+// 将数据源转换成对象
+const convertConfigDataSource = (list1, list2) => {
+    const data = {};
+    for (let item of list1) {
+        data[item.id] = { ...item };
+    }
+    for (let item of list2) {
+        data[item.id] = { ...item };
+    }
+    return data;
+}
+
+// 配置表格弹出框
+const ConfigTableModal = ({visible, setVisible, handleAddConfig, systemConfigDataSource, configDataSource}) => {
+    const [selectKey, setSelectKey] = React.useState();
+    // 加载数据源
+    const loadDataSource = () => {
+        const arr = [];
+        for (let config of systemConfigDataSource) {
+            arr.push({id: config.id, name: config.name, description: config.name, costom: 0});
+        }
+        for (let config of configDataSource) {
+            arr.push({id: config.id, name: config.name, description: config.description, costom: 1});
+        }
+        return arr;
+    }
+    // 列
+    const columns = [
+        {
+          title: '名称',
+          dataIndex: 'name',
+          render: (text, record) => <Tooltip title={record.description}>{text}</Tooltip>,
+        },
+        {
+          title: '类别',
+          dataIndex: 'costom',
+          render: (costom) => (costom === 1) ? <Typography.Text type="warning">自定义</Typography.Text> : <Typography.Text type="success">系统</Typography.Text>,
+        },
+      ];
+
+    const clearModal = () => {
+        setVisible(false);
+        setSelectKey(undefined);
+    }
+    // 选择
+    const handleConfigSelect = () => {
+        // 传递给父组件
+        handleAddConfig(selectKey)
+        // 关闭弹出框
+        clearModal();
+    }
+    // 行选择框
+    const rowSelection = {
+        type: 'radio',
+        onChange: (selectedRowKeys, selectedRows) => {
+            setSelectKey(Number(selectedRowKeys));
+        },
+        selectedRowKeys: [selectKey]
+    };
+
+    return (<Modal title={"配置选择"} open={visible} cancelText="取消" okText="确认"
+                    onCancel={clearModal} onOk={handleConfigSelect} >
+        <Table
+            rowSelection={{...rowSelection}}
+            rowKey="id"
+            columns={columns}
+            dataSource={loadDataSource()}
+            pagination={false}
+        />
+    </Modal>)
+
+}
+
+// 组合项
+const CombinationItem = ({combinationConfig, refreshView, handleCombinationConvert, systemConfigDataSource, configDataSource}) => {
+
+    const [newCombinationConfig, setNewCombinationConfig] = React.useState({ ...combinationConfig, combination: [ ...combinationConfig.combination ] });
+    const [visible, setVisible] = React.useState(false);
+    const [frameVisible, setFrameVisible] = React.useState(false);
+    const [frameIndex, setFrameIndex] = React.useState(false);
+
+    const [combinationName, setCombinationNamesetName] = React.useState(newCombinationConfig.name);
+    const [combinationDesc, setCombinationDesc] = React.useState(newCombinationConfig.description);
+
+    if (!newCombinationConfig.combination) {
+        return null;
+    }
+
+    // 待处理数据
+    const configDataObj = convertConfigDataSource(systemConfigDataSource, configDataSource);
+    const timelineItemList = newCombinationConfig.combination.map((id, index) => {
+        const item = configDataObj[id];
+        item.index = index;
+        return item;
+    });
+
+    // 删除组合配置
+    const handleDeleteCombinationConfig = (index) => {
+        newCombinationConfig.combination.splice(index, 1);
+        setNewCombinationConfig({ ...newCombinationConfig});
+
+    }
+
+    // 打开配置弹出框
+    const openConfigTableModal = (index) => {
+        setFrameIndex(index);
+        setFrameVisible(true);
+    } 
+
+    // 添加配置
+    const handleAddConfig = configId => {
+        if (!frameVisible) {
+            // 添加失败, 窗口未打开
+            return;
+        }
+        
+        const arr = [];
+        for (let i = 0; i < newCombinationConfig.combination.length; i++) {
+            arr.push(newCombinationConfig.combination[i]);
+            if (i === frameIndex) {
+                arr.push(configId);
+            }
+        }
+        if (frameIndex === -1) {
+            arr.push(configId);
+        }
+        newCombinationConfig.combination = arr;
+    }
+
+    // 删除组合
+    const deleteCombination = () => {
+        const result = JsonEditService.deleteCombination(newCombinationConfig.id);
+        if (result === true) {
+            message.success("删除成功");
+            setVisible(false);
+            refreshView();
+            return;
+        }
+        message.success("删除失败, 原因是" + result);
+    }
+    // 保存组合
+    const saveCombination = () => {
+        if (!newCombinationConfig.combination || newCombinationConfig.combination.length === 0) {
+            message.warn("请先维护节点");
+            return;
+        }
+        if (!combinationName) {
+            message.warn("请维护组合名称");
+            return;
+        }
+        if (!combinationDesc) {
+            message.warn("请维护组合作用");
+            return;
+        }
+        const combinationObj = { ...newCombinationConfig, name: combinationName, 
+            description: combinationDesc, combination: [ ...newCombinationConfig.combination ] };
+        const result = JsonEditService.updateCombination(combinationObj);
+        if (result === true) {
+            message.success("保存成功");
+            setVisible(false);
+            refreshView();
+            return;
+        }
+        message.success("保存失败, 原因是" + result);
+    }
+
+
+    return (<>
+        <Tooltip style={{marginLeft: '15px'}} title={newCombinationConfig.description}><Button type="dashed" onClick={e => handleCombinationConvert(combinationConfig.combination)}>{combinationConfig.name}</Button></Tooltip>
+        <Tooltip title="编辑"><Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" /></Tooltip>
+        <Modal open={visible} title='组合管理' onCancel={() => setVisible(false)}
+                footer={[
+                    <Button key="cancel" onClick={() => setVisible(false)}>取消</Button>,
+                    <Button key="delete" onClick={deleteCombination}>删除</Button>,
+                    <Button key="confirm" type='primary' onClick={saveCombination}>保存</Button>
+                ]}
+            >
+            <Input addonBefore={'组合名称'} value={combinationName} onChange={e => setCombinationNamesetName(e.target.value)}/>
+            <Input style={{marginTop: '5px', marginBottom: '15px'}} addonBefore={'组合作用'} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)}/>
+            
+            <Timeline mode="left">
+                {(timelineItemList.length === 0) && (
+                    <Timeline.Item key={0} color="gray">
+                        <Tooltip title="添加" ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(-1)}></Button></Tooltip>
+                    </Timeline.Item>
+                )}
+                {timelineItemList.map((item, index) => {
+                    return (<Timeline.Item key={index} color={item.id > 0 ? '#faad14' : '#52c41a'}>
+                        <Tooltip title="添加" ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
+                        <Tooltip title="删除" ><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
+                        <Tooltip title={item.description} >{item.name}</Tooltip>
+                    </Timeline.Item>)
+                })}
+            </Timeline>
+        </Modal>
+        
+        <ConfigTableModal visible={frameVisible} setVisible={setFrameVisible} handleAddConfig={handleAddConfig}
+                        systemConfigDataSource={systemConfigDataSource} configDataSource={configDataSource}/>
+    </>);
+}
+
+// 默认组合名称
+const defaultCombinationName = '自定义组合';
+// 组合管理
+const CombinationManager = ({refreshView}) => {
+
+    const [visible, setVisible] = React.useState(false);
+    const [combinationName, setCombinationName] = React.useState('');
+    const [combinationDesc, setCombinationDesc] = React.useState('');
+
+    // 添加组合
+    const handleAddCombination = () => {
+        const combinationObj = {};
+        combinationObj.name = combinationName || defaultCombinationName;
+        combinationObj.description = combinationDesc || combinationObj.name;
+        combinationObj.combination = [];
+        const result = JsonEditService.addCombination(combinationObj);
+        if (result === true) {
+            message.success("创建成功")
+            refreshView();
+            return;
+        }
+        message.warn("创建失败, 原因是" + result);
+    }
+
+    return (<>
+        <Button type='link' onClick={e => setVisible(true)}>组合管理</Button>
+        <Popconfirm icon={null} cancelText='取消' okText='新建'
+            onConfirm={handleAddCombination} placement="right"
+            title={<>
+                <Typography.Title level={5}>新建组合</Typography.Title>
+                <Input addonBefore={'组合名称'} placeholder={defaultCombinationName} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
+                <Input style={{marginTop: '3px'}} addonBefore={'组合作用'} placeholder={defaultCombinationName} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
+                </>} >
+                <Button shape="circle" type="text" icon={<PlusOutlined />} size="small" />
+        </Popconfirm>
+        <Modal open={visible} title='组合管理' footer={null} 
+               onCancel={e => setVisible(false)}>
+            暂不支持
+        </Modal>
+    </>)
+}
+
 // 配置视图
-const CustomConfigView = ({style, handleConvertData}) => {
+const CustomConfigView = ({style, handleConvertData, handleCombinationConvert, systemConvertConfigDataSource}) => {
     const [changeConfig, setChangeConfig ] = React.useState(false);
     const refreshView = () => {
         setChangeConfig(!changeConfig);
     }
-    const dataSource = JsonEditService.listAll();
+    const dataSource = JsonEditService.listAllConfig();
     if (!dataSource || dataSource.length === 0) {
         return (<Row style={style}><Col><ConfigManager dataSource={[]} refreshView={refreshView} /></Col></Row>);
     }
 
-    return (<Row style={style}>
+    const combinationConfig = JsonEditService.listAllCombination();
+
+    return (<>
+    <Row style={style}>
         <Col>
             <ConfigManager dataSource={dataSource} refreshView={refreshView} />
         </Col>
         <Col style={{marginLeft: '5px'}}>
             {dataSource.map(item => <ConfigItem key={item.id} config={item} refreshView={refreshView} handleConvertData={handleConvertData}/>)}
         </Col>
-    </Row>);
+    </Row>
+    <Row style={{marginTop: '10px'}}>
+        <Col>
+            <CombinationManager refreshView={refreshView} />
+        </Col>
+        <Col style={{marginLeft: '5px'}}>
+            {combinationConfig.map(item => <CombinationItem key={item.id} combinationConfig={item} refreshView={refreshView}
+                    systemConfigDataSource={systemConvertConfigDataSource} configDataSource={dataSource}  handleCombinationConvert={handleCombinationConvert} />)}
+        </Col>
+    </Row>
+    </>);
 }
 
 export default CustomConfigView;
