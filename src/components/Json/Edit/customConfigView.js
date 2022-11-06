@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Input, Modal, Tooltip, message, Row, Col, List, Skeleton, Checkbox, Popover, Typography, Upload, Timeline, Table, Popconfirm} from 'antd';
+import { Button, Input, Modal, Tooltip, message, Row, Col, List, Skeleton, Checkbox, Typography, Upload, Timeline, Table, Popconfirm} from 'antd';
 
 import JsonEditService from '../../../services/JsonEditService'
 import CodeEditView from './codeEdit'
