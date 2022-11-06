@@ -213,6 +213,11 @@ const ConfigManager = ({dataSource, refreshView}) => {
     const [checkedList, setCheckedList] = React.useState([]);
     const [indeterminate, setIndeterminate] = React.useState(false);
     const [checkAllConfig, setCheckAllConfig] = React.useState(false);
+
+    const [scriptVisible, setScriptVisible] = React.useState(false);
+    const [scriptModalContent, setScriptModalContent] = React.useState();
+    
+
     // 列表页勾选项
     const onChangeConfigItem = (e) => {
         const id = e.target.value;
@@ -331,6 +336,17 @@ const ConfigManager = ({dataSource, refreshView}) => {
         });
         return false;
     }
+    // 打开弹出框
+    const handleOpenScriptContentModal = (content) => {
+        setScriptModalContent(content)
+        setScriptVisible(true);
+    }
+    // 关闭弹出框
+    const handleCloseScriptContentModal = () => {
+        setScriptModalContent(null)
+        setScriptVisible(false);
+    }
+
     return (<>
         <Button type='link' onClick={() => setVisible(true)}>配置管理</Button>
         <Modal title={"配置管理"} open={visible} footer={null} onCancel={() => setVisible(false)} >
@@ -348,12 +364,7 @@ const ConfigManager = ({dataSource, refreshView}) => {
                 footer={<Upload maxCount={1} beforeUpload={(file) => handleImportCOnfig(file)} ><Button icon={<ImportOutlined />}>导入</Button></Upload>}
                 renderItem={(item) => (
                     <List.Item
-                      actions={[<Popover placement="left" 
-                                        title={null} trigger="click"
-                                        content={<div style={{whiteSpace: 'pre-wrap'}}><Typography.Paragraph code copyable>{item.scriptContent}</Typography.Paragraph></div>} 
-                                        >
-                                        <Button type='link' key="list-item-srcipt">脚本</Button>
-                                </Popover>]}
+                      actions={[<Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>]}
                     >
                       <Skeleton loading={false}>
                         <List.Item.Meta
@@ -365,6 +376,9 @@ const ConfigManager = ({dataSource, refreshView}) => {
                     </List.Item>
                   )}
              />
+        </Modal>
+        <Modal title="脚本内容" open={scriptVisible} width="60%" footer={null} onCancel={handleCloseScriptContentModal} >
+            <div style={{whiteSpace: 'pre-wrap'}}><Typography.Paragraph code copyable>{scriptModalContent}</Typography.Paragraph></div>
         </Modal>
     </>)
 }
