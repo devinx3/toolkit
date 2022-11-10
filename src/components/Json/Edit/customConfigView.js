@@ -106,11 +106,13 @@ const DataHandle = {
         // 结尾长度10也不用
         const useLength = processLen - 10 - start;
         const result = [];
-        const prime = [3, 11, 17, 19, 23, 27];
+        const prime = [17, 27, 23, 3, 19, 11];
         for (let i = 0; i < 6; i++) {
             // 索引 = 开始位置 + (使用长度 * 质数 / 30)
             result.push(start + ((useLength * prime[i] / 30) ^ 0));
         }
+        123456
+        364152
         return result;
     },
     // 指定索引添加值
