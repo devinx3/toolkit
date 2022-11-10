@@ -111,8 +111,6 @@ const DataHandle = {
             // 索引 = 开始位置 + (使用长度 * 质数 / 30)
             result.push(start + ((useLength * prime[i] / 30) ^ 0));
         }
-        123456
-        364152
         return result;
     },
     // 指定索引添加值
