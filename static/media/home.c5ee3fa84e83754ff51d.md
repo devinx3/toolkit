@@ -31,6 +31,8 @@
 
 [JSON Crack](https://jsoncrack.com/editor)  视图展示JSON
 
+[JSON Hzero](https://jsonhero.io/)  JSON预览展示, 自动推断属性
+
 
 
 ## 数据转换
@@ -38,5 +40,7 @@
 ### 外链
 
 [FeHelper - Excel/CVS 转 JSON ](https://www.baidufe.com/fehelper/index/index.html) 支持转为 JSON, Xml, MySQL, Html
+
+[JSON 转 Excel ](https://tooltt.com/json2excel/) 支持 JSON 转换为 Excel
 
 [JAVA代码生成平台](http://java.bejson.com/generator/) SQL转换Java代码(MVC模式), 前端UI, Json, Xml
