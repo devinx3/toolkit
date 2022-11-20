@@ -1,11 +1,20 @@
 import React from 'react';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import ReadMeSource from './home.md'
+import GlobalUtil from '../../utils/GlobalUtil'
+
+// 激活高级功能
+const active = () => {
+    if (window.location.hash.lastIndexOf(GlobalUtil.getAdvanceKey()) !== -1) {
+        GlobalUtil.setAdvance();
+    }
+}
 
 const Home = () => {
     const [source, setSource] = React.useState();
 
     React.useEffect(() => {
+        active();
         if (source) {
             return;
         }

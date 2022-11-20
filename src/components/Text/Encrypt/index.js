@@ -1,5 +1,9 @@
 import React from 'react';
-import { Divider, Typography, notification, Button, Input, Col, Row, Tooltip } from 'antd';
+import { Divider, Typography, notification, Button, Input, Col, Row, Upload, Tooltip, message } from 'antd';
+import { UploadOutlined, DownloadOutlined, CopyOutlined } from '@ant-design/icons';
+import FileUtil from '../../../utils/FileUtil'
+import GlobalUtil from '../../../utils/GlobalUtil'
+import StrUtil from '../../../utils/StrUtil'
 
 import CryptoJS from 'crypto-js';
 
@@ -44,6 +48,7 @@ function checkData(data, secret) {
     return true;
 }
 
+// AES 加密
 const handleEncryptAES = (data, secret, writeResult) => {
     if(!checkData(data, secret)) {
         return;
@@ -51,6 +56,7 @@ const handleEncryptAES = (data, secret, writeResult) => {
     writeResult(encryptData(data, secret))
 }
 
+// AES 解密
 const handleDencryptAES = (data, secret, writeResult) => {
     if(!checkData(data, secret)) {
         return;
@@ -73,6 +79,36 @@ const handleDencryptAES = (data, secret, writeResult) => {
     }
 }
 
+// 上传到输入框
+const handleUploadToInput = (file ,setInputData, setSecret) => {
+    FileUtil.readAsText(file, content => {
+        setInputData(content);
+        if (GlobalUtil.enableAdvance()) {
+            setSecret(file.name)
+        }
+    });
+    return false;
+}
+
+// 下载输出框内容
+const handelDownloadFromOuput = (outputData, secret) => {
+    let fielName = null;
+    if (GlobalUtil.enableAdvance()) {
+        fielName = secret;
+    }
+    FileUtil.download(outputData, fielName);
+}
+
+// 复制输出框内容
+const handelCopyFromOuput = (outputData) => {
+    const result = StrUtil.copyToClipboard(outputData);
+    if (result) {
+        message.success("复制成功");
+    } else {
+        message.warn("复制失败, " + result);
+    }
+}
+
 const Encrypt = () => {
 
     const [inputData, setInputData] = React.useState('');
@@ -85,6 +121,11 @@ const Encrypt = () => {
 
         <Row style={{marginTop: '10px'}}>
             <Text>待处理数据(仅支持UTF8)</Text>
+            <Tooltip title='导入'>
+                <Upload maxCount={1} beforeUpload={(file) => handleUploadToInput(file, setInputData, setSecret)} showUploadList={false} >
+                    <Button icon={<UploadOutlined />} type='text' size='small'></Button>
+                </Upload>
+            </Tooltip>
             <Input.TextArea style={{marginTop: '5px'}} rows={8} value={inputData} onChange={e => setInputData(e.target.value)}/>
         </Row>
         <Row style={{marginTop: '10px'}}>
@@ -95,6 +136,12 @@ const Encrypt = () => {
 
         <Row style={{marginTop: '10px'}}>
             <Text>处理后数据</Text>
+            <Tooltip title='下载'>
+                <Button type='text' disabled={!outputData} icon={<DownloadOutlined />} onClick={() => handelDownloadFromOuput(outputData, secret)} size='small'></Button>
+            </Tooltip>
+            <Tooltip title='复制'>
+                <Button type='text' disabled={!outputData} icon={<CopyOutlined />} onClick={() => handelCopyFromOuput(outputData)} size='small'></Button>
+            </Tooltip>
             <Input.TextArea style={{marginTop: '5px'}} rows={8} value={outputData} />
         </Row>
 
