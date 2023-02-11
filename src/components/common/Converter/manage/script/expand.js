@@ -76,7 +76,7 @@ export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHe
                     <Col><Button key="convert" type="primary" onClick={handleConfirm}>转换</Button></Col>
                 </Space>
             </Row>} >
-            <CodeEditor value={scriptContent} onChange={e => setScriptContent(e.target.value)} editorHelpRender={editorHelpRender} />
+            <CodeEditor value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
         </Drawer>
     </>);
 }
@@ -144,7 +144,7 @@ const ExpandManageModal = ({ lang, config, visible, setVisible, editorHelpRender
         </Row>} >
         <Input addonBefore={'功能名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
         <Input style={{ marginTop: '3px' }} addonBefore={'功能作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        <CodeEditor lang={lang} value={scriptContent} onChange={e => setScriptContent(e.target.value)} editorHelpRender={editorHelpRender} />
+        <CodeEditor lang={lang} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
     </Drawer>)
 }
 
