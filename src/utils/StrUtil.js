@@ -13,6 +13,10 @@ const Util = {
     isStr: (input) => {
         return typeof(input) === 'string';
     },
+    // 是否是空字符串
+    isBlank: input => {
+        return input === undefined || input === null || input === '';
+    },
     // 拷贝字符串
     copyToClipboard : (inputValue) => {
 		const inputEle = document.createElement('input')

@@ -25,6 +25,16 @@ const Util = {
     setAdvance: () => {
         cache['adv'] = true;
         window.localStorage.setItem(Util.getAdvanceKey(), '1');
+    },
+    // 剔除未使用的对象
+    omit: (obj, fields) => {
+        // eslint-disable-next-line prefer-object-spread
+        const shallowCopy = Object.assign({}, obj);
+        for (let i = 0; i < fields.length; i += 1) {
+            const key = fields[i];
+            delete shallowCopy[key];
+        }
+        return shallowCopy;
     }
 };
 
