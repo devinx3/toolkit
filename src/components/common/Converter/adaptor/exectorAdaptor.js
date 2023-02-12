@@ -1,5 +1,5 @@
 import { message } from 'antd';
-import loadsh from 'lodash'
+import lodash from 'lodash'
 import dayjs from 'dayjs';
 import cryptoJS from 'crypto-js';
 import * as XLSX from 'xlsx'
@@ -7,7 +7,7 @@ import StrUtil from '../../../../utils/StrUtil'
 
 // 执行器参数
 const exectorUtilParam = {
-    _: loadsh,
+    _: lodash,
     dayjs: dayjs,
     cryptoJS: cryptoJS,
     XLSX: XLSX,
