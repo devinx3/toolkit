@@ -140,7 +140,7 @@ const multiLine2Single = (inputData) => {
 // 编辑页面
 const TextEdit = () => {
     return <>
-        <Title level={3}>编辑JSON</Title>
+        <Title level={3}>编辑文本</Title>
         <Divider />
         <Converter
             lang={LANG.TXT}
