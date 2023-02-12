@@ -19,7 +19,7 @@ const Util = {
     },
     // 拷贝字符串
     copyToClipboard : (inputValue) => {
-		const inputEle = document.createElement('input')
+		const inputEle = document.createElement('textarea')
 		inputEle.value = inputValue
 		document.body.appendChild(inputEle)
 		inputEle.select() // 选取文本域内容;

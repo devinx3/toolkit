@@ -155,7 +155,7 @@ const TextEdit = () => {
                     },
                     {
                         name: "输出",
-                        description: "输出元数据",
+                        description: "输出原数据",
                         scriptContent: `return inputData;`
                     }
                 ],

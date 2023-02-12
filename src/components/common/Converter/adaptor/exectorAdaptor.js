@@ -52,7 +52,7 @@ function doConvert(handleInputObj, input, scriptContent) {
  */
 function convertResult(result) {
     // 如果是 Object 对象则转换成字符串, 否则返回原对象(基本都是字符串)
-    return (result instanceof Object) ? JSON.stringify(result) : defaultIfNullUndefined(result, '')
+    return (result instanceof Object) ? JSON.stringify(result, null, 2) : defaultIfNullUndefined(result, '')
 }
 
 /**

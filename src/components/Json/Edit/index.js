@@ -57,7 +57,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
     }
     // 复制按钮点击事件
     const handleCopyData = () => {
-        if (StrUtil.copyToClipboard(JSON.stringify(outputData))) {
+        if (StrUtil.copyToClipboard(outputData)) {
             message.info("复制成功")
             return true;
         }
