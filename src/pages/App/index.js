@@ -1,6 +1,6 @@
 import './index.css'
 import Icon from '@ant-design/icons'
-import { Layout, Menu, Col, Row} from 'antd'
+import { Layout, Menu, Col, Row, Spin } from 'antd'
 import React, { Suspense, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import routes from '../../configs/router'
@@ -87,7 +87,7 @@ const RouterList = () => {
         })
       }
     });
-  return (<Suspense fallback={<h2>加载中...</h2>}><Switch>
+  return (<Suspense fallback={<Spin></Spin>}><Switch>
     { list }
   </Switch></Suspense>)
 }
