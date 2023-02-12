@@ -114,11 +114,10 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
                         <p className="ant-upload-text">单击或拖动文件到此区域</p>
                         <p className="ant-upload-hint">支持批量</p>
                     </Dragger>)
-                    : (<Input.TextArea autoSize={{ minRows: 25, maxRows: 80 }} disabled={enableFile}
+                    : (<Input.TextArea autoSize={{ minRows: 25, maxRows: 40 }} disabled={enableFile}
                         style={{ marginTop: '5px' }} rows={30} placeholder={enableFile ? "已输入文件" : "待处理的文本片段"}
                         value={enableFile ? '' : inputData} onChange={handleInputChange} />)
             }
-
         </Col>
         <Col span={10} style={{ marginLeft: '30px' }}>
             {!StrUtil.isBlank(errorMsg) ?

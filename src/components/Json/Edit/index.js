@@ -86,7 +86,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
                 <Button size="small" icon={<UploadOutlined />}
                     style={{ marginLeft: '5px' }} >导入</Button>
             </Upload>
-            <Input.TextArea autoSize={{ minRows: 25, maxRows: 80 }}
+            <Input.TextArea autoSize={{ minRows: 25, maxRows: 40 }}
                 style={{ marginTop: '5px' }} rows={30} placeholder="待处理的JSON片段"
                 value={inputCode} onChange={handleInputChange} />
         </Col>
