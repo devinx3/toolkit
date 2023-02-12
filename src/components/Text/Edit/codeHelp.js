@@ -26,31 +26,31 @@ const toolUseDemo = `const { _, dayjs, cryptoJS, XLSX, message } = Util`
 // 常用工具文档
 const toolDocument = (<>
     <Typography.Title level={3}>常用工具</Typography.Title>
-    <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code>{toolUseDemo}</Typography.Paragraph></div>
+    <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{toolUseDemo}</Typography.Paragraph></div>
     <Typography.Paragraph>
         <Typography.Title level={5}>工具库</Typography.Title>
-        <Typography.Text code>{`const { _ } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { _ } = Util`}</Typography.Text>
         <Typography.Link style={{ marginLeft: '5px' }} href='https://www.lodashjs.com/' target="_blank">loadsh 官网</Typography.Link>
     </Typography.Paragraph>
     <Typography.Paragraph>
         <Typography.Title level={5}>日期工具</Typography.Title>
-        <Typography.Text code>{`const { dayjs } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { dayjs } = Util`}</Typography.Text>
         <Typography.Link style={{ marginLeft: '5px' }} href='https://dayjs.gitee.io/zh-CN/' target="_blank">Day.js 官网</Typography.Link>
     </Typography.Paragraph>
     <Typography.Paragraph>
         <Typography.Title level={5}>加密工具</Typography.Title>
-        <Typography.Text code>{`const { cryptoJS } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { cryptoJS } = Util`}</Typography.Text>
         <Typography.Link style={{ marginLeft: '5px' }} href='https://github.com/brix/crypto-js' target="_blank">crypto-js</Typography.Link>
     </Typography.Paragraph>
     <Typography.Paragraph>
         <Typography.Title level={5}>文件工具</Typography.Title>
-        <Typography.Text code>{`const { XLSX } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { XLSX } = Util`}</Typography.Text>
         <Typography.Link style={{ marginLeft: '5px' }} href='https://github.com/rockboom/SheetJS-docs-zh-CN/' target="_blank">SheetJS 文档</Typography.Link>
     </Typography.Paragraph>
     <Typography.Paragraph>
         {/* <Typography.Text>消息工具</Typography.Text> */}
         <Typography.Title level={5}>消息工具</Typography.Title>
-        <Typography.Text code>{`const { message } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { message } = Util`}</Typography.Text>
         <Typography.Text>消息提示方法，使用方式和参数如下:</Typography.Text><br />
         <Typography.Text>(content: 消息内容, duration: 自动关闭的延时, 单位秒, 设为0时不自动关闭)</Typography.Text><br />
         <Typography.Text code>message.success(content, [duration])</Typography.Text><br />
