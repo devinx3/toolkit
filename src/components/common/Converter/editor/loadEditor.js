@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 import * as MonacoType from 'monaco-editor/esm/vs/editor/editor.api';
+import completionPostfix from './postfix'
 
 const converterDTS = `declare const inputData: (string | Object | File[]);
 declare const inputObj: (Object | null)
@@ -96,7 +97,13 @@ function loadMonaco(monaco) {
                 return;
             }
             addMonacoExtraLibs(monaco, converterDTS, converterUri);
-        }).catch(error => console.error("load extraLibs error", error))
+        }).catch(error => console.error("load extraLibs error", error));
+        // 自动补全
+        try {
+            monaco.languages.registerCompletionItemProvider('javascript', completionPostfix(monaco));
+        } catch (error) {
+            console.error("load completionPostfix error", error)
+        }
 }
 
 export default loadMonaco;
