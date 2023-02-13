@@ -1,13 +1,10 @@
 // eslint-disable-next-line
 import * as MonacoType from 'monaco-editor/esm/vs/editor/editor.api';
-import dayjs from './lib/dayjs.dts'
-import cryptoJS from './lib/cryptoJS.dts'
-import xlsx from './lib/xlsx.dts'
 
 const converterDTS = `declare const inputData: (string | Object | File[]);
 declare const inputObj: (Object | null)
 declare const Util: ({
-    _: object,
+    _: typeof import("lodash"),,
     dayjs: typeof import("dayjs"),
     cryptoJS: typeof import("cryptoJS"),
     XLSX: typeof import("xlsx"),
@@ -47,14 +44,17 @@ const addMonacoExtraLibs = (monaco, libSource, libUri) => {
 }
 
 const libConfigs = [{
+    name: 'lodash',
+    path: 'https://cdn.jsdelivr.net/npm/@types/lodash@4.14.93/index.d.ts'
+}, {
     name: 'dayjs',
-    path: dayjs
+    path: 'https://cdn.jsdelivr.net/npm/dayjs@1.11.6/index.d.ts'
 }, {
     name: 'cryptoJS',
-    path: cryptoJS
+    path: 'https://cdn.jsdelivr.net/npm/@types/crypto-js@4.1.1/index.d.ts'
 }, {
     name: 'xlsx',
-    path: xlsx
+    path: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/types/index.d.ts'
 }]
 
 /**
