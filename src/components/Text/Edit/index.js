@@ -82,7 +82,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
     }
     // 下载按钮点击事件
     const handleDownloadClick = () => {
-        FileUtil.download(outputData, 'output.json')
+        FileUtil.download(outputData, 'output.txt')
     }
     return <Row style={{ marginTop: '20px' }}>
         <Col span={7}>
@@ -123,9 +123,11 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
             {!StrUtil.isBlank(errorMsg) ?
                 <Alert message={errorMsg} type="error" /> :
                 StrUtil.isBlank(outputData) ? null : <>
-                    <Tooltip title="覆盖待处理输入框"><Button type="text" icon={<LeftOutlined />} onClick={() => setInputData(outputData)} disabled={enableFile} /></Tooltip>
-                    <CopyButton type='text' onClick={handleCopyData} size='small' />
-                    <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
+                    <Space>
+                        <Tooltip title={enableFile ? "" : "覆盖待处理输入框"}><Button type="text" icon={<LeftOutlined />} onClick={() => setInputData(outputData)} disabled={enableFile} /></Tooltip>
+                        <CopyButton type='text' onClick={handleCopyData} size='small' />
+                        <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
+                    </Space>
                     <pre>{outputData}</pre>
                 </>}
         </Col>

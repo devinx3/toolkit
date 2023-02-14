@@ -23,7 +23,7 @@ const CopyButton = props => {
             setSuccessFlag(false);
         }
     }
-    const btnProps = GlobalUtil.omit(props, 'tipTitle');
+    const btnProps = GlobalUtil.omit(props, ['tipTitle']);
     return <Tooltip title={props.tipTitle || '复制'}>
         <Button {...btnProps} onClick={onClick} icon={successFlag ? <CheckOutlined style={{ color: "#52c41a" }} /> : < CopyOutlined />} onMouseLeave={onMouseLeave} />
     </Tooltip>

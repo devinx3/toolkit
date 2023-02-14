@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Divider, Typography, Button, Input, Col, Row, message, Upload, Tooltip } from 'antd';
+import { Alert, Divider, Typography, Button, Input, Col, Row, message, Upload, Tooltip, Space } from 'antd';
 import { LeftOutlined, UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 import Converter from '../../common/Converter';
 import CopyButton from '../../common/CopyButton'
@@ -56,12 +56,14 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
         return false;
     }
     // 复制按钮点击事件
-    const handleCopyData = () => {
-        if (StrUtil.copyToClipboard(outputData)) {
+    const handleCopyData = (neddCompress) => {
+        const data = (neddCompress === true && StrUtil.isStr(outputData)) ? JSON.stringify(JSON.parse(outputData)) : outputData;
+        if (StrUtil.copyToClipboard(data)) {
             message.info("复制成功")
             return true;
         }
     }
+    const handleCopyCompressData = () => handleCopyData(true);
     // 下载按钮点击事件
     const handleDownloadClick = () => {
         FileUtil.download(outputData, 'output.json')
@@ -94,9 +96,12 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
             {!StrUtil.isBlank(errorMsg) ?
                 <Alert message={errorMsg} type="error" /> :
                 (StrUtil.isBlank(outputData) || outputData.length > OUTPUT_LIMIT) ? null : <>
-                    <Tooltip title="覆盖待处理输入框"><Button type="text" icon={<LeftOutlined />} onClick={() => setInputCode(outputData)} /></Tooltip>
-                    <CopyButton type='text'  onClick={handleCopyData} size="small"/>
-                    <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
+                    <Space>
+                        <Tooltip title="覆盖待处理输入框"><Button type="text" icon={<LeftOutlined />} onClick={() => setInputCode(outputData)} /></Tooltip>
+                        <CopyButton type='text'  onClick={handleCopyData} size="small"/>
+                        <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
+                        <CopyButton tipTitle="压缩后复制" type="dashed" onClick={() => handleCopyCompressData(true)} size='small' />
+                    </Space>
                     <pre>{outputData}</pre>
                 </>}
         </Col>
