@@ -7,6 +7,9 @@ import { EditOutlined } from '@ant-design/icons';
 const { addConfig, updateConfig, deleteConfig } = storeEditService;
 const { Text } = Typography;
 
+// 鼠标移入后延时多少才显示 Tooltip，单位：秒
+const tipMouseEnterDelay = 1;
+
 // 扩展添加配置按钮
 const AddConfigButton = ({ lang, config, scriptContent, onAddSuccess }) => {
     const defaultConfigName = config.name;
@@ -65,7 +68,7 @@ export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHe
         refreshScript();
     }
     return (<>
-        <Tooltip title={config.description}>
+        <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
             <Button onClick={() => setVisible(true)}>{config.name}</Button>
         </Tooltip>
         <Drawer title={config.name} open={visible} width='75%'
@@ -152,10 +155,10 @@ const ExpandManageModal = ({ lang, config, visible, setVisible, editorHelpRender
 export const ExpandManageButton = ({ lang, config, handleConvert, editorHelpRender, refreshScript }) => {
     const [visible, setVisible] = React.useState(false);
     return (<>
-        <Tooltip title={config.description}>
+        <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
             <Button type="dashed" onClick={e => handleConvert(config.scriptContent)}>{config.name}</Button>
         </Tooltip>
-        <Tooltip title="编辑">
+        <Tooltip title="编辑" mouseEnterDelay={tipMouseEnterDelay * 2}>
             <Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" />
         </Tooltip>
         <ExpandManageModal lang={lang} config={config} visible={visible} setVisible={setVisible}

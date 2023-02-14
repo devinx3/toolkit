@@ -8,6 +8,9 @@ import { ScriptUtil } from '../handler';
 const { addCombination, updateCombination, deleteCombination } = storeEditService;
 const { Text } = Typography;
 
+// 鼠标移入后延时多少才显示 Tooltip，单位：秒
+const tipMouseEnterDelay = 1;
+
 // 默认组合名称
 const defaultCombinationName = '自定义组合';
 
@@ -178,12 +181,12 @@ export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, han
             return;
         }
         for (const configId of combinationConfigIdList) {
-            if (ScriptUtil.isBasic({id: configId})) {
+            if (ScriptUtil.isBasic({ id: configId })) {
                 continue;
             }
             if (!storeEditService.queryConfigById(lang, configId)) {
                 message.warn("脚本配置不存在, 请刷新页面");
-                return 
+                return
             }
         }
         const item = {
@@ -223,10 +226,10 @@ export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, han
     }
 
     return (<>
-        <Tooltip style={{ marginLeft: '15px' }} title={combinationConfig.description}>
+        <Tooltip style={{ marginLeft: '15px' }} title={combinationConfig.description} mouseEnterDelay={tipMouseEnterDelay}>
             <Button type="dashed" onClick={e => handleConvert(combinationConfig.combination)}>{combinationConfig.name}</Button>
         </Tooltip>
-        <Tooltip title="编辑">
+        <Tooltip title="编辑" mouseEnterDelay={tipMouseEnterDelay * 2}>
             <Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" />
         </Tooltip>
 
@@ -247,14 +250,14 @@ export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, han
             <Timeline mode="left">
                 {(timelineItemList.length === 0) && (
                     <Timeline.Item key={0} color="gray">
-                        <Tooltip title="添加" ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(-1)}></Button></Tooltip>
+                        <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2} ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(-1)}></Button></Tooltip>
                     </Timeline.Item>
                 )}
                 {timelineItemList.map((item, index) => {
                     return (<Timeline.Item key={index} color={item.id > 0 ? '#faad14' : '#52c41a'}>
-                        <Tooltip title="添加" ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
-                        <Tooltip title="删除" ><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
-                        <Tooltip title={item.description} >{item.name}</Tooltip>
+                        <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
+                        <Tooltip title="删除" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
+                        <Tooltip title={item.description} mouseEnterDelay={tipMouseEnterDelay}>{item.name}</Tooltip>
                     </Timeline.Item>)
                 })}
             </Timeline>

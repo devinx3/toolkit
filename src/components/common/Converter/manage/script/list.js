@@ -9,6 +9,8 @@ import dayjs from 'dayjs'
 
 const { addConfig, batchDeleteConfig } = storeEditService;
 
+// 鼠标移入后延时多少才显示 Tooltip，单位：秒
+const tipMouseEnterDelay = 1;
 // 配置报表
 const CONFIG_VERSION = 101;
 
@@ -167,7 +169,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                     </Checkbox>
                     <Button type='text' disabled={dataSource.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
                     <Button type='text' disabled={dataSource.length === 0} icon={<ExportOutlined />} onClick={handleExportConfig}>导出</Button>
-                    <Tooltip title="不支持导入">
+                    <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
                         <Button type='text' disabled={dataSource.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON配置</Button>
                     </Tooltip>
                 </>)}

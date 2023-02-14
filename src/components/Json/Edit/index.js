@@ -100,7 +100,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
                         <Tooltip title="覆盖待处理输入框"><Button type="text" icon={<LeftOutlined />} onClick={() => setInputCode(outputData)} /></Tooltip>
                         <CopyButton type='text'  onClick={handleCopyData} size="small"/>
                         <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
-                        <CopyButton tipTitle="压缩后复制" type="dashed" onClick={() => handleCopyCompressData(true)} size='small' />
+                        <CopyButton tipTitle="压缩并复制" type="dashed" onClick={() => handleCopyCompressData(true)} size='small' />
                     </Space>
                     <pre>{outputData}</pre>
                 </>}

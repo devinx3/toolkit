@@ -6,6 +6,9 @@ import { ExpandManageButton, ExpandAddButton } from './expand'
 import { ScriptUtil } from '../handler';
 import ExpandManageList from './list'
 
+// 鼠标移入后延时多少才显示 Tooltip，单位：秒
+const tipMouseEnterDelay = 1;
+
 /**
  * 获取相关语言对应的脚本信息
  * @param {string} lang 语言
@@ -31,7 +34,7 @@ const ScriptManage = ({ lang, context, basicButtons, expandAddButton, editorHelp
         <Row style={{ marginTop: '10px' }}>
             {basicButtons.map((config, key) => {
                 return (<Col key={key} style={{ marginLeft: '10px' }}>
-                    <Tooltip title={config.description}>
+                    <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
                         <Button onClick={() => handleConvert(config.scriptContent)}>{config.name}</Button>
                     </Tooltip>
                 </Col>)
