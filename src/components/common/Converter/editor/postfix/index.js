@@ -1,13 +1,15 @@
 
 import defUtils from './utils';
 import defTemplates from './templates';
-import typescript from 'typescript'
+// 为了使用typescript
+// eslint-disable-next-line
+import * as tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker';
 
 const DEFAULT_TAB_SIZE = 4;
 const DEFAULT_INSERT_SPACES = true;
 // 导出对象
 const completionPostfix = (monaco) => {
-    const ts = typescript;
+    const ts = tsWorker.create ? global.ts : {}; // typescript/ts.worker 中定义 "globalThis.ts = typescript;"
     const dependency = { monaco, ts }
     const utils = defUtils(dependency);
     const templates = defTemplates(dependency);
@@ -100,6 +102,5 @@ const completionPostfix = (monaco) => {
         }
     }
 }
-
 
 export default completionPostfix;
