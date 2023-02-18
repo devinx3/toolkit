@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 import * as MonacoType from 'monaco-editor/esm/vs/editor/editor.api';
-import completionPostfix from './postfix'
+import registerPostfix from './postfix'
+import globalUtil, { keys } from '../../../../utils/GlobalUtil'
 
 const converterDTS = `declare const inputData: (string | Object | File[]);
 declare const inputObj: (Object | null)
@@ -27,7 +28,6 @@ class Cache {
         return key in this.dataSource;
     }
     get(key) {
-        debugger
         return this.dataSource[key];
     }
     set(key, val) {
@@ -58,14 +58,18 @@ const libConfigs = [{
     path: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/types/index.d.ts'
 }]
 
+// 缓存key
+const loadMonacoKey = keys.loadMonaco;
+
 /**
  * 加载编辑器
  * @param {MonacoType} monaco 
  */
 function loadMonaco(monaco) {
-    if (!monaco) {
+    if (!monaco || globalUtil.getFromCache(loadMonacoKey)) {
         return;
     }
+    globalUtil.setToCache(loadMonacoKey, true)
     const extraLibs = monaco.languages.typescript.javascriptDefaults.getExtraLibs() || {};
     const fetchLib = (libConfig) => {
         const name = libConfig.name;
@@ -98,12 +102,12 @@ function loadMonaco(monaco) {
             }
             addMonacoExtraLibs(monaco, converterDTS, converterUri);
         }).catch(error => console.error("load extraLibs error", error));
-        // 自动补全
-        try {
-            monaco.languages.registerCompletionItemProvider('javascript', completionPostfix(monaco));
-        } catch (error) {
-            console.error("load completionPostfix error", error)
-        }
+    // 自动补全
+    try {
+        registerPostfix(monaco, provider => monaco.languages.registerCompletionItemProvider('javascript', provider))
+    } catch (error) {
+        console.error("load completionPostfix error", error)
+    }
 }
 
 export default loadMonaco;

@@ -1,15 +1,12 @@
 
 import defUtils from './utils';
 import defTemplates from './templates';
-// 为了使用typescript
-// eslint-disable-next-line
-import * as tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker';
 
 const DEFAULT_TAB_SIZE = 4;
 const DEFAULT_INSERT_SPACES = true;
-// 导出对象
-const completionPostfix = (monaco) => {
-    const ts = tsWorker.create ? global.ts : {}; // typescript/ts.worker 中定义 "globalThis.ts = typescript;"
+
+// 自动补全提供者
+const getCompletionPostfixProvider = (monaco, ts) => {
     const dependency = { monaco, ts }
     const utils = defUtils(dependency);
     const templates = defTemplates(dependency);
@@ -103,4 +100,31 @@ const completionPostfix = (monaco) => {
     }
 }
 
-export default completionPostfix;
+// 加载ts
+const loadTs = () => {
+    if (global.ts) {
+        return Promise.resolve(global.ts);
+    } else {
+        // 引入ts
+        return new Promise((resolve, reject) => {
+            import('monaco-editor/esm/vs/language/typescript/ts.worker')
+                .then(() => {
+                    const ts = global.ts; // typescript/ts.worker 中定义 "globalThis.ts = typescript;"
+                    if (!ts) {
+                        reject(new Error("获取tsWorker失败"));
+                    }
+                    resolve(ts);
+                }).then(reject)
+        })
+    }
+}
+
+// 自动对象
+const registerPostfix = (monaco, registerProvider) => {
+    // 引入ts
+    loadTs()
+        .then(ts => registerProvider(getCompletionPostfixProvider(monaco, ts)))
+        .catch(error => console.log("register postfix error", error))
+}
+
+export default registerPostfix;

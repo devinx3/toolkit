@@ -1,9 +1,9 @@
 import CuszIcons from '../icons'
 import { FileTextOutlined, EditOutlined } from '@ant-design/icons'
-import Home from '../pages/Home'
 import React from 'react'
 
-const Encrypt = React.lazy(() => import('../components/Text/Encrypt'))
+const Home = React.lazy(() => import('../pages/Home'))
+const Encrypt = React.lazy(() => import('../components/Text/Encrypt'));
 const TextEdit = React.lazy(() => import('../components/Text/Edit'));
 const JsonEdit = React.lazy(() => import('../components/Json/Edit'));
 

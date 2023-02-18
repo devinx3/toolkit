@@ -1,7 +1,8 @@
 import React from "react"
-import ManageBlock from "./manage"
-import DataBlock from "./data"
 import { LANG } from "./constants";
+
+const ManageBlock = React.lazy(() => import("./manage"))
+const DataBlock = React.lazy(() => import("./data"))
 
 /**
  * 转换事件上下文
@@ -81,10 +82,10 @@ const Converter = ({ lang = "txt", manage, handleInputObj, dataBlockRender }) =>
         handleInputObj: handleInputObj || handleInputObjDataSource[lang],
     };
 
-    return <>
+    return <React.Suspense fallback={<></>}>
         <ManageBlock {...manageConfig} />
         <DataBlock {...dataConfig} />
-    </>
+    </React.Suspense>
 }
 
 export default Converter

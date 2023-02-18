@@ -1,6 +1,11 @@
 // 缓存
 const cache = {};
 
+// 缓存key
+export const keys = {
+    loadMonaco: 'converter.loadEditor.loadMonaco.loaded'
+}
+
 // 工具
 const Util = {
     // 从缓存获取数据
