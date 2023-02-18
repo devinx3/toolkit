@@ -1,4 +1,5 @@
 import React from 'react';
+import { Spin } from 'antd';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import ReadMeSource from './home.md'
 import GlobalUtil from '../../utils/GlobalUtil'
@@ -19,12 +20,15 @@ const Home = () => {
             return;
         }
         fetch(ReadMeSource)
-        .then(res => res.text())
-        .then(content => setSource(content))
-        .catch(e => console.error("fetch readme", e))
+            .then(res => res.text())
+            .then(content => setSource(content))
+            .catch(e => console.error("fetch readme", e))
     }, [source]);
 
-    return (<MarkdownPreview 
+    if (!source) {
+        return <Spin />
+    }
+    return (<MarkdownPreview
         source={source} 
         linkTarget='_blank'
         rehypeRewrite={(node, index, parent) => {
