@@ -10,16 +10,16 @@ const { Content, Footer, Sider } = Layout;
 
 // Logo
 const Logo = (props) => {
-  const {collapsed, clearItemKey} = props;
+  const { collapsed, clearItemKey } = props;
   return (<Row className="logo" >
-    <Col span={5}><NavLink to={'/home'} onClick={clearItemKey}><Icon component={() => <LogoSvg height="2em" width="2em"/>}/></NavLink></Col>
-    {collapsed? null : <Col span={12}>工具箱</Col>}
-</Row>)
+    <Col span={5}><NavLink to={'/home'} onClick={clearItemKey}><Icon component={() => <LogoSvg height="2em" width="2em" />} /></NavLink></Col>
+    {collapsed ? null : <Col span={12}>工具箱</Col>}
+  </Row>)
 }
 
 // 侧边栏
 function generageItems() {
-  if(!routes) {
+  if (!routes) {
     return [];
   }
   const list = [];
@@ -78,17 +78,17 @@ const getDefaultOpenKeys = () => {
 // 路由
 const RouterList = () => {
   const list = [];
-    routes.forEach(route => {
-      if (route.path) {
-        list.push(<Route exact path={route.path} key={route.key} component={route.component} />);
-      }else if (route.routes) {
-        route.routes.forEach(child => {
-            list.push(<Route exact path={child.path} key={route.key + "/" + child.key} component={child.component} />);
-        })
-      }
-    });
+  routes.forEach(route => {
+    if (route.path) {
+      list.push(<Route exact path={route.path} key={route.key} component={route.component} />);
+    } else if (route.routes) {
+      route.routes.forEach(child => {
+        list.push(<Route exact path={child.path} key={route.key + "/" + child.key} component={child.component} />);
+      })
+    }
+  });
   return (<Suspense fallback={<Spin></Spin>}><Switch>
-    { list }
+    {list}
   </Switch></Suspense>)
 }
 
@@ -96,8 +96,8 @@ const RouterList = () => {
 const TopBanner = () => {
   return global?.location?.hostname !== 'devinx3.github.io' && <Alert showIcon={false}
     message={<Typography.Text>国内镜像发布了! &nbsp;&nbsp; <Tooltip placement="right" title="需自行迁移配置">
-                <Typography.Link href='https://devinx3.gitee.io/toolkit' target='_blank'>跳转 &gt;&gt;</Typography.Link></Tooltip>
-            </Typography.Text>}
+      <Typography.Link href='https://devinx3.gitee.io/toolkit' target='_blank'>跳转 &gt;&gt;</Typography.Link></Tooltip>
+    </Typography.Text>}
     tooltip="自行迁移配置"
     banner
     closable
@@ -111,45 +111,45 @@ const App = () => {
     setItemSelectKey(e.key);
   }
   return (<>
-      <TopBanner />
-      <HashRouter>
-        <Layout
-          style={{
-            minHeight: '100vh',
-          }}
-        >
-          <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-            <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])}/>
-            <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
-                  onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
-          </Sider>
-          <Layout className="site-layout">
-            <Content
+    <TopBanner />
+    <HashRouter>
+      <Layout
+        style={{
+          minHeight: '100vh',
+        }}
+      >
+        <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+          <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])} />
+          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
+            onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+        </Sider>
+        <Layout className="site-layout">
+          <Content
+            style={{
+              margin: '10px 16px',
+            }}
+          >
+            <div
+              className="site-layout-background"
               style={{
-                margin: '10px 16px',
+                padding: 24,
+                minHeight: 600,
               }}
             >
-              <div
-                className="site-layout-background"
-                style={{
-                  padding: 24,
-                  minHeight: 600,
-                }}
-              >
-                  {/* {renderRoutes(routes)} */}
-                  <RouterList />
-              </div>
-            </Content>
-            <Footer
-              style={{
-                textAlign: 'center',
-              }}
-            >
-              Devinx3 Toolkit ©2022 Created by Devinx3
-            </Footer>
-          </Layout>
+              {/* {renderRoutes(routes)} */}
+              <RouterList />
+            </div>
+          </Content>
+          <Footer
+            style={{
+              textAlign: 'center',
+            }}
+          >
+            Devinx3 Toolkit ©2022 Created by Devinx3
+          </Footer>
         </Layout>
-      </HashRouter>
-    </>);
+      </Layout>
+    </HashRouter>
+  </>);
 };
 export default App;
