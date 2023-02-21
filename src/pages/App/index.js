@@ -1,6 +1,6 @@
 import './index.css'
 import Icon from '@ant-design/icons'
-import { Layout, Menu, Col, Row, Spin } from 'antd'
+import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip } from 'antd'
 import React, { Suspense, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import routes from '../../configs/router'
@@ -92,51 +92,64 @@ const RouterList = () => {
   </Switch></Suspense>)
 }
 
+// 顶级公告
+const TopBanner = () => {
+  return global?.location?.hostname !== 'devinx3.github.io' && <Alert showIcon={false}
+    message={<Typography.Text>国内镜像发布了! &nbsp;&nbsp; <Tooltip placement="right" title="需自行迁移配置">
+                <Typography.Link href='https://devinx3.gitee.io/toolkit' target='_blank'>跳转 &gt;&gt;</Typography.Link></Tooltip>
+            </Typography.Text>}
+    tooltip="自行迁移配置"
+    banner
+    closable
+  />
+}
+
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [itemSelectKey, setItemSelectKey] = useState();
   const handleMenuClick = (e) => {
     setItemSelectKey(e.key);
   }
-  return (
-    <HashRouter>
-      <Layout
-        style={{
-          minHeight: '100vh',
-        }}
-      >
-        <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-          <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])}/>
-          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
-                onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
-        </Sider>
-        <Layout className="site-layout">
-          <Content
-            style={{
-              margin: '10px 16px',
-            }}
-          >
-            <div
-              className="site-layout-background"
+  return (<>
+      <TopBanner />
+      <HashRouter>
+        <Layout
+          style={{
+            minHeight: '100vh',
+          }}
+        >
+          <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+            <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])}/>
+            <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
+                  onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+          </Sider>
+          <Layout className="site-layout">
+            <Content
               style={{
-                padding: 24,
-                minHeight: 600,
+                margin: '10px 16px',
               }}
             >
-                {/* {renderRoutes(routes)} */}
-                <RouterList />
-            </div>
-          </Content>
-          <Footer
-            style={{
-              textAlign: 'center',
-            }}
-          >
-            Devinx3 Toolkit ©2022 Created by Devinx3
-          </Footer>
+              <div
+                className="site-layout-background"
+                style={{
+                  padding: 24,
+                  minHeight: 600,
+                }}
+              >
+                  {/* {renderRoutes(routes)} */}
+                  <RouterList />
+              </div>
+            </Content>
+            <Footer
+              style={{
+                textAlign: 'center',
+              }}
+            >
+              Devinx3 Toolkit ©2022 Created by Devinx3
+            </Footer>
+          </Layout>
         </Layout>
-      </Layout>
-    </HashRouter>
-  );
+      </HashRouter>
+    </>);
 };
 export default App;
