@@ -48,7 +48,6 @@ const toolDocument = (<>
         <Typography.Link style={{ marginLeft: '5px' }} href='https://github.com/rockboom/SheetJS-docs-zh-CN/' target="_blank">SheetJS 文档</Typography.Link>
     </Typography.Paragraph>
     <Typography.Paragraph>
-        {/* <Typography.Text>消息工具</Typography.Text> */}
         <Typography.Title level={5}>消息工具</Typography.Title>
         <Typography.Text code copyable>{`const { message } = Util`}</Typography.Text>
         <Typography.Text>消息提示方法，使用方式和参数如下:</Typography.Text><br />
@@ -68,7 +67,13 @@ const readExcel = (file, callbackWorkbook) => {
     const reader = new FileReader();
     reader.onload = function (e) {
         const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const workbook = XLSX.read(data, { 
+            type: 'binary',
+            // 1252: ISO-8859-1 (默认值)
+            // 936: 中文简体编码; 65001: UTF8
+            // 其他编码参考: https://github.com/sheetjs/js-codepage#generated-codepages
+            codepage: 65001
+        });
         callbackWorkbook(workbook)
     };
     reader.readAsBinaryString(file)
@@ -84,13 +89,56 @@ return new Promise((resolve, reject) => {
         } catch (error) {
             reject(error)
         }
-    })
+    });
 })`
 
-// 遍历对象
+// 文件案例文档
 const FileDocument = (<>
     <Typography.Title level={3}>文件读取</Typography.Title>
     <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{FileDemo}</Typography.Paragraph></div>
+</>);
+
+// 多文件案例文档
+const MutiFileDemo =
+`const { XLSX } = Util;
+const readExcel = (file, callbackWorkbook) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary', codepage: 65001 });
+        callbackWorkbook(workbook)
+    };
+    reader.readAsBinaryString(file)
+}
+const readMutiExcel = fileList => {
+    try {
+        return Promise.all(fileList.map(file => {
+            return new Promise((resolve, reject) => {
+                try {
+                    readExcel(file, resolve);
+                } catch(error) {
+                    reject(error)
+                }
+            });
+        }));
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+// 将指定 sheet, 转换成 JSON 对象
+const getSheetJsonObj = (workbook, idx) => XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[idx]], {
+    defval: 'null'  //单元格为空时的默认值
+});
+return new Promise((resolve, reject) => {
+    readMutiExcel(inputData)
+    .then(workbookList => resolve(workbookList.map(wb => getSheetJsonObj(wb, 0))))
+    .catch(reject)
+})`
+
+// 多文件案例文档
+const MutiFileDocument = (<>
+    <Typography.Title level={3}>多文件读取</Typography.Title>
+    <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{MutiFileDemo}</Typography.Paragraph></div>
 </>);
 
 const CodeHelpView = () => {
@@ -98,6 +146,7 @@ const CodeHelpView = () => {
         <Popover placement="rightTop" content={helpDocument} title={null} trigger="click"><Button type='link'>帮助文档</Button></Popover>
         <Popover placement="rightTop" content={toolDocument} title={null} trigger="click"><Button type='link'>常用工具</Button></Popover>
         <Popover placement="rightTop" content={FileDocument} title={null} trigger="click"><Button type='link'>文件读取样例</Button></Popover>
+        <Popover placement="rightTop" content={MutiFileDocument} title={null} trigger="click"><Button type='link'>多文件读取样例</Button></Popover>
     </>)
 }
 
