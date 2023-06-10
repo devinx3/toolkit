@@ -90,7 +90,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             delete obj['id']
             source.push(obj);
         }
-        const exportData = dynamicConfig.convertExportData(JSON.stringify(dataSource), CONFIG_VERSION);
+        const exportData = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION);
         const fileName = 'config' + dayjs().format('MMDDHHmmss');
         FileUtil.download(exportData, fileName);
     }
