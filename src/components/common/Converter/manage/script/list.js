@@ -44,6 +44,20 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         setIndeterminate(!!list.length && list.length < dataSource.length);
         setCheckAllConfig(list.length === dataSource.length);
     }
+    // 获取被勾选的配置项
+    const getCheckConfigItem = removeId => {
+        const source = [];
+        for (let config of dataSource) {
+            if (checkedList.indexOf(config.id) !== -1) {
+                const obj = { ...config };
+                if (removeId) {
+                    delete obj['id']
+                }
+                source.push(obj);
+            }
+        }
+        return source;
+    }
     // 全部勾选页
     const onCheckAllChangeConfigItem = (e) => {
         if (e.target.checked) {
@@ -84,12 +98,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             message.info("没有选中任何行, 无需导出")
             return;
         }
-        const source = [];
-        for (let config of dataSource) {
-            const obj = { ...config };
-            delete obj['id']
-            source.push(obj);
-        }
+        const source = getCheckConfigItem(true);
         const exportData = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION);
         const fileName = 'config' + dayjs().format('MMDDHHmmss');
         FileUtil.download(exportData, fileName);
@@ -100,7 +109,8 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             message.info("没有选中任何行, 无法复制")
             return;
         }
-        if (StrUtil.copyToClipboard(JSON.stringify(dataSource))) {
+        const source = getCheckConfigItem(true);
+        if (StrUtil.copyToClipboard(JSON.stringify(source))) {
             message.success("复制成功")
         }
     }
