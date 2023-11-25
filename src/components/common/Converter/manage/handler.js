@@ -94,6 +94,9 @@ class DynamicConfig {
     }
     // 转换导入数据
     convertImportData(str) {
+        if (!str) {
+            throw new Error('数据不能为空');
+        }
         // 匹配特征前缀
         const processPrefix = str.slice(0, this.featurePrefix.length);
         if (processPrefix !== this.featurePrefix) {

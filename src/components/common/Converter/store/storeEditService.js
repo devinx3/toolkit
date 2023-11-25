@@ -93,6 +93,16 @@ const EditService = {
     queryConfigById: (lang, id) => {
         return queryItemById(configCache[lang], id)
     },
+    // 根据名称查询配置
+    queryConfigByName: (lang, name) => {
+        const ressult = [];
+        listConfig(lang)?.forEach(item => {
+            if (item.name === name) {
+                ressult.push(item);
+            }
+        });
+        return ressult;
+    },
     // 添加配置
     addConfig: (lang, item) => {
         // 最大id加1作为新ID
@@ -226,6 +236,10 @@ export const requestService = (fn, ...params) => {
         }
         if (result === true) {
             resove.apply(this, params)
+        } else if (result instanceof Array) {
+            resove.apply(this, [result])
+        } else if (result instanceof Object) {
+            resove.apply(this, result)
         } else {
             reject(result)
         }
