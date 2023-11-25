@@ -52,9 +52,9 @@ const importFromUrl = (url, handleCallback) => {
     );
 }
 // 是否由有效的 url 路径
-const isValidUrl = urlString => {
+const convertURL = (urlString) => {
     try {
-        return Boolean(new URL(urlString));
+        return new URL(urlString);
     } catch (e) {
         return false;
     }
@@ -289,8 +289,12 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             return false;
         }
         if (importConfigUrl?.length > 0) {
-            if (!isValidUrl(importConfigUrl)) {
+            const matchURL = convertURL(importConfigUrl);
+            if (!matchURL) {
                 message.error("无效的导入地址");
+                return false;
+            } else if (matchURL.protocol !== window.location.protocol) {
+                message.warn("不支持的协议, 目前仅支持 【" + window.location.protocol + "】开始的导入地址");
                 return false;
             }
             setImporting(true);
