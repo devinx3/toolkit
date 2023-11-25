@@ -20,7 +20,12 @@ const EXPORT_DATA_NAME = 'd';
 const EXPORT_CONFIG_NAME = 'c';
 // 从url中获取数据
 const importFromUrl = (url, handleCallback) => {
-    const handlerError = (e, data) => {
+    const handleError = (e, data) => {
+        if (e instanceof Error) {
+            handleCallback(e);
+        } else {
+            handleCallback(new Error(e));
+        }
         message.error("加载失败: " + url)
         console.debug('加载失败', e);
     }
@@ -28,8 +33,7 @@ const importFromUrl = (url, handleCallback) => {
         { name: CONFIG_CALLBACK_NAME, timeout: 30000 },
         (e, data) => {
             if (e) {
-                handlerError(e, data);
-                handleCallback(undefined, undefined);
+                handleError(e, data);
                 return;
             }
             try {
@@ -41,12 +45,12 @@ const importFromUrl = (url, handleCallback) => {
                     throw new Error("数据格式异常");
                 }
                 const itemConfig = data[EXPORT_CONFIG_NAME];
-                if (!itemConfig && !(typeof (itemConfig) === 'object')) {
+                if (itemConfig && !(typeof (itemConfig) === 'object')) {
                     throw new Error("数据格式异常");
                 }
                 handleCallback(scriptContent, itemConfig);
             } catch (error) {
-                handlerError(error, data);
+                handleError(error, data);
             }
         }
     );
@@ -205,7 +209,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
     }
     // 导入浏览器中
     const handleImportConfigCallback = (importData, importConofig) => {
-        if (!importData) {
+        if (!importData || importData instanceof Error) {
             setImporting(false);
             return;
         }
@@ -294,7 +298,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                 message.error("无效的导入地址");
                 return false;
             } else if (matchURL.protocol !== window.location.protocol) {
-                message.warn("不支持的协议, 目前仅支持 【" + window.location.protocol + "】开始的导入地址");
+                message.warn("不支持的协议, 目前仅支持 【" + window.location.protocol + "】开头的导入地址");
                 return false;
             }
             setImporting(true);
