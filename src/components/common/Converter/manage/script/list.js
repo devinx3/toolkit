@@ -6,7 +6,7 @@ import { dynamicConfig } from '../handler';
 import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
 import dayjs from 'dayjs'
-import jsonp from 'jsonp';
+import jsonp from '../../../../../utils/jsonp'
 
 const { addConfig, queryConfigByName, updateConfig, batchDeleteConfig } = storeEditService;
 
@@ -19,41 +19,28 @@ const CONFIG_CALLBACK_NAME = '__devinx3_call_231125__';
 const EXPORT_DATA_NAME = 'd';
 const EXPORT_CONFIG_NAME = 'c';
 // 从url中获取数据
-const importFromUrl = (url, handleCallback) => {
-    const handleError = (e, data) => {
-        if (e instanceof Error) {
-            handleCallback(e);
-        } else {
-            handleCallback(new Error(e));
+const importFromUrl = (url, handleCallback, handleClear) => {
+    jsonp(url, {
+        name: CONFIG_CALLBACK_NAME,
+        timeout: 30000
+    }).then(function (data) {
+        if (!data) {
+            throw new Error("数据格式异常");
         }
+        const scriptContent = data[EXPORT_DATA_NAME];
+        if (!(typeof (scriptContent) === 'string')) {
+            throw new Error("数据格式异常");
+        }
+        const itemConfig = data[EXPORT_CONFIG_NAME];
+        if (itemConfig && !(typeof (itemConfig) === 'object')) {
+            throw new Error("数据格式异常");
+        }
+        handleCallback(scriptContent, itemConfig);
+    }).catch(e => {
+        handleClear();
         message.error("加载失败: " + url)
-        console.debug('加载失败', e);
-    }
-    jsonp(url,
-        { name: CONFIG_CALLBACK_NAME, timeout: 30000 },
-        (e, data) => {
-            if (e) {
-                handleError(e, data);
-                return;
-            }
-            try {
-                if (!data) {
-                    throw new Error("数据格式异常");
-                }
-                const scriptContent = data[EXPORT_DATA_NAME];
-                if (!(typeof (scriptContent) === 'string')) {
-                    throw new Error("数据格式异常");
-                }
-                const itemConfig = data[EXPORT_CONFIG_NAME];
-                if (itemConfig && !(typeof (itemConfig) === 'object')) {
-                    throw new Error("数据格式异常");
-                }
-                handleCallback(scriptContent, itemConfig);
-            } catch (error) {
-                handleError(error, data);
-            }
-        }
-    );
+        console.debug('加载失败', e)
+    }).finally(() => handleClear(undefined))
 }
 // 是否由有效的 url 路径
 const convertURL = (urlString) => {
@@ -208,9 +195,11 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         }
     }
     // 导入浏览器中
+    const startImport = () => setImporting(false);
+    const completeImport = () => setImporting(false);
     const handleImportConfigCallback = (importData, importConofig) => {
-        if (!importData || importData instanceof Error) {
-            setImporting(false);
+        if (!importData) {
+            completeImport();
             return;
         }
         let newList = null;
@@ -227,7 +216,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                 execFun(importContext);
             } catch (e) {
                 message.error("导入失败, 异常消息: " + e.message);
-                setImporting(false);
+                completeImport();
                 return;
             }
         }
@@ -238,11 +227,11 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             newList = JSON.parse(dynamicConfig.convertImportData(importData));
         } catch (e) {
             message.error("导入失败, 异常消息: " + e.message);
-            setImporting(false);
+            completeImport();
             return;
         }
         if (!(newList && newList.length && newList.length > 0)) {
-            setImporting(false);
+            completeImport();
             return;
         }
         let successCount = 0;
@@ -282,7 +271,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             } else {
                 message.warn("部分导入成功, 异常个数" + (newList.length - successCount) + ", 异常消息: " + errorMsg);
             }
-            setImporting(false);
+            completeImport();
             refreshScript();
         });
     }
@@ -301,11 +290,15 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                 message.warn("不支持的协议, 目前仅支持 【" + window.location.protocol + "】开头的导入地址");
                 return false;
             }
-            setImporting(true);
-            importFromUrl(importConfigUrl, handleImportConfigCallback);
+            startImport();
+            importFromUrl(importConfigUrl, handleImportConfigCallback, completeImport);
         } else {
-            setImporting(true);
-            FileUtil.readAsText(file, handleImportConfigCallback);
+            startImport();
+            FileUtil.readAsText({
+                file,
+                handleRead: handleImportConfigCallback,
+                handleError: completeImport
+            });
         }
         return false;
     }

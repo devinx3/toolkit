@@ -1,13 +1,14 @@
 const Util = {
     // 读取文件内容(默认以UTF8格式读取)
-    readAsText: (file, setFileContent, charset) => {
+    readAsText: ({file, handleRead, charset, handleError}) => {
         if (!charset) {
             charset = 'utf8';
         }
         const reader = new FileReader();
         reader.onload = () =>{
-            setFileContent(reader.result)
+            handleRead(reader.result)
         }
+        reader.onerror = handleError;
         reader.readAsText(file, charset);
     },
     // 下载文件
