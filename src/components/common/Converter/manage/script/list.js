@@ -286,9 +286,6 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             if (!matchURL) {
                 message.error("无效的导入地址");
                 return false;
-            } else if (matchURL.protocol !== window.location.protocol) {
-                message.warn("不支持的协议, 目前仅支持 【" + window.location.protocol + "】开头的导入地址");
-                return false;
             }
             startImport();
             importFromUrl(importConfigUrl, handleImportConfigCallback, completeImport);
