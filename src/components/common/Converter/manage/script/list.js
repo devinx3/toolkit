@@ -341,7 +341,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                         <Button type='text' disabled={dataSource.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON配置</Button>
                     </Tooltip>
                 </Spin>)}
-                footer={<Spin spinning={importing}><Input type='url' placeholder='配置导入文件地址(待开放)' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear/>
+                footer={<Spin spinning={importing}><Input type='url' placeholder='配置导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear/>
                     {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
                         <Button icon={<ImportOutlined />}>导入</Button>
                     </Upload>)
