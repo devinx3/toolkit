@@ -3,21 +3,48 @@ import * as MonacoType from 'monaco-editor/esm/vs/editor/editor.api';
 import registerPostfix from './postfix'
 import globalUtil, { keys } from '../../../../utils/GlobalUtil'
 
-const converterDTS = `declare const inputData: (string | Object | File[]);
-declare const inputObj: (Object | null)
-declare const Util: ({
-    _: typeof import("lodash"),,
-    dayjs: typeof import("dayjs"),
-    cryptoJS: typeof import("cryptoJS"),
-    XLSX: typeof import("xlsx"),
-    message: {
-        info(content: string, duration?: number): void;
-        success(content: string, duration?: number): void;
-        error(content: string, duration?: number): void;
-        warning(content: string, duration?: number): void;
-        loading(content: string, duration?: number): void;
+const generageImportPluginSource = (pluginNames) => {
+    if (!pluginNames || pluginNames.length <= 0) {
+        return `(moduleName: string): null`;
     }
-});`;
+    let importPluginSource = '(moduleName: ';
+    importPluginSource = importPluginSource + pluginNames.map(name => "'" + name + "'").join(" | ");
+    importPluginSource = importPluginSource + ") => Promise<";
+    importPluginSource = importPluginSource + pluginNames.map(name => "typeof import('" + name + "')").join(" | ");
+    importPluginSource = importPluginSource + ">"
+    return importPluginSource;
+}
+
+const converterDTS = (pluginNames) => {
+    const importPluginSource = generageImportPluginSource(pluginNames);
+    return `
+    declare const inputData: (string | Object | File[]);
+    declare const inputObj: (Object | null);
+    interface ElementDefinition & Element {
+        type: string | Element;
+        props: any;
+        children?: string | number | ElementDefinition | ElementDefinition[]
+    }
+    declare const Util: ({
+        _: typeof import("lodash"),
+        dayjs: typeof import("dayjs"),
+        cryptoJS: typeof import("cryptoJS"),
+        XLSX: typeof import("xlsx"),
+        message: {
+            info(content: string, duration?: number): void;
+            success(content: string, duration?: number): void;
+            error(content: string, duration?: number): void;
+            warning(content: string, duration?: number): void;
+            loading(content: string, duration?: number): void;
+        },
+        ReactHelper: {
+            createContainer(createChildren: { resolve: (out: any) => void, reject: (err: any) => Element | Element[] }, options?: object): Promise<void>;
+            createElement: typeof import("react").createElement;
+            useState: typeof import("react").useState;
+        },
+        importPlugin: ${importPluginSource}
+    });`;
+}
 
 // 缓存对象
 class Cache {
@@ -57,6 +84,14 @@ const libConfigs = [{
     name: 'xlsx',
     path: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/types/index.d.ts'
 }]
+const innerConfigs = [{
+    name: 'react',
+    path: 'https://cdn.jsdelivr.net/npm/@types/react@18.2.0/index.d.ts'
+}]
+const pluginConfigs = [{
+    name: 'antd',
+    path: 'https://cdn.jsdelivr.net/npm/antd@4.23.6/es/index.d.ts'
+}]
 
 // 缓存key
 const loadMonacoKey = keys.loadMonaco;
@@ -85,7 +120,8 @@ function loadMonaco(monaco) {
         }
         return _fetchLib();
     }
-    Promise.all(libConfigs.map(libConfig => fetchLib(libConfig)))
+    const _libs = [...innerConfigs, ...libConfigs, ...pluginConfigs]
+    Promise.all(_libs.map(libConfig => fetchLib(libConfig)))
         .then(libs => {
             libs.filter(lib => !!lib).forEach(lib => {
                 libCache.set(lib.name, lib.content)
@@ -100,7 +136,7 @@ function loadMonaco(monaco) {
             if (converterUri in extraLibs) {
                 return;
             }
-            addMonacoExtraLibs(monaco, converterDTS, converterUri);
+            addMonacoExtraLibs(monaco, converterDTS(pluginConfigs.map(x => x.name)), converterUri);
         }).catch(error => console.error("load extraLibs error", error));
     // 自动补全
     try {

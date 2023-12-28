@@ -1,4 +1,6 @@
-import { message } from 'antd';
+import { message, Modal } from 'antd';
+import ReactDOM from 'react-dom/client';
+import React from 'react';
 import lodash from 'lodash'
 import dayjs from 'dayjs';
 import cryptoJS from 'crypto-js';
@@ -12,6 +14,99 @@ const exectorUtilParam = {
     cryptoJS: cryptoJS,
     XLSX: XLSX,
     message: message
+}
+
+// /**
+//  * 根据传入的参数, 生成 React 元素对象
+//  * @param {*} elementDefinition 元素定义对象
+//  * @returns React 元素对象
+//  */
+// function compositeCreateElement(...args) {
+//     if (!args?.length) {
+//         throw new Error("args error")
+//     } else if (args.length > 1) {
+//         const [type, props, ...children] = args;
+//         return React.createElement(type, props, ...children);
+//     }
+//     const elementDefinition = args[0];
+//     if (elementDefinition.$$typeof) {
+//         return elementDefinition;
+//     } else if (!elementDefinition.type) {
+//         const [type, props, ...children] = args;
+//         return React.createElement(type, props, ...children);
+//     }
+//     const _children = [];
+//     const { type, props, children } = elementDefinition;
+//     if (children instanceof Array) {
+//         children.forEach(child => _children.push(compositeCreateElement(child)));
+//     } else if (children instanceof Object && children.type) {
+//         _children.push(compositeCreateElement(children));
+//     } else if (children) {
+//         switch (typeof children) {
+//             case 'string':
+//             case 'number':
+//                 _children.push(children);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+//     return React.createElement(type, props, _children);
+// }
+const containerId = 'converter-container';
+/**
+ * 创建 React 容器
+ * @param {*} createChildren 创建子元素的回调方法
+ * @returns Promise 子元素
+ */
+function createContainer(createChildren, options = {}) {
+    const container = ReactDOM.createRoot(document.getElementById(containerId));
+    const Container = ({ onSuccess, onError }) => {
+        try {
+            const handleClose = (res) => container.unmount();
+            const handleCancel = (res) => handleClose() & onError(res);
+            const child = createChildren({
+                resolve: out => handleClose() & onSuccess(out),
+                reject: err => handleClose() & onError(err),
+            });
+            const children = child instanceof Array ? child : [child];
+            return React.createElement(Modal, {
+                onCancel: () => handleCancel("已取消"),
+                onOk: () => handleCancel("已取消"),
+                footer: null,
+                maskClosable: true,
+                ...options,
+                open: true,
+                key: containerId + '-modal'
+            }, React.createElement(React.Fragment, {}, ...children));
+        } catch (err) {
+            onError(err);
+        }
+    }
+    return new Promise((resolve, reject) => {
+        try {
+            container.render(React.createElement(Container, { onSuccess: resolve, onError: reject }));
+        } catch (err) {
+            reject(err);
+        }
+    })
+}
+// 添加 react 帮助类
+exectorUtilParam.ReactHelper = {
+    createContainer,
+    createElement: React.createElement,
+    createFragment: (children) => {
+        React.createElement(React.Fragment, {}, ...children)
+    },
+    useState: React.useState
+}
+
+// 添加插件支持
+exectorUtilParam.importPlugin = moduleName => {
+    if (moduleName === 'antd') {
+        return import('antd');
+    }
+    throw new Error("unknown moduleName")
 }
 
 /**
