@@ -37,10 +37,8 @@ const converterDTS = (pluginNames) => {
             warning(content: string, duration?: number): void;
             loading(content: string, duration?: number): void;
         },
-        ReactHelper: {
-            createContainer(createChildren: { resolve: (out: any) => void, reject: (err: any) => Element | Element[] }, options?: object): Promise<void>;
-            createElement: typeof import("react").createElement;
-            useState: typeof import("react").useState;
+        UIHelper: {
+            createSchemaForm(getSchemaFormProps: { resolve: (out: any) => void, reject: (err: any) => object }, options?: object): Promise<void>;
         },
         importPlugin: ${importPluginSource}
     });`;

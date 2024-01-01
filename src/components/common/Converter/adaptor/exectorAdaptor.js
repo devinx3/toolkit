@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import cryptoJS from 'crypto-js';
 import * as XLSX from 'xlsx'
 import StrUtil from '../../../../utils/StrUtil'
+import { BetaSchemaForm } from '@ant-design/pro-components';
 
 // 执行器参数
 const exectorUtilParam = {
@@ -16,43 +17,6 @@ const exectorUtilParam = {
     message: message
 }
 
-// /**
-//  * 根据传入的参数, 生成 React 元素对象
-//  * @param {*} elementDefinition 元素定义对象
-//  * @returns React 元素对象
-//  */
-// function compositeCreateElement(...args) {
-//     if (!args?.length) {
-//         throw new Error("args error")
-//     } else if (args.length > 1) {
-//         const [type, props, ...children] = args;
-//         return React.createElement(type, props, ...children);
-//     }
-//     const elementDefinition = args[0];
-//     if (elementDefinition.$$typeof) {
-//         return elementDefinition;
-//     } else if (!elementDefinition.type) {
-//         const [type, props, ...children] = args;
-//         return React.createElement(type, props, ...children);
-//     }
-//     const _children = [];
-//     const { type, props, children } = elementDefinition;
-//     if (children instanceof Array) {
-//         children.forEach(child => _children.push(compositeCreateElement(child)));
-//     } else if (children instanceof Object && children.type) {
-//         _children.push(compositeCreateElement(children));
-//     } else if (children) {
-//         switch (typeof children) {
-//             case 'string':
-//             case 'number':
-//                 _children.push(children);
-//                 break;
-//             default:
-//                 break;
-//         }
-//     }
-//     return React.createElement(type, props, _children);
-// }
 const containerId = 'converter-container';
 /**
  * 创建 React 容器
@@ -91,22 +55,15 @@ function createContainer(createChildren, options = {}) {
         }
     })
 }
-// 添加 react 帮助类
-exectorUtilParam.ReactHelper = {
-    createContainer,
-    createElement: React.createElement,
-    createFragment: (children) => {
-        React.createElement(React.Fragment, {}, ...children)
-    },
-    useState: React.useState
-}
-
-// 添加插件支持
-exectorUtilParam.importPlugin = moduleName => {
-    if (moduleName === 'antd') {
-        return import('antd');
+// 添加 UI 帮助类
+exectorUtilParam.UIHelper = {
+    createSchemaForm: (getSchemaFormProps) => {
+        return createContainer(params => {
+            const props = getSchemaFormProps(params) || {};
+            props.layoutType = 'From';
+            return <BetaSchemaForm {...props} />
+        })
     }
-    throw new Error("unknown moduleName")
 }
 
 /**
