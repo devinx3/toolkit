@@ -137,7 +137,7 @@ return new Promise((resolve, reject) => {
 
 // 多文件案例文档
 const MutiFileDocument = (<>
-    <Typography.Title level={3}>多文件读取</Typography.Title>
+    <Typography.Title level={3}>多文件读取(实验中)</Typography.Title>
     <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{MutiFileDemo}</Typography.Paragraph></div>
 </>);
 
@@ -146,7 +146,7 @@ const CodeHelpView = () => {
         <Popover placement="rightTop" content={helpDocument} title={null} trigger="click"><Button type='link'>帮助文档</Button></Popover>
         <Popover placement="rightTop" content={toolDocument} title={null} trigger="click"><Button type='link'>常用工具</Button></Popover>
         <Popover placement="rightTop" content={FileDocument} title={null} trigger="click"><Button type='link'>文件读取样例</Button></Popover>
-        <Popover placement="rightTop" content={MutiFileDocument} title={null} trigger="click"><Button type='link'>多文件读取样例</Button></Popover>
+        <Popover placement="rightTop" content={MutiFileDocument} title={null} trigger="click"><Button type='link'>多文件读取样例(实验中)</Button></Popover>
     </>)
 }
 
