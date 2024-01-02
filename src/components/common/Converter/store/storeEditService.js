@@ -1,67 +1,37 @@
-import store from './store'
-import { LANG } from '../constants'
+import store  from './store'
 
+const { createRepository, TYPE } = store;
 
-// 读取配置
-const listConfig = (lang) => {
-    return store.editConfig.list(lang) || [];
-}
-// 加载所有脚本
-const loadAllConfig = () => {
-    const data = {};
-    for (const key in LANG) {
-        const lang = LANG[key];
-        data[lang] = listConfig(lang)
-    }
-    return data;
-}
-
-// 读取配置组合
-const listCombination = (lang) => {
-    return store.editCombination.list(lang);
-}
-// 加载所有配置组合
-const loadAllCombination = () => {
-    const data = {};
-    for (const lang in LANG) {
-        data[lang] = listCombination(lang)
-    }
-    return data;
-}
-
-// eg: {json: [{id: 1, name: '名称', description: '描述', scriptContent: '脚本内容'}] }
 // 数据源
-const configCache = loadAllConfig();
+// editConfig: [{id: 1, name: '名称', description: '描述', scriptContent: '脚本内容'}]
+// editCombination: [{id: 1, name: '名称', description: '描述', combination: [1, 2, 3]}]
 
-// eg: [{id: 1, name: '名称', description: '描述', combination: [1, 2, 3]}]
-const combinationCache = loadAllCombination();
-
-// 写入配置
-const storeEditConfig = (lang, arr) => {
-    try {
-        store.editConfig.store(lang, arr);
-        configCache[lang] = listConfig(lang);
-    } catch (e) {
-        console.log("storeEditConfig error", e);
-        return e.message;
+// 创建数据仓库
+function createEditRepository (type) {
+    const baseRepository = createRepository(type)
+    const store = (category, obj) => {
+        try {
+            baseRepository.store(category, obj)
+        } catch (e) {
+            console.log(`store ${type} error`, e);
+            return e.message;
+        }
+        return true;
     }
-    return true;
+    return {
+        forceList: baseRepository.forceList,
+        list: baseRepository.list,
+        store
+    }
 }
 
-// 写入配置
-const storeEditCombination = (lang, arr) => {
-    try {
-        store.editCombination.store(lang, arr);
-        combinationCache[lang] = listCombination(lang);
-    } catch (e) {
-        console.log("storeEditCombination error", e);
-        return e.message;
-    }
-    return true;
-}
+// 数据仓库
+const configRepository = createEditRepository(TYPE.editConfig);
+const combinationRepository = createEditRepository(TYPE.editCombination);
 
 // 根据id在数据源查询数据
-const queryItemById = (source, id) => {
+const queryItemById = (baseRepository, category, id) => {
+    const source = baseRepository.list(category);
     for (let item of source) {
         if (item.id === id) {
             return item;
@@ -71,8 +41,8 @@ const queryItemById = (source, id) => {
 }
 
 // 查询最大id
-const queryMaxId = (fn, lang) => {
-    const source = fn(lang);
+const queryMaxId = (baseRepository, category) => {
+    const source = baseRepository.forceList(category);
     let maxId = 0;
     for (let item of source) {
         if (item.id > maxId) {
@@ -85,59 +55,45 @@ const queryMaxId = (fn, lang) => {
 // 数据方法存储方法
 const EditService = {
     // 查询所有配置
-    listAllConfig: (lang) => {
-        configCache[lang] = listConfig(lang)
-        return configCache[lang];
-    },
+    listAllConfig: (category) => configRepository.list(category),
     // 根据 ID 查询配置
-    queryConfigById: (lang, id) => {
-        return queryItemById(configCache[lang], id)
-    },
+    queryConfigById: (category, id) => queryItemById(configRepository, category, id),
     // 根据名称查询配置
-    queryConfigByName: (lang, name) => {
-        const ressult = [];
-        listConfig(lang)?.forEach(item => {
-            if (item.name === name) {
-                ressult.push(item);
-            }
-        });
-        return ressult;
-    },
+    queryConfigByName: (category, name) => EditService.listAllConfig(category)?.filter(item => item.name === name) || [],
     // 添加配置
-    addConfig: (lang, item) => {
+    addConfig: (category, item) => {
         // 最大id加1作为新ID
-        item.id = queryMaxId(listConfig, lang) + 1;
-        configCache[lang].push(item);
-        return storeEditConfig(lang, configCache[lang]);
+        item.id = queryMaxId(configRepository, category) + 1;
+        const arr = EditService.listAllConfig(category);
+        arr.push(item);
+        return configRepository.store(category, arr);
     },
     // 更新配置
-    updateConfig: (lang, item) => {
-        const source = configCache[lang];
+    updateConfig: (category, item) => {
+        const source = EditService.listAllConfig(category);
         for (let index = 0; index < source.length; index++) {
             if (source[index].id === item.id) {
                 source[index].name = item.name;
                 source[index].description = item.description;
                 source[index].scriptContent = item.scriptContent;
-                return storeEditConfig(lang, source);
+                return configRepository.store(category, source);
             }
         }
         return false;
     },
     // 删除配置
-    deleteConfig: (lang, id) => {
-        return EditService.batchDeleteConfig(lang, [id]);
-    },
+    deleteConfig: (category, id) => EditService.batchDeleteConfig(category, [id]),
     // 批量删除配置
-    batchDeleteConfig: (lang, idList) => {
+    batchDeleteConfig: (category, idList) => {
         if (!(idList && idList.length && idList.length > 0)) {
             // 传入为空则代表删除成功
             return true;
         }
-        const source = configCache[lang];
+        const source = EditService.listAllConfig(category);
         let success = false;
         for (let index = 0; index < source.length; index++) {
             if (idList.indexOf(source[index].id) >= 0) {
-                const pass = EditService.checkCombinationByConfig(lang, [source[index].id]);
+                const pass = EditService.checkCombinationByConfig(category, [source[index].id]);
                 if (pass !== true) {
                     return "当前配置被组合 [" + pass + "] 引用";
                 }
@@ -147,22 +103,17 @@ const EditService = {
             }
         }
         if (success) {
-            return storeEditConfig(lang, source);
+            return configRepository.store(category, source);
         }
         return "数据不存在, 请刷新页面";
     },
     // 查询所有组合
-    listAllCombination: (lang) => {
-        combinationCache[lang] = listCombination(lang);
-        return combinationCache[lang];
-    },
+    listAllCombination: (category) => combinationRepository.list(category),
     // 根据 ID 查询组合
-    queryCombinationById: (lang, id) => {
-        return queryItemById(combinationCache[lang], id)
-    },
+    queryCombinationById: (category, id) => queryItemById(combinationRepository, category, id),
     // 是否组合存在指定配置
-    checkCombinationByConfig: (lang, configIdList) => {
-        for (let item of EditService.listAllCombination(lang)) {
+    checkCombinationByConfig: (category, configIdList) => {
+        for (let item of EditService.listAllCombination(category)) {
             if (item.combination) {
                 for (let configId of item.combination) {
                     if (configIdList.indexOf(configId) >= 0) {
@@ -174,38 +125,36 @@ const EditService = {
         return true;
     },
     // 添加组合
-    addCombination: (lang, item) => {
-        const source = combinationCache[lang];
+    addCombination: (category, item) => {
+        const source = EditService.listAllCombination(category);
         // 最大id加1作为新ID
-        item.id = queryMaxId(listCombination, lang) + 1;
+        item.id = queryMaxId(combinationRepository, category) + 1;
         source.push(item);
-        return storeEditCombination(lang, source);
+        return combinationRepository.store(category, source);
     },
     // 更新配置
-    updateCombination: (lang, item) => {
-        const source = combinationCache[lang];
+    updateCombination: (category, item) => {
+        const source = EditService.listAllCombination(category);
         for (let index = 0; index < source.length; index++) {
             if (source[index].id === item.id) {
                 source[index].name = item.name;
                 source[index].description = item.description;
                 source[index].combination = item.combination;
-                return storeEditCombination(lang, source);
+                return combinationRepository.store(category, source);
             }
         }
         return false;
     },
     // 删除配置
-    deleteCombination: (lang, id) => {
-        return EditService.batchDeleteCombination(lang, [id]);
-    },
+    deleteCombination: (category, id) => EditService.batchDeleteCombination(category, [id]),
     // 批量删除配置
-    batchDeleteCombination: (lang, idList) => {
+    batchDeleteCombination: (category, idList) => {
         if (!(idList && idList.length && idList.length > 0)) {
             // 传入为空则代表删除成功
             return true;
         }
         let success = false;
-        const source = combinationCache[lang];
+        const source = EditService.listAllCombination(category)
         for (let index = 0; index < source.length; index++) {
             if (idList.indexOf(source[index].id) >= 0) {
                 source.splice(index, 1);
@@ -214,7 +163,7 @@ const EditService = {
             }
         }
         if (success) {
-            return storeEditCombination(lang, source);
+            return combinationRepository.store(category, source);
         }
         return false;
     },
