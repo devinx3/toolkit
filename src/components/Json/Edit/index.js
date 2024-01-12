@@ -178,10 +178,12 @@ const JsonEdit = () => {
                 // 基本按钮
                 buttons: [
                     {
+                        code: "delNullProperty",
                         name: "删除空字段",
                         description: "删除值为空的字段",
                         scriptContent: `const _INNER_ = ${delNullProperty.toString()};return _INNER_(inputObj);`
                     }, {
+                        code: "underlineToHump",
                         name: "下划线转驼峰",
                         description: "JSON key 下划线转驼峰",
                         scriptContent: `const _INNER_ = ${underlineToHump.toString()};return _INNER_(inputObj);`
@@ -189,13 +191,13 @@ const JsonEdit = () => {
                 ],
                 // 自定义按钮描述默认值
                 expandScriptButton: {
-                    name: "自定义配置",
-                    description: "支持转换和添加自定义配置",
+                    name: "自定义节点",
+                    description: "支持转换和添加自定义节点",
                     scriptContent: "return inputObj;"
                 },
-                // 组合按钮
+                // 编排按钮
                 expandCombinationButton: {
-                    name: "自定义组合",
+                    name: "自定义编排",
                     description: "支持多脚本顺序执行",
                 },
                 // 编辑器帮助文档

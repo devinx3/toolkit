@@ -11,24 +11,24 @@ const { Text } = Typography;
 // 鼠标移入后延时多少才显示 Tooltip，单位：秒
 const tipMouseEnterDelay = 1;
 
-// 默认组合名称
-const defaultCombinationName = '自定义组合';
+// 默认编排名称
+const defaultCombinationName = '自定义编排';
 
-// 新增组合
-export const ExpandAddButton = ({ lang, combinationConfig, refreshManage }) => {
+// 新增编排
+export const ExpandAddButton = ({ category, combinationConfig, refreshManage }) => {
     const [combinationName, setCombinationName] = React.useState();
     const [combinationDesc, setCombinationDesc] = React.useState();
 
     combinationConfig.name = combinationConfig.name || defaultCombinationName;
     combinationConfig.description = combinationConfig.description || combinationConfig.name;
-    // 添加组合
+    // 添加编排
     const handleAddCombination = () => {
         const item = {};
         item.name = combinationName || defaultCombinationName;
         item.description = combinationDesc || item.name;
         item.combination = [];
 
-        requestService(addCombination, lang, item)
+        requestService(addCombination, category, item)
             .then(() => {
                 message.success("创建成功")
                 refreshManage();
@@ -37,9 +37,9 @@ export const ExpandAddButton = ({ lang, combinationConfig, refreshManage }) => {
     return <Popconfirm icon={null} cancelText='取消' okText='新建'
         onConfirm={handleAddCombination} placement="right"
         title={<>
-            <Typography.Title level={5}>新建组合</Typography.Title>
-            <Input addonBefore={'组合名称'} placeholder={combinationConfig.name} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
-            <Input style={{ marginTop: '3px' }} addonBefore={'组合作用'} placeholder={combinationConfig.description} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
+            <Typography.Title level={5}>新建编排</Typography.Title>
+            <Input addonBefore={'编排名称'} placeholder={combinationConfig.name} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
+            <Input style={{ marginTop: '3px' }} addonBefore={'编排作用'} placeholder={combinationConfig.description} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
         </>} >
         <Button style={{ marginLeft: '10px' }} shape="circle" type="text" icon={<PlusOutlined />} size="small" />
     </Popconfirm>
@@ -49,20 +49,20 @@ export const ExpandAddButton = ({ lang, combinationConfig, refreshManage }) => {
 const convertConfigDataSource = (list) => {
     const data = {};
     for (let item of list) {
-        data[item.id] = { ...item };
+        data[item.code] = { ...item };
     }
     return data;
 }
 
 
-// 配置表格弹出框
+// 节点表格弹出框
 const ConfigTableModal = ({ visible, setVisible, handleAddConfig, configDataSource }) => {
     const [selectKey, setSelectKey] = React.useState();
     // 加载数据源
     const loadDataSource = () => {
         const arr = [];
         for (let config of configDataSource) {
-            arr.push({ id: config.id, name: config.name, description: config.description, costom: ScriptUtil.isBasic(config) ? 0 : 1 });
+            arr.push({ code: config.code, name: config.name, description: config.description, costom: ScriptUtil.isBasic(config) ? 0 : 1 });
         }
         return arr;
     }
@@ -95,17 +95,16 @@ const ConfigTableModal = ({ visible, setVisible, handleAddConfig, configDataSour
     const rowSelection = {
         type: 'radio',
         onChange: (selectedRowKeys, selectedRows) => {
-            setSelectKey(Number(selectedRowKeys));
+            setSelectKey(selectedRowKeys[0]);
         },
         selectedRowKeys: [selectKey]
     };
 
-
-    return (<Modal title="配置选择" open={visible} cancelText="取消" okText="确认"
+    return (<Modal title="节点选择" open={visible} cancelText="取消" okText="确认"
         onCancel={clearModal} onOk={handleConfigSelect} >
         <Table
             rowSelection={{ ...rowSelection }}
-            rowKey="id"
+            rowKey="code"
             columns={columns}
             dataSource={loadDataSource()}
             pagination={false}
@@ -115,111 +114,111 @@ const ConfigTableModal = ({ visible, setVisible, handleAddConfig, configDataSour
 
 
 // 扩展按钮
-export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, handleConvert, configDataSource }) => {
+export const ExpandManageButton = ({ category, combinationConfig, refreshManage, handleConvert, configDataSource }) => {
     const [visible, setVisible] = React.useState(false);
     const [frameVisible, setFrameVisible] = React.useState(false);
     const [frameIndex, setFrameIndex] = React.useState(false);
 
     const [combinationName, setCombinationName] = React.useState(combinationConfig.name);
     const [combinationDesc, setCombinationDesc] = React.useState(combinationConfig.description);
-    const [combinationConfigIdList, setCombinationConfigIdList] = React.useState([...combinationConfig.combination]);
+    const [combinationConfigCodeList, setCombinationConfigCodeList] = React.useState([...combinationConfig.combination]);
 
     // 待处理数据
     const configDataObj = convertConfigDataSource(configDataSource);
-    const timelineItemList = combinationConfigIdList.map((id, index) => {
-        const item = configDataObj[id] || {};
+    const timelineItemList = combinationConfigCodeList.map((code, index) => {
+        const item = configDataObj[code] || {};
         item.index = index;
         return item;
     });
 
-    // 重置组合
+    // 重置编排
     const handleReset = () => {
         setCombinationName(combinationConfig.name)
         setCombinationDesc(combinationConfig.description)
-        setCombinationConfigIdList([...combinationConfig.combination])
+        setCombinationConfigCodeList([...combinationConfig.combination])
     }
-    // 取消组合
+    // 取消编排
     const handleCancel = () => {
         setVisible(false);
     }
-    // 添加配置
-    const handleAddConfig = configId => {
+    // 添加节点
+    const handleAddConfig = configCode => {
         if (!frameVisible) {
             // 添加失败, 窗口未打开
             return;
         }
 
         const arr = [];
-        for (let i = 0; i < combinationConfigIdList.length; i++) {
-            arr.push(combinationConfigIdList[i]);
+        for (let i = 0; i < combinationConfigCodeList.length; i++) {
+            arr.push(combinationConfigCodeList[i]);
             if (i === frameIndex) {
-                arr.push(configId);
+                arr.push(configCode);
             }
         }
         if (frameIndex === -1) {
-            arr.push(configId);
+            arr.push(configCode);
         }
-        setCombinationConfigIdList(arr)
+        setCombinationConfigCodeList(arr)
     }
-    // 删除组合
+    // 删除编排
     const handleDelete = () => {
-        requestService(deleteCombination, lang, combinationConfig.id)
+        requestService(deleteCombination, category, combinationConfig.code)
             .then(() => {
                 message.success("删除成功");
                 setVisible(false);
                 refreshManage();
             }).catch(reason => message.success("删除失败, 原因是" + reason))
     }
-    // 保存组合
+    // 保存编排
     const handleSave = () => {
-        if (combinationConfigIdList.length === 0) {
+        if (combinationConfigCodeList.length === 0) {
             message.warn("请先维护节点");
             return;
         }
         if (!combinationName) {
-            message.warn("请维护组合名称");
+            message.warn("请维编排名称");
             return;
         }
-        for (const configId of combinationConfigIdList) {
-            if (ScriptUtil.isBasic({ id: configId })) {
+        for (const configCode of combinationConfigCodeList) {
+            if (ScriptUtil.isBasic(configCode)) {
                 continue;
             }
-            if (!storeEditService.queryConfigById(lang, configId)) {
-                message.warn("脚本配置不存在, 请刷新页面");
+            if (!storeEditService.queryConfigByCode(category, configCode)) {
+                message.warn("脚本节点不存在, 请刷新页面");
                 return
             }
         }
         const item = {
-            id: combinationConfig.id,
+            code: combinationConfig.code,
             name: combinationName,
             description: combinationDesc || combinationName,
-            combination: combinationConfigIdList
+            combination: combinationConfigCodeList
         };
-        requestService(updateCombination, lang, item)
+        requestService(updateCombination, category, item)
             .then(() => {
                 message.success("保存成功");
                 setVisible(false);
                 refreshManage();
             }).catch(reason => message.error("保存失败, 原因是: " + reason));
     }
-    // 删除组合配置
+    // 删除b编排
     const handleDeleteCombinationConfig = (index) => {
-        combinationConfigIdList.splice(index, 1);
-        setCombinationConfigIdList([...combinationConfigIdList]);
+        combinationConfigCodeList.splice(index, 1);
+        setCombinationConfigCodeList([...combinationConfigCodeList]);
     }
-    // 组合数据是否发生变化
+    // 编排数据是否发生变化
     const combinationConfigChangeFlag = () => {
-        if (combinationConfigIdList.length !== combinationConfig.combination.length) {
+        if (combinationConfigCodeList.length !== combinationConfig.combination.length) {
             return true;
         }
-        for (let i = 0; i++; i <= combinationConfigIdList.length) {
-            if (combinationConfigIdList[i] !== combinationConfig.combination[i]) {
+        for (let i = 0; i++; i <= combinationConfigCodeList.length) {
+            if (combinationConfigCodeList[i] !== combinationConfig.combination[i]) {
                 return true;
             }
         }
         return combinationName !== combinationConfig.name || combinationDesc !== combinationConfig.description;
     }
-    // 打开配置弹出框
+    // 打节点弹出框
     const openConfigTableModal = (index) => {
         setFrameIndex(index);
         setFrameVisible(true);
@@ -227,25 +226,25 @@ export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, han
 
     return (<>
         <Tooltip style={{ marginLeft: '15px' }} title={combinationConfig.description} mouseEnterDelay={tipMouseEnterDelay}>
-            <Button type="dashed" onClick={e => handleConvert(combinationConfig.combination)}>{combinationConfig.name}</Button>
+            <Button type="dashed" onClick={e => handleConvert(combinationConfig, combinationConfig.combination)}>{combinationConfig.name}</Button>
         </Tooltip>
         <Tooltip title="编辑" mouseEnterDelay={tipMouseEnterDelay * 2}>
             <Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" />
         </Tooltip>
 
         <Drawer open={visible} onCancel={handleCancel}
-            title={combinationConfigChangeFlag() ? <Text style={{ color: "#1890ff" }} strong >编辑组合 *</Text> : <Text>编辑组合</Text>}
+            title={combinationConfigChangeFlag() ? <Text style={{ color: "#1890ff" }} strong >编辑编排 *</Text> : <Text>编辑编排</Text>}
             onClose={handleCancel}
             footer={<Row justify="end">
                 <Space>
                     <Col><Button key="reset" onClick={handleReset}>重置</Button></Col>
-                    <Col><Button key="delete" onClick={handleDelete}>删除组合</Button></Col>
-                    <Col><Button type='primary' onClick={handleSave}>保存组合</Button></Col>
+                    <Col><Button key="delete" onClick={handleDelete}>删除编排</Button></Col>
+                    <Col><Button type='primary' onClick={handleSave}>保存编排</Button></Col>
                 </Space>
             </Row>}
         >
-            <Input addonBefore={'组合名称'} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
-            <Input style={{ marginTop: '5px', marginBottom: '15px' }} addonBefore={'组合作用'} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
+            <Input addonBefore={'编排名称'} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
+            <Input style={{ marginTop: '5px', marginBottom: '15px' }} addonBefore={'编排作用'} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
 
             <Timeline mode="left">
                 {(timelineItemList.length === 0) && (
@@ -254,7 +253,7 @@ export const ExpandManageButton = ({ lang, combinationConfig, refreshManage, han
                     </Timeline.Item>
                 )}
                 {timelineItemList.map((item, index) => {
-                    return (<Timeline.Item key={index} color={item.id > 0 ? '#faad14' : '#52c41a'}>
+                    return (<Timeline.Item key={index} color={ScriptUtil.isBasic(item) ? '#52c41a' : '#faad14'}>
                         <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
                         <Tooltip title="删除" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
                         <Tooltip title={item.description} mouseEnterDelay={tipMouseEnterDelay}>{item.name}</Tooltip>

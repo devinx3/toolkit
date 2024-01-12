@@ -10,45 +10,45 @@ import ExpandManageList from './list'
 const tipMouseEnterDelay = 1;
 
 /**
- * 获取相关语言对应的脚本信息
- * @param {string} lang 语言
- * @returns 根据语言加载脚本
+ * 获取相关分类对应的脚本信息
+ * @param {string} category 分类
+ * @returns 根据分类加载脚本
  */
-const loadScriptByLang = (lang) => {
-    return storeEditService.listAllConfig(lang);
+const loadScriptByCategory = (category) => {
+    return storeEditService.listAllConfig(category) || [];
 }
 
 // 脚本管理
-const ScriptManage = ({ lang, context, basicButtons, expandAddButton, editorHelpRender, refreshManage }) => {
+const ScriptManage = ({ lang, category, context, basicButtons, expandAddButton, editorHelpRender, refreshManage }) => {
     basicButtons = ScriptUtil.convertBasicButtons(basicButtons);
-    const expandButtons = expandAddButton ? loadScriptByLang(lang) : [];
+    const expandButtons = expandAddButton ? loadScriptByCategory(category) : [];
     /**
      * 执行转换
      * @param {string} scriptContent 脚本内容
      * @returns 转换结果
      */
-    const handleConvert = scriptContent => {
-        return context.onConvert([scriptContent]);
+    const handleConvert = config => {
+        return context.onConvert(context.createScriptEvent(config.code, config.name, config.scriptContent, config.version));
     }
     return <>
         <Row style={{ marginTop: '10px' }}>
             {basicButtons.map((config, key) => {
                 return (<Col key={key} style={{ marginLeft: '10px' }}>
                     <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
-                        <Button onClick={() => handleConvert(config.scriptContent)}>{config.name}</Button>
+                        <Button onClick={() => handleConvert(config)}>{config.name}</Button>
                     </Tooltip>
                 </Col>)
             })}
             {expandAddButton ? <Col style={{ marginLeft: '10px' }}>
-                <ExpandAddButton lang={lang} context={context} config={expandAddButton}
+                <ExpandAddButton category={category} context={context} config={expandAddButton}
                     editorHelpRender={editorHelpRender} refreshScript={refreshManage} />
             </Col> : null}
         </Row>
         {expandButtons.length > 0 && (<Row style={{ marginTop: '10px' }}>
-            <ExpandManageList lang={lang} dataSource={expandButtons} refreshScript={refreshManage} />
-            {expandButtons.map((item, key) => {
-                return (<Col key={key} style={{ marginLeft: '10px' }}>
-                    <ExpandManageButton lang={lang} config={item} editorHelpRender={editorHelpRender}
+            <ExpandManageList category={category} dataSource={expandButtons} refreshScript={refreshManage} />
+            {expandButtons.filter(item => !item.hidden).map((item, key) => {
+                return (<Col key={item.code + "-" + key} style={{ marginLeft: '10px', marginTop: '5px' } }>
+                    <ExpandManageButton category={category} config={item} editorHelpRender={editorHelpRender}
                         refreshScript={refreshManage} handleConvert={handleConvert} />
                 </Col>)
             })}
