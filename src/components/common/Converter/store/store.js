@@ -1,18 +1,7 @@
-const callTableInfo = (version) => {
-    if (version) {
-        return {
-            getEditConfigKey: category => `devinx3.toolkit.edit.config.${category}`,
-            getEditCombinationKey: category => `devinx3.toolkit.edit.combination.${category}`
-        }
-    }
-    return {
-        getEditConfigKey: category => `devinx3.toolkit.${category}EditOnfig`,
-        getEditCombinationKey: category => `devinx3.toolkit.${category}EditCombination`
-    }
+const tableInfo = {
+    getEditConfigKey: category => `devinx3.toolkit.edit.config.${category}`,
+    getEditCombinationKey: category => `devinx3.toolkit.edit.combination.${category}`
 }
-
-const tableInfo = callTableInfo(1);
-// const historyTableInfo = callTableInfo(null);
 
 // 查询数据
 const query = key => {
@@ -49,7 +38,7 @@ const mapperContext = (() => {
 // 缓存
 const cacheDataSource = {};
 const clearCache = (key) => cacheDataSource[key] = undefined;
-const getCacheKey = (type, category) => type  + "|" + category;
+const getCacheKey = (type, category) => type + "|" + category;
 // 创建仓库
 function createRepository(type) {
     const baseMapper = mapperContext.getMapper(type);

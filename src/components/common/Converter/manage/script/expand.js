@@ -1,17 +1,17 @@
 import React from 'react';
-import { Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
+import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
-const { addConfig, updateConfig, deleteConfig } = storeEditService;
+const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
 const { Text } = Typography;
 
 // 鼠标移入后延时多少才显示 Tooltip，单位：秒
 const tipMouseEnterDelay = 1;
 
-// 扩展添加配置按钮
-const AddConfigButton = ({ lang, config, scriptContent, onAddSuccess }) => {
+// 扩展添加节点按钮
+const AddConfigButton = ({ category, config, scriptContent, onAddSuccess }) => {
     const defaultConfigName = config.name;
     const defaultConfigDesc = config.description || defaultConfigName;
     const [configName, setConfigName] = React.useState();
@@ -26,28 +26,28 @@ const AddConfigButton = ({ lang, config, scriptContent, onAddSuccess }) => {
             description: configDesc || configName || defaultConfigDesc,
             scriptContent: scriptContent
         }
-        requestService(addConfig, lang, newConfig)
+        requestService(addConfig, category, newConfig)
             .then(() => {
                 setConfigName(null)
                 setConfigDesc(null)
-                message.success("添加配置成功")
+                message.success("添加节点成功")
                 onAddSuccess()
             })
-            .catch(reason => message.error("添加配置失败, 失败原因: " + reason));
+            .catch(reason => message.error("添加节点失败, 失败原因: " + reason));
     }
 
     return (<Popconfirm icon={null} cancelText='取消' okText='确认'
         onConfirm={handleAddConfig}
         title={<>
-            <Input addonBefore={'功能名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName(e.target.value)} />
-            <Input style={{ marginTop: '3px' }} addonBefore={'功能作用'} placeholder={defaultConfigDesc} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
+            <Input addonBefore={'节点名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName(e.target.value)} />
+            <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} placeholder={defaultConfigDesc} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
         </>} >
-        <Button>添加自定义配置</Button>
+        <Button>添加自定义节点</Button>
     </Popconfirm>);
 }
 
 // 按钮组的扩展按钮
-export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHelpRender }) => {
+export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender }) => {
     const [visible, setVisible] = React.useState(false);
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
     const handleCancel = () => {
@@ -58,7 +58,7 @@ export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHe
             message.warn("脚本内容不能为空")
             return;
         }
-        context.onConvert([scriptContent])
+        context.onConvert(context.createScriptEvent(config.code, config.name, scriptContent, config.version));
         setVisible(false);
     };
     const handleAddSuccess = () => {
@@ -75,7 +75,7 @@ export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHe
             onClose={handleCancel}
             footer={<Row justify="end">
                 <Space>
-                    <Col><AddConfigButton key='add' lang={lang} config={config} scriptContent={scriptContent} onAddSuccess={handleAddSuccess} /></Col>
+                    <Col><AddConfigButton key='add' category={category} config={config} scriptContent={scriptContent} onAddSuccess={handleAddSuccess} /></Col>
                     <Col><Button key="convert" type="primary" onClick={handleConfirm}>转换</Button></Col>
                 </Space>
             </Row>} >
@@ -85,7 +85,7 @@ export const ExpandAddButton = ({ lang, context, config, refreshScript, editorHe
 }
 
 // 扩展管理弹出框
-const ExpandManageModal = ({ lang, config, visible, setVisible, editorHelpRender, refreshScript }) => {
+const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRender, refreshScript }) => {
     const [configName, setConfigName] = React.useState(config.name);
     const [configDesc, setConfigDesc] = React.useState(config.description);
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
@@ -97,20 +97,20 @@ const ExpandManageModal = ({ lang, config, visible, setVisible, editorHelpRender
         setConfigDesc(config.description)
         setScriptContent(config.scriptContent)
     };
-    // 删除配置
+    // 删除节点
     const handleRemove = () => {
-        requestService(deleteConfig, lang, config.id)
+        requestService(deleteConfig, category, config.code)
             .then(() => {
-                message.success("删除配置成功")
+                message.success("删除节点成功")
                 handleCancel()
                 refreshScript()
             })
-            .catch(reason => message.error("删除配置失败, 失败原因: " + reason));
+            .catch(reason => message.error("删除节点失败, 失败原因: " + reason));
     }
-    // 更新配置
+    // 更新节点
     const handleSave = () => {
         if (!configName) {
-            message.error("功能名称不能为空");
+            message.error("节点名称不能为空");
             return;
         }
         if (!scriptContent) {
@@ -118,50 +118,64 @@ const ExpandManageModal = ({ lang, config, visible, setVisible, editorHelpRender
             return;
         }
         const newConfig = {
-            id: config.id,
+            code: config.code,
             name: configName,
             description: configDesc || configName,
             scriptContent: scriptContent
         }
-        requestService(updateConfig, lang, newConfig)
+        requestService(updateConfig, category, newConfig)
             .then(() => {
-                message.success("更新配置成功")
+                message.success("更新节点成功")
                 handleCancel()
                 refreshScript()
             })
-            .catch(reason => console.log(reason) & message.error("更新配置失败, 失败原因: " + reason));
+            .catch(reason => console.log(reason) & message.error("更新节点失败, 失败原因: " + reason));
     }
-    // 配置数据是否发生变化
+    // 节点数据是否发生变化
     const configChangeFlag = () => {
         return configName !== config.name || configDesc !== config.description || scriptContent !== config.scriptContent;
     }
     return (<Drawer open={visible} width='75%' onCancel={handleCancel}
-        title={configChangeFlag() ? <Text style={{ color: "#1890ff" }} strong >编辑配置 *</Text> : <Text>编辑配置</Text>}
+        title={configChangeFlag() ? <Text style={{ color: "#1890ff" }} strong >编辑节点 *</Text> : <Text>编辑节点</Text>}
         onClose={handleCancel}
         footer={<Row justify="end">
             <Space>
                 <Col><Button key="reset" onClick={handleReset}>重置</Button></Col>
-                <Col><Button key="remove" onClick={handleRemove}>删除配置</Button></Col>
-                <Col><Button key="update" type="primary" onClick={handleSave}>更新配置</Button></Col>
+                <Col><Button key="remove" onClick={handleRemove}>删除节点</Button></Col>
+                <Col><Button key="update" type="primary" onClick={handleSave}>更新节点</Button></Col>
             </Space>
         </Row>} >
-        <Input addonBefore={'功能名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
-        <Input style={{ marginTop: '3px' }} addonBefore={'功能作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        <CodeEditor lang={lang} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
+        <Input addonBefore={'节点名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
+        <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
+        <CodeEditor value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
     </Drawer>)
 }
 
 // 扩展管理按钮
-export const ExpandManageButton = ({ lang, config, handleConvert, editorHelpRender, refreshScript }) => {
+export const ExpandManageButton = ({ category, config, handleConvert, editorHelpRender, refreshScript }) => {
+    const handleHiddenConfig = () => {
+        requestService(hiddenConfig, category, config.code)
+            .then(() => {
+                message.success("隐藏成功")
+                refreshScript()
+            })
+            .catch(reason => console.log(reason) & message.error("更新节点失败, 失败原因: " + reason));
+    }
     const [visible, setVisible] = React.useState(false);
+    const menus = [{
+        key: "edit",
+        label: (<Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" >编辑</Button>)
+    }, {
+        key: "hidden",
+        label: (<Button shape="circle" type="text" onClick={e => handleHiddenConfig()} icon={<EyeInvisibleOutlined />} size="small">隐藏</Button>)
+    }];
     return (<>
         <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
-            <Button type="dashed" onClick={e => handleConvert(config.scriptContent)}>{config.name}</Button>
+            <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
+                <Button type="dashed" onClick={e => handleConvert(config)}>{config.name}</Button>
+            </Dropdown>
         </Tooltip>
-        <Tooltip title="编辑" mouseEnterDelay={tipMouseEnterDelay * 2}>
-            <Button shape="circle" type="text" onClick={e => setVisible(true)} icon={<EditOutlined />} size="small" />
-        </Tooltip>
-        <ExpandManageModal lang={lang} config={config} visible={visible} setVisible={setVisible}
+        <ExpandManageModal category={category} config={config} visible={visible} setVisible={setVisible}
             editorHelpRender={editorHelpRender} refreshScript={refreshScript} />
     </>);
 }

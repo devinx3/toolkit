@@ -139,24 +139,53 @@ class DynamicConfig {
 export const dynamicConfig = new DynamicConfig();
 
 
-// 基本按钮的最大ID
-const basicButtonMaxId = -10;
+// 生成编码
+const generateCode = (input) => {
+    return CryptoJS.MD5(input || '0').toString(CryptoJS.enc.Hex);
+}
+
+// 平台编码前缀
+const PLATFORM_NUM_PREFIX = "P|";
+// 生成平台编码
+const generatePlatformCode = (input) => {
+    return PLATFORM_NUM_PREFIX + generateCode(input);
+}
+// 判断是否是平台编码
+const isPlatformCode = (code) => {
+    return code?.startsWith && code.startsWith(PLATFORM_NUM_PREFIX);
+}
+
+// 2024-01-01 00:00:00
+const START_TIME = 1704038400000;
+// 设置版本
+const generateVersion = () => {
+    return parseInt(Math.floor((new Date().getTime() - START_TIME) / 1000), 10).toString(16);
+}
+// 根据版本判断是否可更新
+const canUpdate = (sourceVersion, targetVersion) => {
+    // 不存在报错, 可直接更新
+    if (!sourceVersion) return true;
+    if (!targetVersion) return false;
+    const sourceNum = parseInt(sourceVersion, 16);
+    const targetNum = parseInt(targetVersion, 16);
+    return targetNum > sourceNum;
+}
 
 export const ScriptUtil = {
+    generateCode,
+    generateVersion,
+    canUpdate,
     // 转换基本按钮
     convertBasicButtons: (basicButtons) => {
         const dataSource = [];
         basicButtons && basicButtons.forEach((basicButton, i) => {
             const item = { ...basicButton };
-            item.id = basicButtonMaxId - (basicButtons.length - i) * 10;
+            item.code = generatePlatformCode(basicButton.code || i);
             dataSource.push(item);
         })
         return dataSource;
     },
     isBasic: (config) => {
-        return config.id <= basicButtonMaxId;
-    },
-    isBasicById: (configId) => {
-        return configId <= basicButtonMaxId;
+        return config?.code ? isPlatformCode(config.code) : isPlatformCode(config);
     }
 }

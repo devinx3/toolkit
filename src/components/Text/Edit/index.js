@@ -128,7 +128,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
                         <CopyButton type='text' onClick={handleCopyData} size='small' />
                         <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
                     </Space>
-                    <pre>{outputData}</pre>
+                    {React.isValidElement(outputData) ? <pre>{outputData}</pre> : <div>{outputData}</div> }
                 </>}
         </Col>
     </Row>
@@ -150,19 +150,21 @@ const TextEdit = () => {
                 // 基本按钮
                 buttons: [
                     {
+                        code: "multiLine2Single",
                         name: "多行转一行",
                         description: "多行合并成一行",
                         scriptContent: `const _INNER_ = ${multiLine2Single.toString()};return _INNER_(inputData);`
                     },
                     {
+                        code: "originalData",
                         name: "输出",
                         description: "输出原数据",
                         scriptContent: `return inputData;`
                     }
                 ],
                 expandScriptButton: {
-                    name: "自定义配置",
-                    description: "支持转换和添加自定义配置",
+                    name: "自定义",
+                    description: "支持转换和添加自定义节点",
                     scriptContent: "return inputData;"
                 },
                 // 编辑器帮助文档

@@ -1,9 +1,10 @@
 {
   "name": "toolkit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "dependencies": {
     "@ant-design/pro-components": "^2.6.43",
+    "@babel/standalone": "^7.23.7",
     "@monaco-editor/react": "^4.4.6",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",

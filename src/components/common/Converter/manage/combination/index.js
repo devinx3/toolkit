@@ -6,52 +6,52 @@ import { ExpandAddButton, ExpandManageButton } from './expand'
 import { ScriptUtil } from '../handler';
 
 /**
- * 获取相关语言对应的组合信息
- * @param {string} lang 语言
- * @returns 根据语言加载组合
+ * 获取相关分类对应的编排信息
+ * @param {string} category 分类
+ * @returns 根据分类加载编排
  */
-const loadConfigByLang = (lang) => {
-    return storeEditService.listAllConfig(lang) || [];
+const loadConfigByCategory = (category) => {
+    return storeEditService.listAllConfig(category) || [];
 }
 /**
- * 获取相关语言对应的组合信息
- * @param {string} lang 语言
- * @returns 根据语言加载组合
+ * 获取相关分类对应的编排信息
+ * @param {string} category 分类
+ * @returns 根据分类加载编排
  */
-const loadCombinationByLang = (lang) => {
-    return storeEditService.listAllCombination(lang) || [];
+const loadCombinationByCategory = (category) => {
+    return storeEditService.listAllCombination(category) || [];
 }
 
 /**
- * 组合列表
+ * 编排列表
  */
 const ExpandManageList = () => {
-    return <Button type='link' disabled>组合管理</Button>
+    return <Button type='link' disabled>脚本编排</Button>
 }
 
 /**
- * 根据配置ID获取脚本内容
+ * 根据节点编码获取脚本内容
  * @param {语言} lang 
  * @param {基本按钮} basicButtons 
- * @param {配置ID} configId 
+ * @param {节点编码} configCode 
  * @returns 
  */
-const getScriptConfig = (lang, basicButtons, configId) => {
-    if (ScriptUtil.isBasicById(configId)) {
+const getScriptConfig = (category, basicButtons, configCode) => {
+    if (ScriptUtil.isBasic(configCode)) {
         for (let basicButton of basicButtons) {
-            if (configId === basicButton.id) {
+            if (configCode === basicButton.code) {
                 return basicButton;
             }
         }
     }
-    return storeEditService.queryConfigById(lang, configId);
+    return storeEditService.queryConfigByCode(category, configCode);
 }
 
-// 脚本组合管理
-const CombinationManage = ({ lang, context, basicButtons, expandAddButton }) => {
-    const expandButtons = loadCombinationByLang(lang) || [];
+// 脚本脚本编排
+const CombinationManage = ({ lang, category, context, basicButtons, expandAddButton }) => {
+    const expandButtons = loadCombinationByCategory(category) || [];
     const [refresh, setRefresh] = React.useState(false);
-    const configButtons = loadConfigByLang(lang);
+    const configButtons = loadConfigByCategory(category);
     if (configButtons.length === 0) {
         return <></>;
     }
@@ -62,41 +62,40 @@ const CombinationManage = ({ lang, context, basicButtons, expandAddButton }) => 
      * @param {string} scriptContent 脚本内容
      * @returns 转换结果
      */
-    const handleConvert = idList => {
-        if (!idList || idList.length === 0) {
-            message.error("不存在任何配置")
+    const handleConvert = (combinationItem, codeList) => {
+        if (!codeList || codeList.length === 0) {
+            message.error("不存在任何节点")
             return;
         }
         let errorMessage = null;
-        const scriptContentList = idList.map(id => {
-            const scriptConfig = getScriptConfig(lang, basicButtons, id);
+        const combinationNode = context.createScriptEvent(combinationItem.code, combinationItem.name, null, combinationItem.version);
+        let targetNode = combinationNode;
+        codeList.forEach(code => {
+            const scriptConfig = getScriptConfig(category, basicButtons, code);
             if (!scriptConfig) {
-                errorMessage = "配置不存在";
+                errorMessage = "节点不存在";
                 return null;
-            }else if (!scriptConfig.scriptContent) {
+            } else if (!scriptConfig.scriptContent) {
                 errorMessage = "脚本内容为空";
                 return null;
             }
-            return {
-                name: scriptConfig.name,
-                content: scriptConfig.scriptContent
-            };
+            targetNode = targetNode.add(scriptConfig.code, scriptConfig.name, scriptConfig.scriptContent, scriptConfig.version);
         })
         if (errorMessage) {
             message.error(errorMessage)
             return;
         }
-        return context.onConvert(scriptContentList);
+        return context.onConvert(combinationNode);
     }
     const configDataSource = [...basicButtons, ...configButtons]
     return <Row style={{ marginTop: '10px' }}>
         <Col>
             <ExpandManageList />
-            <ExpandAddButton lang={lang} combinationConfig={expandAddButton} refreshManage={refreshManage} />
+            <ExpandAddButton category={category} combinationConfig={expandAddButton} refreshManage={refreshManage} />
         </Col>
         {expandButtons.map((item, key) => {
             return <Col style={{ marginLeft: '10px' }} key={key} >
-                <ExpandManageButton lang={lang} combinationConfig={item} refreshManage={refreshManage} configDataSource={configDataSource} handleConvert={handleConvert} />
+                <ExpandManageButton category={category} combinationConfig={item} refreshManage={refreshManage} configDataSource={configDataSource} handleConvert={handleConvert} />
             </Col>
         })}
     </Row>

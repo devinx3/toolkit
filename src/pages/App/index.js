@@ -5,8 +5,12 @@ import React, { Suspense, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import routes from '../../configs/router'
 import { HashRouter, Route, NavLink, Switch } from 'react-router-dom'
+import upgrade from './upgradation';
 
 const { Content, Footer, Sider } = Layout;
+
+// 系统版本
+const VERSION = "0.3.0";
 
 // Logo
 const Logo = (props) => {
@@ -92,6 +96,12 @@ const RouterList = () => {
   </Switch></Suspense>)
 }
 
+// 升级公告
+const UpgradeBanner = () => {
+  const msg = upgrade(VERSION);
+  return msg ? <Alert showIcon={false} message={<Typography.Text>{msg}</Typography.Text>} tooltip="升级公告" banner closable /> : <></>
+}
+
 // 顶级公告
 const TopBanner = () => {
   return global?.location?.hostname === 'devinx3.github.io' && <Alert showIcon={false}
@@ -112,6 +122,7 @@ const App = () => {
   }
   return (<>
     <TopBanner />
+    <UpgradeBanner />
     <HashRouter>
       <Layout
         style={{

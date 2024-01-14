@@ -1,5 +1,6 @@
 import React from "react"
 import { Spin } from "antd";
+import { LANG } from "../constants";
 import { newConvert } from '../adaptor/exectorAdaptor'
 
 // 设置数据块上下文
@@ -15,7 +16,7 @@ class DataBlockContext {
     }
 }
 
-const DataBlock = ({ context, dataBlockRender, handleInputObj }) => {
+const DataBlock = ({ lang, category, context, dataBlockRender, handleInputObj }) => {
 
     const [inputData, setInputData] = React.useState('');
     const [outputData, setOutputData] = React.useState('');
@@ -24,7 +25,7 @@ const DataBlock = ({ context, dataBlockRender, handleInputObj }) => {
     const dataBlockContext = React.useMemo(() => new DataBlockContext(), []);
 
     // 设置转换方法
-    context.setConvertHandler(scriptList => {
+    context.setConvertHandler(scriptEvent => {
         if (loading) {
             console.warn("Conversion failed because loading");
             return;
@@ -36,11 +37,18 @@ const DataBlock = ({ context, dataBlockRender, handleInputObj }) => {
             if (pass !== true) {
                 return setOutputData('') & setErrorMsg(pass) & setLoading(false)
             }
+            const options = { enableJsx: lang === LANG.JSX }
             const onError = data => setOutputData('') & setErrorMsg(data);
-            newConvert(handleInputObj, scriptList, inputData)
-                .then(data => data === '' ? onError('无执行结果') : setOutputData(data) & setErrorMsg(''))
-                .catch(onError)
-                .finally(() => setLoading(false))
+            const onSuccess = data => data === '' ? onError('无执行结果') : setOutputData(data) & setErrorMsg('');
+            try {
+                newConvert(category, handleInputObj, scriptEvent, inputData, options)
+                    .then(onSuccess)
+                    .catch(onError)
+                    .finally(() => setLoading(false))
+            } catch (err) {
+                setLoading(false);
+                onError(err.message);
+            }
         }, 60)
     });
 

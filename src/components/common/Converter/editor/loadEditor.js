@@ -37,9 +37,6 @@ const converterDTS = (pluginNames) => {
             warning(content: string, duration?: number): void;
             loading(content: string, duration?: number): void;
         },
-        UIHelper: {
-            createSchemaForm(getSchemaFormProps: { resolve: (out: any) => void, reject: (err: any) => object }, options?: object): Promise<void>;
-        },
         importPlugin: ${importPluginSource}
     });`;
 }

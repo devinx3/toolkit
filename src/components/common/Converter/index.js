@@ -1,5 +1,6 @@
 import React from "react"
 import { LANG } from "./constants";
+import { ScriptNode } from "./adaptor"
 
 const ManageBlock = React.lazy(() => import("./manage"))
 const DataBlock = React.lazy(() => import("./data"))
@@ -7,7 +8,7 @@ const DataBlock = React.lazy(() => import("./data"))
 /**
  * 转换事件上下文
  */
-class ContextEvnet {
+class ConvertContext {
     constructor() {
         this.convertHandler = null;
     }
@@ -15,14 +16,14 @@ class ContextEvnet {
     setConvertHandler(convertHandler) {
         this.convertHandler = convertHandler;
     }
-    // 是否存在转换器
-    hasConvertHandler() {
-        return !!this.convertHandler;
+    // 创建脚本事件
+    createScriptEvent(code, name, script, version) {
+        return new ScriptNode({ code, name, script, version})
     }
     // 执行转换方法
-    onConvert(scriptList) {
+    onConvert(node) {
         if (this.convertHandler) {
-            return this.convertHandler(scriptList)
+            return this.convertHandler(node)
         }
         console.warn("No convert handler")
     }
@@ -34,6 +35,7 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
 /**
  * @typedef {{
  *      lang: string,
+ *      category: string,               // 分类
  *      manage: {
  *          buttons: {                  // 基本按钮
  *              name: string,           // 名称
@@ -45,7 +47,7 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  *              description: string,    // 描述
  *              scriptContent: string,  // 脚本内容
  *          },
- *          expandCombinationButton: {  // 自定义组合(*)
+ *          expandCombinationButton: {  // 自定义编排(*)
  *              name: string,           // 默认名称
  *              description: string,    // 默认描述
  *          },
@@ -68,15 +70,18 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  * 转换对象
  * @param {ConverterType} props 属性
  */
-const Converter = ({ lang = "txt", manage, handleInputObj, dataBlockRender }) => {
-    const context = React.useMemo(() => new ContextEvnet(), []);
+const Converter = ({ lang = "txt", category, manage, handleInputObj, dataBlockRender }) => {
+    const context = React.useMemo(() => new ConvertContext(), []);
     // 默认配置
     const manageConfig = {
-        lang,
         ...manage,
+        lang,
+        category: category || lang,
         context
     }
     const dataConfig = {
+        lang,
+        category: category || lang,
         context,
         dataBlockRender,
         handleInputObj: handleInputObj || handleInputObjDataSource[lang],
@@ -84,7 +89,7 @@ const Converter = ({ lang = "txt", manage, handleInputObj, dataBlockRender }) =>
 
     return <React.Suspense fallback={<></>}>
         <ManageBlock {...manageConfig} />
-        <DataBlock {...dataConfig} />
+        <DataBlock { ...dataConfig } />
     </React.Suspense>
 }
 

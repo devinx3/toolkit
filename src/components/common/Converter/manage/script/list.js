@@ -1,14 +1,14 @@
 import React from 'react';
-import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin } from 'antd';
-import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined } from '@ant-design/icons';
+import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin, Drawer } from 'antd';
+import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import storeEditService, { requestService } from '../../store/storeEditService';
-import { dynamicConfig } from '../handler';
+import { ScriptUtil, dynamicConfig } from '../handler';
 import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
 import dayjs from 'dayjs'
 import jsonp from '../../../../../utils/jsonp'
 
-const { addConfig, queryConfigByName, updateConfig, batchDeleteConfig } = storeEditService;
+const { addConfig, queryConfigByCode, updateConfig, hiddenConfig, batchDeleteConfig } = storeEditService;
 
 // 鼠标移入后延时多少才显示 Tooltip，单位：秒
 const tipMouseEnterDelay = 1;
@@ -51,7 +51,7 @@ const convertURL = (urlString) => {
     }
 }
 
-const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
+const ExpandManageList = ({ category, dataSource, refreshScript }) => {
 
     const [visible, setVisible] = React.useState(false);
 
@@ -62,9 +62,6 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
     const [scriptVisible, setScriptVisible] = React.useState(false);
     const [scriptModalContent, setScriptModalContent] = React.useState();
 
-    // 导出 URL 配置
-    const [exportUrlVisible, setExportUrlVisible] = React.useState();
-    const [coverByName, setCoverByName] = React.useState();;
     // 导入配置路径
     const [importConfigUrl, setImportConfigUrl] = React.useState();
     const [importing, setImporting] = React.useState(false);
@@ -75,12 +72,12 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
 
     // 列表页勾选项
     const onChangeConfigItem = (e) => {
-        const id = e.target.value;
+        const code = e.target.value;
         const list = [...checkedList];
-        const index = list.indexOf(id);
+        const index = list.indexOf(code);
         if (e.target.checked) {
             if (index < 0) {
-                list.push(id);
+                list.push(code);
             }
         } else {
             if (index >= 0) {
@@ -91,15 +88,12 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         setIndeterminate(!!list.length && list.length < dataSource.length);
         setCheckAllConfig(list.length === dataSource.length);
     }
-    // 获取被勾选的配置项
-    const getCheckConfigItem = removeId => {
+    // 获取被勾选的节点项
+    const getCheckConfigItem = () => {
         const source = [];
         for (let config of dataSource) {
-            if (checkedList.indexOf(config.id) !== -1) {
+            if (checkedList.indexOf(config.code) !== -1) {
                 const obj = { ...config };
-                if (removeId) {
-                    delete obj['id']
-                }
                 source.push(obj);
             }
         }
@@ -110,7 +104,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         if (e.target.checked) {
             const allList = [];
             for (let item of dataSource) {
-                allList.push(item.id);
+                allList.push(item.code);
             }
             setCheckedList(allList);
         } else {
@@ -125,13 +119,13 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         setCheckAllConfig(false);
         setIndeterminate(false);
     }
-    // 删除配置
+    // 删除节点
     const handleDeleteConfig = () => {
         if (checkedList.length === 0) {
             message.info("没有选中任何行, 无需删除")
             return;
         }
-        requestService(batchDeleteConfig, lang, checkedList)
+        requestService(batchDeleteConfig, category, checkedList)
             .then(() => {
                 message.success("删除成功")
                 clearCheckAll();
@@ -155,41 +149,41 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         return exportData;
     }
     let doubleExportTimer = null;
-    const handleDoubleExportUrlConfig = () => {
-        clearTimeout(doubleExportTimer);
-        setExportUrlVisible(true)
-    }
-    // 导出 URL 文件配置
+    // 导出 URL 文件节点
     const handleExportUrlConfig = () => {
         clearTimeout(doubleExportTimer);
         doubleExportTimer = setTimeout(() => {
             clearTimeout(doubleExportTimer);
-            const urlConfig = {};
-            if (coverByName) {
-                urlConfig.coverByName = 1;
-            }
-            handleExportConfig(urlConfig);
+            handleExportConfig({});
         }, 555);
     }
-    // 导出配置
+    // 导出节点
     const handleExportConfig = (config) => {
         if (checkedList.length === 0) {
             message.info("没有选中任何行, 无需导出")
             return;
         }
-        const source = getCheckConfigItem(true);
+        const source = getCheckConfigItem();
         const exportData = handleExportData(source, config);
-        const fileName = 'config' + dayjs().format('MMDDHHmmss');
+        const fileName = 'config-' + category + "-" + dayjs().format('MMDDHHmmss');
         FileUtil.download(exportData, fileName);
     }
+    const hanldeHidden = (checkedScriptHidden) => {
+        requestService(hiddenConfig, category, checkedList, checkedScriptHidden)
+        .then(() => {
+            message.success("隐藏成功")
+            clearCheckAll();
+            refreshScript()
+        }).catch(err => message.error("隐藏失败"));
+    }
 
-    // 复制JSON配置
+    // 复制JSON节点
     const handleCopyConfig = () => {
         if (checkedList.length === 0) {
             message.info("没有选中任何行, 无法复制")
             return;
         }
-        const source = getCheckConfigItem(true);
+        const source = getCheckConfigItem();
         if (StrUtil.copyToClipboard(JSON.stringify(source))) {
             message.success("复制成功")
         }
@@ -198,6 +192,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
     const startImport = () => setImporting(false);
     const completeImport = () => setImporting(false);
     const handleImportConfigCallback = (importData, importConofig) => {
+        debugger
         if (!importData) {
             completeImport();
             return;
@@ -237,33 +232,32 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
         let successCount = 0;
         let errorMsg = '';
         Promise.all(newList.map(async config => {
-            if (importConofig.coverByName) {
-                const dbList = await requestService(queryConfigByName, lang, config.name);
-                if (dbList?.length === 1) {
-                    // 更新数据
-                    try {
-                        console.debug("导入的数据:", dbList[0]);
-                        config.id = dbList[0].id;
-                        await requestService(updateConfig, lang, config);
-                        return successCount++;
-                    } catch (reason) {
-                        return errorMsg = errorMsg + reason + ";";
+            const dbList = queryConfigByCode(category, config.code);
+            if (dbList?.length === 1) {
+                // 更新数据
+                try {
+                    console.debug("导入的数据:", dbList[0]);
+                    if (ScriptUtil.canUpdate(dbList[0].version, config.version)) {
+                        updateConfig(category, config, true)
                     }
-                } else if (dbList?.length > 1) {
-                    message.warn("匹配到多个【" + config.name + "】, 将会新增配置");
+                    return successCount++;
+                } catch (reason) {
+                    return errorMsg = errorMsg + reason + ";";
                 }
+            } else if (dbList?.length > 1) {
+                return "导入失败: 存在多个相同的编码: " + config.code + ";";
             } else {
                 config.name = config.name + '(by impory)';
             }
             try {
-                await requestService(addConfig, lang, config);
+                addConfig(category, config, true)
                 return successCount++;
             } catch (reason) {
                 return errorMsg = errorMsg + reason + ";";
             }
         })).finally(() => {
             if (successCount === 0) {
-                message.error("全部导入失败, 异常消息: ");
+                message.error("全部导入失败, 异常消息: " + errorMsg);
                 return;
             }
             if (successCount === newList.length) {
@@ -275,7 +269,7 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
             refreshScript();
         });
     }
-    // 导入配置
+    // 导入节点
     const handleImportConfig = (file) => {
         if (importing) {
             message.warn("正在导入中, 请等待");
@@ -311,12 +305,12 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
     }
 
     return (<>
-        <Button type='link' onClick={() => setVisible(true)}>配置管理</Button>
-        <Modal title={"配置管理"} open={visible} footer={null} onCancel={() => setVisible(false)} >
+        <Button type='link' style={{ marginTop: '5px' }} onClick={() => setVisible(true)}>脚本节点</Button>
+        <Drawer title={"脚本节点"} open={visible} placement={"left"} footer={null} onClose={() => setVisible(false)} >
             <List
                 itemLayout="horizontal"
                 dataSource={dataSource}
-                rowKey='id'
+                rowKey='code'
                 header={(<Spin spinning={importing}>
                     <Checkbox indeterminate={indeterminate}
                         disabled={dataSource.length === 0}
@@ -324,16 +318,19 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                         onChange={onCheckAllChangeConfigItem}>
                         全选
                     </Checkbox>
-                    <Button type='text' disabled={dataSource.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
-                    <Button type='text' disabled={dataSource.length === 0} icon={<ExportOutlined />}
-                         onClick={handleExportUrlConfig} onDoubleClick={handleDoubleExportUrlConfig}>导出</Button>
+                    <Button type='text' disabled={checkedList.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
+                    <Button type='text' disabled={checkedList.length === 0} icon={<ExportOutlined />}
+                         onClick={handleExportUrlConfig}>导出</Button>
+                    <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(true)} icon={<EyeInvisibleOutlined />}>隐藏</Button>
+                    <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(false)} icon={<EyeOutlined />}>显示</Button>
                     <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
-                        <Button type='text' disabled={dataSource.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON配置</Button>
+                        <Button type='text' disabled={checkedList.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON节点</Button>    
                     </Tooltip>
+
                 </Spin>)}
-                footer={<Spin spinning={importing}><Input type='url' placeholder='配置导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear/>
+                footer={<Spin spinning={importing}><Input type='url' placeholder='节点导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear/>
                     {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
-                        <Button icon={<ImportOutlined />}>导入</Button>
+                        <Button style={{marginTop: "3px"}} icon={<ImportOutlined />}>导入</Button>
                     </Upload>)
                     }
                 </Spin>}
@@ -343,20 +340,17 @@ const ExpandManageList = ({ lang, dataSource, refreshScript }) => {
                     >
                         <Skeleton loading={false}>
                             <List.Item.Meta
-                                avatar={<Checkbox value={item.id} checked={checkedList.indexOf(item.id) >= 0} onChange={onChangeConfigItem} />}
-                                title={item.name}
+                                avatar={<Checkbox value={item.code} checked={checkedList.indexOf(item.code) >= 0} onChange={onChangeConfigItem} />}
+                                title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
                                 description={item.description}
                             />
                         </Skeleton>
                     </List.Item>
                 )}
             />
-        </Modal>
+        </Drawer>
         <Modal title="脚本内容" open={scriptVisible} width="60%" footer={null} onCancel={handleCloseScriptContentModal} >
             <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{scriptModalContent}</Typography.Paragraph></div>
-        </Modal>
-        <Modal title="导出 URL 文件配置" open={exportUrlVisible} width="20%" footer={null} onCancel={() => setExportUrlVisible(false)} >
-            <Checkbox checked={coverByName} onChange={e => setCoverByName(e.target.checked)} on >同名覆盖</Checkbox>
         </Modal>
     </>)
 }
