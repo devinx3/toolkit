@@ -2,12 +2,12 @@ const versionStorageKey = "devinx3.toolkit.platform.version";
 const upgrade1 = (v) => {
     const version = localStorage.getItem(versionStorageKey);
     if (version === v) {
-        return undefined;
+        return { upgrade: false };
     }
     const currentTime = new Date().getTime();
     // 2024-06-01
     if (currentTime > 1717200000000) {
-        return "当前版本已过期, 已强制升级; 若出现问题请联系作者";
+        return { upgrade: true, message: "当前版本已过期, 已强制升级; 若出现问题请联系作者" };
     }
     const prefix = parseInt(currentTime, 10).toString(16);
     const sufLen = 32 - prefix.length;
@@ -49,9 +49,9 @@ const upgrade1 = (v) => {
             if (newArr.length > 0) localStorage.setItem(combinationKey.target, JSON.stringify(newArr));
         }
     })
-    return "已自动升级版本成功";
+    return { upgrade: true, message: "已自动升级版本成功" };
 }
-  
+
 const setVersion = (version) => {
     localStorage.setItem(versionStorageKey, version);
     return undefined;
@@ -61,9 +61,9 @@ const upgradeMap = { "0.3.0": upgrade1 }
 const upgrade = (version) => {
     const callback = upgradeMap[version];
     try {
-        let msg = callback ? callback(version) : undefined;
-        if (!msg) setVersion(version)
-        return msg;
+        let obj = callback ? callback(version) : undefined;
+        if (!obj || obj.upgrade) setVersion(version)
+        return obj?.message;
     } catch (err) {
         console.error("系统版本升级失败", err);
         alert("系统版本升级失败, 将会刷新页面");
