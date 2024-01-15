@@ -40,11 +40,11 @@ const getScriptConfig = (category, basicButtons, configCode) => {
     if (ScriptUtil.isBasic(configCode)) {
         for (let basicButton of basicButtons) {
             if (configCode === basicButton.code) {
-                return basicButton;
+                return [basicButton];
             }
         }
     }
-    return storeEditService.queryConfigByCode(category, configCode);
+    return storeEditService.queryConfigByCode(category, configCode) || [];
 }
 
 // 脚本脚本编排
@@ -71,7 +71,7 @@ const CombinationManage = ({ lang, category, context, basicButtons, expandAddBut
         const combinationNode = context.createScriptEvent(combinationItem.code, combinationItem.name, null, combinationItem.version);
         let targetNode = combinationNode;
         codeList.forEach(code => {
-            const scriptConfig = getScriptConfig(category, basicButtons, code);
+            const scriptConfig = getScriptConfig(category, basicButtons, code)[0];
             if (!scriptConfig) {
                 errorMessage = "节点不存在";
                 return null;

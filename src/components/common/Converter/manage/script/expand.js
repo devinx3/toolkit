@@ -2,6 +2,7 @@ import React from 'react';
 import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
+import { SCRIPT_CODE_PREFIX } from '../../constants'
 import { EditOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
@@ -46,6 +47,11 @@ const AddConfigButton = ({ category, config, scriptContent, onAddSuccess }) => {
     </Popconfirm>);
 }
 
+// 种子
+const nextSeed = (() => {
+    let version = 100;
+    return () => version++;
+})();
 // 按钮组的扩展按钮
 export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender }) => {
     const [visible, setVisible] = React.useState(false);
@@ -58,7 +64,9 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
             message.warn("脚本内容不能为空")
             return;
         }
-        context.onConvert(context.createScriptEvent(config.code, config.name, scriptContent, config.version));
+        const version = nextSeed(); 
+        const code = SCRIPT_CODE_PREFIX.EXPAND_ADD + "CONVERT";
+        context.onConvert(context.createScriptEvent(code, config.name, scriptContent, version));
         setVisible(false);
     };
     const handleAddSuccess = () => {

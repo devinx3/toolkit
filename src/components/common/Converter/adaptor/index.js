@@ -206,9 +206,7 @@ class ScriptTask {
         return item.i = this._compileInvocation();
     }
     // 执行任务
-    run(thisObj, inputData, handleInputObj, handleUtil) {
-        const inputObj = handleInputObj ? handleInputObj() : undefined;
-        const util = handleUtil ? handleUtil() || {} : {};
+    run(thisObj, inputData, inputObj, util) {
         // 编译并执行方法
         return this._compileAndGetInvocation().execute(thisObj, [inputData, inputObj, util, this.transform ? React : undefined]);
     }
@@ -232,8 +230,10 @@ export class ScriptExector {
         return ((async () => {
             try {
                 const { before, after, transform, getUtil } = this.handler;
+                const taskParamUtil = getUtil ? getUtil() || {} : {};
                 // 前置
                 const { handleInputObj } = before(this.root, inputData) || {};
+                const taskInputObject = handleInputObj ? handleInputObj(inputData) : undefined;
                 // 任务执行
                 let nodeOutputData = undefined;
                 const outContext = { input: undefined, output: undefined };
@@ -242,7 +242,7 @@ export class ScriptExector {
                 while (node) {
                     this.nexState(node, index, nodeOutputData);
                     const task = new ScriptTask(this.category, node.code, node.script, node.version, transform)
-                    nodeOutputData = task.run(this.context.get(), inputData, index === 0 ? handleInputObj : null, getUtil);
+                    nodeOutputData = task.run(this.context.get(), inputData, taskInputObject, taskParamUtil);
                     if (nodeOutputData instanceof Function) nodeOutputData = nodeOutputData.apply(this.context.get());
                     if (nodeOutputData instanceof Promise) nodeOutputData = await nodeOutputData;
                     if (nodeOutputData instanceof ScriptResult) {
@@ -250,7 +250,7 @@ export class ScriptExector {
                             const tmpResult = nodeOutputData.get();
                             if (tmpResult?.input) outContext.input = tmpResult.input;
                             if (tmpResult?.output) outContext.output = tmpResult.output;
-                        } 
+                        }
                     } else if (this.options.enableJsx && React.isValidElement(nodeOutputData)) {
                         outContext.output = nodeOutputData;
                     }

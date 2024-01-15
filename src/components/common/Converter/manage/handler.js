@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import { SCRIPT_CODE_PREFIX } from '../constants'
 
 class DynamicConfig {
     constructor() {
@@ -144,15 +145,13 @@ const generateCode = (input) => {
     return CryptoJS.MD5(input || '0').toString(CryptoJS.enc.Hex);
 }
 
-// 平台编码前缀
-const PLATFORM_NUM_PREFIX = "P|";
 // 生成平台编码
 const generatePlatformCode = (input) => {
-    return PLATFORM_NUM_PREFIX + generateCode(input);
+    return SCRIPT_CODE_PREFIX.PLATFORM + generateCode(input);
 }
 // 判断是否是平台编码
 const isPlatformCode = (code) => {
-    return code?.startsWith && code.startsWith(PLATFORM_NUM_PREFIX);
+    return code?.startsWith && code.startsWith(SCRIPT_CODE_PREFIX.PLATFORM);
 }
 
 // 2024-01-01 00:00:00

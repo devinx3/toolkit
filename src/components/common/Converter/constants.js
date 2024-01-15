@@ -4,3 +4,13 @@ export const LANG = {
     TXT: "txt",
     JSX: "jsx",
 }
+
+// 脚本编码分隔符
+export const SCRIPT_CODE_SEPARATOR = "|";
+// 脚本编码前缀(都以|结束)
+export const SCRIPT_CODE_PREFIX = {
+    // 平台编码前缀
+    PLATFORM: "P|",
+    // 扩展按钮前缀
+    EXPAND_ADD: "EA|"
+}
