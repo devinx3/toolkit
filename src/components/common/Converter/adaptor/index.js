@@ -248,7 +248,6 @@ export class ScriptExector {
                 let medianInputData = inputData;
                 let index = 0;
                 while (node) {
-                    debugger
                     this.nexState(node, index, nodeOutputData);
                     const task = new ScriptTask(this.category, node.code, node.script, node.version, transform)
                     nodeOutputData = task.run(this.context.get(), medianInputData, handleInputObj, taskParamUtil);

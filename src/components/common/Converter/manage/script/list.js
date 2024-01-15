@@ -192,7 +192,6 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     const startImport = () => setImporting(false);
     const completeImport = () => setImporting(false);
     const handleImportConfigCallback = (importData, importConofig) => {
-        debugger
         if (!importData) {
             completeImport();
             return;
