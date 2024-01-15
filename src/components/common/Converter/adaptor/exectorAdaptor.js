@@ -92,6 +92,10 @@ export function newConvert(category, handleInputObj, scriptEvent, inputData, opt
         getUtil: () => ({ ...exectorUtilParam }),
         before: (rootNode, _input) => ({ handleInputObj }),
         after: (rootNode, _output) => convertResult(_output),
+        // 转换中间值
+        convertMedian: (stageNode, val) => {
+            return handleInputObj && stageNode?.hasNext?.() ? convertResult(val) : val
+        },
         transform: options.enableJsx ? code => transform(code, { presets: ["react"] })?.code : undefined,
     }
     return new ScriptExector(category, scriptEvent, handler, options).submit(inputData);

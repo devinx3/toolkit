@@ -128,7 +128,7 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
                         <CopyButton type='text' onClick={handleCopyData} size='small' />
                         <Tooltip title="下载"><DownloadOutlined style={{ marginLeft: '8px' }} onClick={() => handleDownloadClick(outputData)} /></Tooltip>
                     </Space>
-                    {React.isValidElement(outputData) ? <pre>{outputData}</pre> : <div>{outputData}</div> }
+                    {React.isValidElement(outputData) ? <div>{outputData}</div> : <pre>{outputData}</pre> }
                 </>}
         </Col>
     </Row>

@@ -90,6 +90,11 @@ class ScriptContext {
         this.getName = () => root.name;
         this.#stage = stage;
         this.#previous = previous;
+        this.originInputData = null;
+    }
+    // 原始输入
+    getOriginInputData() {
+        return this.originInputData;
     }
     // 阶段编码
     getStageCode() {
@@ -139,6 +144,7 @@ const createScriptContext = (category, root) => {
     }
     return {
         get: () => context,
+        setInputData: data => context.originInputData = data,
         nextStage: (node, position, previousOut) => {
             if (!node) return;
             modifyStage(node, position);
@@ -206,7 +212,8 @@ class ScriptTask {
         return item.i = this._compileInvocation();
     }
     // 执行任务
-    run(thisObj, inputData, inputObj, util) {
+    run(thisObj, inputData, handleInputObj, util) {
+        const inputObj = handleInputObj ? handleInputObj(inputData) : undefined;
         // 编译并执行方法
         return this._compileAndGetInvocation().execute(thisObj, [inputData, inputObj, util, this.transform ? React : undefined]);
     }
@@ -229,20 +236,22 @@ export class ScriptExector {
     submit(inputData) {
         return ((async () => {
             try {
-                const { before, after, transform, getUtil } = this.handler;
+                this.context.setInputData(inputData);
+                const { before, after, convertMedian, transform, getUtil } = this.handler;
                 const taskParamUtil = getUtil ? getUtil() || {} : {};
                 // 前置
                 const { handleInputObj } = before(this.root, inputData) || {};
-                const taskInputObject = handleInputObj ? handleInputObj(inputData) : undefined;
                 // 任务执行
                 let nodeOutputData = undefined;
                 const outContext = { input: undefined, output: undefined };
                 let node = this.root.script ? this.root : this.root.next();
+                let medianInputData = inputData;
                 let index = 0;
                 while (node) {
+                    debugger
                     this.nexState(node, index, nodeOutputData);
                     const task = new ScriptTask(this.category, node.code, node.script, node.version, transform)
-                    nodeOutputData = task.run(this.context.get(), inputData, taskInputObject, taskParamUtil);
+                    nodeOutputData = task.run(this.context.get(), medianInputData, handleInputObj, taskParamUtil);
                     if (nodeOutputData instanceof Function) nodeOutputData = nodeOutputData.apply(this.context.get());
                     if (nodeOutputData instanceof Promise) nodeOutputData = await nodeOutputData;
                     if (nodeOutputData instanceof ScriptResult) {
@@ -254,6 +263,7 @@ export class ScriptExector {
                     } else if (this.options.enableJsx && React.isValidElement(nodeOutputData)) {
                         outContext.output = nodeOutputData;
                     }
+                    medianInputData = convertMedian(node, nodeOutputData);
                     node = node.next();
                     index++;
                 }
