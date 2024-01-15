@@ -3,7 +3,6 @@
   "version": "0.3.0",
   "private": true,
   "dependencies": {
-    "@ant-design/pro-components": "^2.6.43",
     "@babel/standalone": "^7.23.7",
     "@monaco-editor/react": "^4.4.6",
     "@testing-library/jest-dom": "^5.16.5",
@@ -46,5 +45,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }

@@ -5,7 +5,6 @@ import lodash from 'lodash'
 import dayjs from 'dayjs';
 import cryptoJS from 'crypto-js';
 import * as XLSX from 'xlsx'
-import { BetaSchemaForm } from '@ant-design/pro-components';
 import { ScriptExector, ScriptResult } from './index'
 import { transform } from '@babel/standalone'
 
@@ -58,13 +57,6 @@ function createContainer(createChildren, options = {}) {
 }
 // 添加 UI 帮助类
 exectorUtilParam.UIHelper = {
-    createSchemaForm: (getSchemaFormProps) => {
-        return createContainer(params => {
-            const props = getSchemaFormProps(params) || {};
-            props.layoutType = 'From';
-            return <BetaSchemaForm {...props} />
-        })
-    },
     buildIOElement: (inEle, outEle) => {
         return ScriptResult.boxArea(inEle, outEle)
     }
