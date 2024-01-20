@@ -20,6 +20,12 @@ const exectorUtilParam = {
 exectorUtilParam.importPlugin = (pluginName) => {
     if (pluginName === 'antd') {
         return import('antd');
+    } else if (pluginName === '@ant-design/icons') {
+        return import('@ant-design/icons');
+    } else if (pluginName === '@ant-design/pro-components') {
+        return import('@ant-design/pro-components');
+    } else if (pluginName === '@monaco-editor/react') {
+        return import('@monaco-editor/react');
     }
     throw new Error("不存在的插件：" + pluginName);
 }
