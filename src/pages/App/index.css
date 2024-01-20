@@ -1,9 +1,11 @@
+@import '~antd/dist/reset.css';
+
 .logo {
-    height: 25px;
-    margin: 20px;
-    font-size: large;
-    text-align: center;
-  }
+  height: 25px;
+  margin: 20px;
+  font-size: large;
+  text-align: center;
+}
 
 .site-layout .site-layout-background {
   background: #fff;
