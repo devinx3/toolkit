@@ -223,7 +223,25 @@ export const ExpandManageButton = ({ category, combinationConfig, refreshManage,
         setFrameIndex(index);
         setFrameVisible(true);
     }
-
+    // 获取编码节点
+    const getNodeList = (list) => {
+        if (!list || list.length === 0) {
+            return [{
+                color: "gray",
+                children: <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2} ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(-1)}></Button></Tooltip>
+            }]
+        }
+        return list.map((item, index) => {
+            return {
+                color: ScriptUtil.isBasic(item) ? '#52c41a' : '#faad14',
+                children: (<>
+                    <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
+                    <Tooltip title="删除" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
+                    <Tooltip title={item.description} mouseEnterDelay={tipMouseEnterDelay}>{item.name}</Tooltip>
+                </>)
+            }
+        })
+    }
     return (<>
         <Tooltip style={{ marginLeft: '15px' }} title={combinationConfig.description} mouseEnterDelay={tipMouseEnterDelay}>
             <Button type="dashed" onClick={e => handleConvert(combinationConfig, combinationConfig.combination)}>{combinationConfig.name}</Button>
@@ -246,20 +264,7 @@ export const ExpandManageButton = ({ category, combinationConfig, refreshManage,
             <Input addonBefore={'编排名称'} value={combinationName} onChange={e => setCombinationName(e.target.value)} />
             <Input style={{ marginTop: '5px', marginBottom: '15px' }} addonBefore={'编排作用'} value={combinationDesc} onChange={e => setCombinationDesc(e.target.value)} />
 
-            <Timeline mode="left">
-                {(timelineItemList.length === 0) && (
-                    <Timeline.Item key={0} color="gray">
-                        <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2} ><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(-1)}></Button></Tooltip>
-                    </Timeline.Item>
-                )}
-                {timelineItemList.map((item, index) => {
-                    return (<Timeline.Item key={index} color={ScriptUtil.isBasic(item) ? '#52c41a' : '#faad14'}>
-                        <Tooltip title="添加" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<PlusOutlined />} onClick={e => openConfigTableModal(index)}></Button></Tooltip>
-                        <Tooltip title="删除" mouseEnterDelay={tipMouseEnterDelay * 2}><Button shape="circle" type="text" icon={<DeleteOutlined />} onClick={e => handleDeleteCombinationConfig(index)}></Button></Tooltip>
-                        <Tooltip title={item.description} mouseEnterDelay={tipMouseEnterDelay}>{item.name}</Tooltip>
-                    </Timeline.Item>)
-                })}
-            </Timeline>
+            <Timeline mode="left" items={getNodeList(timelineItemList)} />
         </Drawer>
 
         <ConfigTableModal visible={frameVisible} setVisible={setFrameVisible} handleAddConfig={handleAddConfig} configDataSource={configDataSource} />
