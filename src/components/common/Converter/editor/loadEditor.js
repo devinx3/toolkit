@@ -20,6 +20,7 @@ const converterDTS = (pluginNames) => {
     return `
     declare const inputData: (string | Object | File[]);
     declare const inputObj: (Object | null);
+    declare const React: typeof import("react"),
     interface ElementDefinition & Element {
         type: string | Element;
         props: any;

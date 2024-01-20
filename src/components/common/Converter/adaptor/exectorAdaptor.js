@@ -14,7 +14,16 @@ const exectorUtilParam = {
     dayjs: dayjs,
     cryptoJS: cryptoJS,
     XLSX: XLSX,
-    message: message
+    message: message,
+    importPlugin: (pluginName) => new Promise(pluginName)
+}
+
+// 导入插件
+exectorUtilParam.importPlugin = (pluginName) => {
+    if (pluginName === 'antd') {
+        return import('antd');
+    }
+    throw new Error("不存在的插件：" + pluginName);
 }
 
 const containerId = 'converter-container';

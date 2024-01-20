@@ -1,11 +1,14 @@
 import CuszIcons from '../icons'
-import { FileTextOutlined, EditOutlined } from '@ant-design/icons'
+import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined  } from '@ant-design/icons'
 import React from 'react'
+import dynamicRoue from '../components/Customization/Template/route'
+
 
 const Home = React.lazy(() => import('../pages/Home'))
 const Encrypt = React.lazy(() => import('../components/Text/Encrypt'));
 const TextEdit = React.lazy(() => import('../components/Text/Edit'));
 const JsonEdit = React.lazy(() => import('../components/Json/Edit'));
+const CustomizeManage = React.lazy(() => import('../components/Customization/Manage'));
 
 const routes = [
   {
@@ -31,7 +34,7 @@ const routes = [
         icon: <CuszIcons.Encryption />,
         path: '/text/encrypt',
         component: Encrypt,
-      },{
+      }, {
         key: 'text-edit',
         name: '编辑',
         icon: <EditOutlined />,
@@ -52,6 +55,21 @@ const routes = [
         path: '/json/edit',
         component: JsonEdit,
       },
+    ],
+  },
+  {
+    key: 'customize',
+    name: '定制化',
+    icon: <ContainerOutlined />,
+    routes: [
+      {
+        key: 'customize-manage',
+        name: '管理',
+        icon: <ControlOutlined />,
+        path: '/customize/manage',
+        component: CustomizeManage,
+      },
+      ...dynamicRoue()
     ],
   }
 ];

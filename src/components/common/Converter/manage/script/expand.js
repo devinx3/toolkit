@@ -84,7 +84,7 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
             footer={<Row justify="end">
                 <Space>
                     <Col><AddConfigButton key='add' category={category} config={config} scriptContent={scriptContent} onAddSuccess={handleAddSuccess} /></Col>
-                    <Col><Button key="convert" type="primary" onClick={handleConfirm}>转换</Button></Col>
+                    <Col><Button key="convert" type="primary" onClick={handleConfirm}>执行</Button></Col>
                 </Space>
             </Row>} >
             <CodeEditor value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />

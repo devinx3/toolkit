@@ -259,7 +259,7 @@ export class ScriptExector {
                             if (tmpResult?.input) outContext.input = tmpResult.input;
                             if (tmpResult?.output) outContext.output = tmpResult.output;
                         }
-                    } else if (this.options.enableJsx && React.isValidElement(nodeOutputData)) {
+                    } else if (this.options.enableJsx) {
                         outContext.output = nodeOutputData;
                     }
                     medianInputData = convertMedian(node, nodeOutputData);
