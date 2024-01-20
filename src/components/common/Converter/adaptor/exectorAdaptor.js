@@ -1,6 +1,4 @@
-import { message, Modal } from 'antd';
-import ReactDOM from 'react-dom/client';
-import React from 'react';
+import { message } from 'antd';
 import lodash from 'lodash'
 import dayjs from 'dayjs';
 import cryptoJS from 'crypto-js';
@@ -24,51 +22,6 @@ exectorUtilParam.importPlugin = (pluginName) => {
         return import('antd');
     }
     throw new Error("不存在的插件：" + pluginName);
-}
-
-const containerId = 'converter-container';
-/**
- * 创建 React 容器
- * @param {*} createChildren 创建子元素的回调方法
- * @returns Promise 子元素
- */
-function createContainer(createChildren, options = {}) {
-    const container = ReactDOM.createRoot(document.getElementById(containerId));
-    const Container = ({ onSuccess, onError }) => {
-        try {
-            const handleClose = (res) => container.unmount();
-            const handleCancel = (res) => handleClose() & onError(res);
-            const child = createChildren({
-                resolve: out => handleClose() & onSuccess(out),
-                reject: err => handleClose() & onError(err),
-            });
-            const children = child instanceof Array ? child : [child];
-            return React.createElement(Modal, {
-                onCancel: () => handleCancel("已取消"),
-                onOk: () => handleCancel("已取消"),
-                footer: null,
-                maskClosable: true,
-                ...options,
-                open: true,
-                key: containerId + '-modal'
-            }, React.createElement(React.Fragment, {}, ...children));
-        } catch (err) {
-            onError(err);
-        }
-    }
-    return new Promise((resolve, reject) => {
-        try {
-            container.render(React.createElement(Container, { onSuccess: resolve, onError: reject }));
-        } catch (err) {
-            reject(err);
-        }
-    })
-}
-// 添加 UI 帮助类
-exectorUtilParam.UIHelper = {
-    buildIOElement: (inEle, outEle) => {
-        return ScriptResult.boxArea(inEle, outEle)
-    }
 }
 
 /**

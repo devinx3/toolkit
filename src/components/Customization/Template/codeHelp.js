@@ -66,7 +66,6 @@ const toolDocument = (<>
 // Form 脚本
 const FormDemo =`// 脚本执行区
 const { importPlugin } = Util;
-const contextName =  this.getName()
 return async () => {
     // 脚本执行区(异步导入插件)
     const { Row, Col, Form, Input, Space, Button } = await importPlugin("antd");

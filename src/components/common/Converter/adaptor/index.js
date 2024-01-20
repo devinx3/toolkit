@@ -25,8 +25,6 @@ export class ScriptNode {
 }
 
 // 脚本结果对象
-// 区域标识
-const AREA = Symbol(1)
 export class ScriptResult {
     #origin = undefined
     constructor(origin) {
@@ -34,12 +32,6 @@ export class ScriptResult {
     }
     get() {
         return this.#origin;
-    }
-    static boxArea(input, output) {
-        return new ScriptResult({ input, output, [AREA]: true })
-    }
-    isArea() {
-        return this.#origin?.[AREA] === true;
     }
 }
 
@@ -243,7 +235,6 @@ export class ScriptExector {
                 const { handleInputObj } = before(this.root, inputData) || {};
                 // 任务执行
                 let nodeOutputData = undefined;
-                const outContext = { input: undefined, output: undefined };
                 let node = this.root.script ? this.root : this.root.next();
                 let medianInputData = inputData;
                 let index = 0;
@@ -253,23 +244,12 @@ export class ScriptExector {
                     nodeOutputData = task.run(this.context.get(), medianInputData, handleInputObj, taskParamUtil);
                     if (nodeOutputData instanceof Function) nodeOutputData = nodeOutputData.apply(this.context.get());
                     if (nodeOutputData instanceof Promise) nodeOutputData = await nodeOutputData;
-                    if (nodeOutputData instanceof ScriptResult) {
-                        if (nodeOutputData.isArea()) {
-                            const tmpResult = nodeOutputData.get();
-                            if (tmpResult?.input) outContext.input = tmpResult.input;
-                            if (tmpResult?.output) outContext.output = tmpResult.output;
-                        }
-                    } else if (this.options.enableJsx) {
-                        outContext.output = nodeOutputData;
-                    }
                     medianInputData = convertMedian(node, nodeOutputData);
                     node = node.next();
                     index++;
                 }
-                if (outContext.input) {
-                    nodeOutputData = ScriptResult.boxArea(outContext.input, outContext.output);
-                } else if (outContext.output) {
-                    nodeOutputData = new ScriptResult(outContext.output);
+                if (this.options.enableJsx) {
+                    nodeOutputData = new ScriptResult(nodeOutputData);
                 }
                 // 后置
                 return after(this.root, nodeOutputData);
