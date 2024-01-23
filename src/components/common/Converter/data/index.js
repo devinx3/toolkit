@@ -16,7 +16,7 @@ class DataBlockContext {
     }
 }
 
-const DataBlock = ({ lang, category, context, dataBlockRender, handleInputObj }) => {
+const DataBlock = ({ lang, category, context, manageBlock, dataBlockRender, handleInputObj }) => {
 
     const [inputData, setInputData] = React.useState('');
     const [outputData, setOutputData] = React.useState('');
@@ -56,6 +56,15 @@ const DataBlock = ({ lang, category, context, dataBlockRender, handleInputObj })
         {dataBlockRender({
             state: {
                 inputData, setInputData, outputData, setOutputData, errorMsg, setErrorMsg,
+            },
+            manageBlock,
+            context: {
+                category
+            },
+            getCurrentNode: () => {
+                const node = context.getNode() ? { ...context.getNode() } : {};
+                node.code = (node.script ? "TMP|1|" : "TMP|0|") + node.code;
+                return node;
             },
             setCheckInputData: fn => dataBlockContext.setCheckInputData(fn),
         })}

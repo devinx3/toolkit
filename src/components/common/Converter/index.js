@@ -18,13 +18,19 @@ class ConvertContext {
     }
     // 创建脚本事件
     createScriptEvent(code, name, script, version) {
-        return new ScriptNode({ code, name, script, version})
+        return new ScriptNode({ code, name, script, version })
+    }
+    // 获取执行节点
+    getNode() {
+        return this.node;
     }
     // 执行转换方法
     onConvert(node) {
         if (this.convertHandler) {
+            this.node = node;
             return this.convertHandler(node)
         }
+        this.node = undefined;
         console.warn("No convert handler")
     }
 }
@@ -70,7 +76,7 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  * 转换对象
  * @param {ConverterType} props 属性
  */
-const Converter = ({ lang = "txt", category, manage, handleInputObj, dataBlockRender }) => {
+const Converter = ({ lang = "txt", category, manage, dataUseMange, handleInputObj, dataBlockRender }) => {
     const context = React.useMemo(() => new ConvertContext(), []);
     // 默认配置
     const manageConfig = {
@@ -86,10 +92,11 @@ const Converter = ({ lang = "txt", category, manage, handleInputObj, dataBlockRe
         dataBlockRender,
         handleInputObj: handleInputObj || handleInputObjDataSource[lang],
     };
-
+    const manageBlock = <ManageBlock {...manageConfig} />;
+    dataConfig.manageBlock = dataUseMange ? manageBlock : null;
     return <React.Suspense fallback={<></>}>
-        <ManageBlock {...manageConfig} />
-        <DataBlock { ...dataConfig } />
+        {dataUseMange ? null : manageBlock}
+        <DataBlock {...dataConfig } />
     </React.Suspense>
 }
 
