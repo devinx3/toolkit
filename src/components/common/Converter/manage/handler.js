@@ -1,6 +1,21 @@
 import CryptoJS from 'crypto-js';
 import { SCRIPT_CODE_PREFIX } from '../constants'
 
+export const SIMPLE_SECRET_STRATEGY = 1;
+const secretContext = (() => {
+    const defaultStrategy = {
+        encrypt: (str) => str,
+        decrypt: (str) => str,
+    }
+    const _context = {}
+    const register = (strategyType, strategyCallback) => _context[strategyType] = strategyCallback;
+    register(SIMPLE_SECRET_STRATEGY, {
+        encrypt: (str, secret) => CryptoJS.AES.encrypt(str, secret).toString(),
+        decrypt: (str, secret) => CryptoJS.AES.decrypt(str, secret).toString(CryptoJS.enc.Utf8),
+    })
+    return (strategyType) => _context[strategyType] || defaultStrategy;
+})();
+
 class DynamicConfig {
     constructor() {
         // 特征前缀
@@ -18,7 +33,7 @@ class DynamicConfig {
         return CryptoJS.AES.encrypt(str, secret).toString();
     }
     // 解密
-    dencrypt(str, secret) {
+    decrypt(str, secret) {
         return CryptoJS.AES.decrypt(str, secret).toString(CryptoJS.enc.Utf8);
     }
     convertSecret(verion) {
@@ -56,7 +71,8 @@ class DynamicConfig {
         return str.slice(0, index) + str.slice(index + 1);
     }
     // 转换导出数据
-    convertExportData(str, verion) {
+    convertExportData(originalStr, verion, secretStrategy, dynamicSecretKey) {
+        const str = secretContext(secretStrategy).encrypt(originalStr, dynamicSecretKey);
         // 秘钥组成
         // 以 devinx3 开头
         // 后面接长度以l/S结束(仅仅当默认密码时为S, 否则为l)(这里的值不要和特征前缀存在相同字符)
@@ -94,7 +110,7 @@ class DynamicConfig {
         return processPrefix + processLen + processSuffix + newEncryptData;
     }
     // 转换导入数据
-    convertImportData(str) {
+    convertImportData(str, secretStrategy, dynamicSecretKey) {
         if (!str) {
             throw new Error('数据不能为空');
         }
@@ -124,17 +140,25 @@ class DynamicConfig {
         }
         const secretIndex = this.getFeatureSecretIndex(processLen);
         const encryptData = str.slice(processSuffixIndex + 1);
+        let exportStr = '';
         if (secretIndex === -1) {
-            return this.encrypt(str, encryptData);
+            exportStr = this.encrypt(str, encryptData);
+        } else {
+            let newEncryptData = encryptData;
+            let secret = '';
+            for (let i = 0; i < secretIndex.length; i++) {
+                // 指定位置
+                secret = secret + newEncryptData[secretIndex[i]];
+                newEncryptData = this.removeSecret(newEncryptData, secretIndex[i]);
+            }
+            exportStr = this.decrypt(newEncryptData, secret);
         }
-        let newEncryptData = encryptData;
-        let secret = '';
-        for (let i = 0; i < secretIndex.length; i++) {
-            // 指定位置
-            secret = secret + newEncryptData[secretIndex[i]];
-            newEncryptData = this.removeSecret(newEncryptData, secretIndex[i]);
+        try {
+            return secretContext(secretStrategy).decrypt(exportStr, dynamicSecretKey);
+        } catch (e) {
+            console.error(e)
+            throw new Error('密钥错误');
         }
-        return this.dencrypt(newEncryptData, secret);
     }
 }
 export const dynamicConfig = new DynamicConfig();

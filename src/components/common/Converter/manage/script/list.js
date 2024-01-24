@@ -1,10 +1,11 @@
 import React from 'react';
-import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin, Drawer } from 'antd';
+import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin, Drawer, Space } from 'antd';
 import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import storeEditService, { requestService } from '../../store/storeEditService';
-import { ScriptUtil, dynamicConfig } from '../handler';
+import { ScriptUtil, dynamicConfig, SIMPLE_SECRET_STRATEGY } from '../handler';
 import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
+import GlobalUtil from '../../../../../utils/GlobalUtil'
 import dayjs from 'dayjs'
 import jsonp from '../../../../../utils/jsonp'
 
@@ -18,6 +19,9 @@ const CONFIG_VERSION = 101;
 const CONFIG_CALLBACK_NAME = '__devinx3_call_231125__';
 const EXPORT_DATA_NAME = 'd';
 const EXPORT_CONFIG_NAME = 'c';
+const EXPORT_SECRET_STRATEGY_NAME = 'ss';
+// 密钥
+const SECRET_KEY_NAME = 'secretKey';
 // 从url中获取数据
 const importFromUrl = (url, handleCallback, handleClear) => {
     jsonp(url, {
@@ -62,12 +66,17 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     const [scriptVisible, setScriptVisible] = React.useState(false);
     const [scriptModalContent, setScriptModalContent] = React.useState();
 
+    // 密钥
+    const [secretKey, setSecretKey] = React.useState('');
     // 导入配置路径
     const [importConfigUrl, setImportConfigUrl] = React.useState();
     const [importing, setImporting] = React.useState(false);
 
     const handleChangeImportConfigUrl = (e) => {
-        setImportConfigUrl(e.target.value?.trim());
+        const url = e.target.value?.trim();
+        setImportConfigUrl(url);
+        const secretKey = GlobalUtil.getSearchParams(url).get(SECRET_KEY_NAME)?.trim();
+        if (secretKey) setSecretKey(secretKey);
     }
 
     // 列表页勾选项
@@ -135,10 +144,12 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     }
     // 构造导出数据
     const handleExportData = (source, config) => {
-        const data = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION);
+        const secretStrategy = secretKey ? SIMPLE_SECRET_STRATEGY : undefined;
+        const data = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION, secretStrategy, secretKey);
         if (!config) {
             return data;
         }
+        if (secretStrategy) config[EXPORT_SECRET_STRATEGY_NAME] = secretStrategy;
         let exportData = CONFIG_CALLBACK_NAME;
         exportData = exportData + '({'
         exportData = exportData + `${EXPORT_DATA_NAME}:"${data}"`
@@ -218,7 +229,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
             importConofig = {};
         }
         try {
-            newList = JSON.parse(dynamicConfig.convertImportData(importData));
+            newList = JSON.parse(dynamicConfig.convertImportData(importData, importConofig[EXPORT_SECRET_STRATEGY_NAME], secretKey));
         } catch (e) {
             message.error("导入失败, 异常消息: " + e.message);
             completeImport();
@@ -246,7 +257,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
             } else if (dbList?.length > 1) {
                 return "导入失败: 存在多个相同的编码: " + config.code + ";";
             } else {
-                config.name = config.name + '(by impory)';
+                config.name = config.name + config.code ? '' : '(by import)';
             }
             try {
                 addConfig(category, config, true)
@@ -302,7 +313,6 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
         setScriptModalContent(null)
         setScriptVisible(false);
     }
-
     return (<>
         <Button type='link' style={{ marginTop: '5px' }} onClick={() => setVisible(true)}>脚本节点</Button>
         <Drawer title={"脚本节点"} open={visible} placement={"left"} footer={null} onClose={() => setVisible(false)} >
@@ -327,11 +337,14 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
                     </Tooltip>
 
                 </Spin>)}
-                footer={<Spin spinning={importing}><Input type='url' placeholder='节点导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear/>
-                    {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
-                        <Button style={{marginTop: "3px"}} icon={<ImportOutlined />}>导入</Button>
-                    </Upload>)
-                    }
+                footer={<Spin spinning={importing}>
+                    <Input style={{marginTop: "3px"}} type='url' placeholder='导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
+                    <Input style={{marginTop: "3px"}} type='text' addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
+                    <Space style={{marginTop: "3px"}}>
+                        {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
+                            <Button icon={<ImportOutlined />}>导入</Button>
+                        </Upload>)}
+                    </Space>
                 </Spin>}
                 renderItem={(item) => (
                     <List.Item

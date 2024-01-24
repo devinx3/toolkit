@@ -48,7 +48,7 @@ const TabPanel = ({items }) => {
         }
         setCurrentItems([])
     }
-    return <Tabs type="editable-card" animated={true} hideAdd={true} tabBarGutter={0} activeKey={currentKey} items={currentItems} onChange={setCurrentKey} onEdit={handleRemove} />;
+    return <Tabs type="editable-card" animated={true} hideAdd={true} size='small'  tabBarGutter={0} activeKey={currentKey} items={currentItems} onChange={setCurrentKey} onEdit={handleRemove} />;
 }
 
 // 数据块渲染

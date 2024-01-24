@@ -40,6 +40,14 @@ const Util = {
             delete shallowCopy[key];
         }
         return shallowCopy;
+    },
+    /**
+     * 获取搜索参数对象
+     * @param {string} url 地址
+     */
+    getSearchParams: (url) => {
+        const idx = url?.indexOf ? url.indexOf("?") : -1;
+        return new URLSearchParams(idx < 0 ? undefined : url.substring(idx + 1));
     }
 };
 
