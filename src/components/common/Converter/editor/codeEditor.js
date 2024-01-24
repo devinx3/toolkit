@@ -3,7 +3,7 @@ import { Input, Radio, Space } from 'antd';
 import MonacoEditor from '@monaco-editor/react';
 import loadEditor from './loadEditor';
 
-const CodeEditor = ({ value, onChange, editorHelpRender }) => {
+const CodeEditor = ({ path, value, onChange, editorHelpRender }) => {
     const [enableMonaco, setEnableMonaco] = React.useState(true);
     const handleChangeEditor = (() => setEnableMonaco(!enableMonaco));
     return (<>
@@ -18,7 +18,7 @@ const CodeEditor = ({ value, onChange, editorHelpRender }) => {
             />
         </Space>
         {enableMonaco ?
-            <MonacoEditor height="90%" language="javascript" theme='vs-dark' value={value} onChange={onChange} beforeMount={loadEditor} />
+            <MonacoEditor height="66vh" language="javascript" theme="vs-dark" path={path} value={value} onChange={onChange} beforeMount={loadEditor} />
             : <Input.TextArea placeholder="请输入脚本" rows={8} value={value} onChange={e => onChange(e.target.value)} />}
     </>)
 }
