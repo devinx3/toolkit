@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, Typography, Divider, Form, Row, Col, Button, Input, Space, Select, message } from 'antd'
-import { StorageHelper, RouteBuilder } from '../handler';
+import { DEFAULT_ROUTE, StorageHelper, RouteBuilder } from '../handler';
 import Icon from '@ant-design/icons'
 import * as icons from '@ant-design/icons'
 
@@ -23,14 +23,12 @@ const Manage = () => {
         setCurrentIdx(idx);
     }
     const onFinish = () => {
-        const icon = form.getFieldValue("icon")
-        console.log("icon", icon)
         const route = RouteBuilder.builder(form.getFieldsValue());
         if (currentIdx < 0) {
             const category = form.getFieldValue("category")
             for (const item of StorageHelper.listRoutes()) {
-                if (item.category === category) {
-                    message.error(`新增失败, 编码${category}重复`)
+                if (item.category.toLowerCase() === category.toLowerCase()) {
+                    message.error(`新增失败, 编码 ${item.category} 已被使用, 换一个吧 ^_^`)
                     return;
                 }
             }
@@ -70,8 +68,7 @@ const Manage = () => {
                         const route = routes[idx];
                         return (<List.Item>
                             <List.Item.Meta
-                                avatar={icons[route.icon] ? <Icon component={icons[route.icon]} /> : null}
-                                title={<Button type='text' onClick={() => editRoute(route, idx)}><b>{route.name}</b>({route.category})</Button>}
+                                description={<Button type='text' icon={icons[route.icon] ? <Icon component={icons[route.icon]} /> : null} onClick={() => editRoute(route, idx)}><b>{route.name}</b>({route.category})</Button>}
                             />
                         </List.Item>)
                     }}
@@ -104,7 +101,7 @@ const Manage = () => {
                             <Button htmlType="button" onClick={onReset}>
                                 重置
                             </Button>
-                            {currentIdx < 0 ? null : <Button htmlType="button" onClick={onRemove}>删除</Button>}
+                            {currentIdx < 0 ? null : <Button htmlType="button" onClick={onRemove} disabled={DEFAULT_ROUTE.category === form.getFieldValue("category")}>删除</Button>}
                         </Space>
                     </Form.Item>
                 </Form>)}

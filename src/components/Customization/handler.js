@@ -1,3 +1,6 @@
+// 默认分类
+export const DEFAULT_ROUTE = Object.freeze({ category: "initial", name: "我的定制", icon: "HomeOutlined" });
+
 export class RouteBuilder {
     static KEY_PREFIX = "customize-cat"
     static PATH_PREFIX = "/customize/cat"
@@ -30,22 +33,30 @@ export const StorageHelper = (() => {
     const STORE_KEY = "devinx3.toolkit.customization.manage"
     const getStorage = () => {
         const str = localStorage.getItem(STORE_KEY);
-        return str ? JSON.parse(str) : null;
+        let obj = str ? JSON.parse(str) : null;
+        if (!obj) obj = {};
+        if (!obj?.routes) obj.routes = [DEFAULT_ROUTE];
+        return obj;
     }
-    const setStorage = (storeObj) => localStorage.setItem(STORE_KEY, JSON.stringify(storeObj));
+    const setStorage = (storeObj) => {
+        if (storeObj?.routes?.length) {
+            localStorage.setItem(STORE_KEY, JSON.stringify(storeObj))
+        } else {
+            localStorage.removeItem(STORE_KEY)
+        }       
+    };
     const listRoutes = () => {
-        const obj = getStorage() || {};
-        return obj?.routes || [];
+        return getStorage().routes || [];
     }
     const addRoute = (routeBuilder) => {
-        const obj = getStorage() || {};
+        const obj = getStorage();
         obj.routes = obj.routes || [];
         obj.routes.push(routeBuilder.store());
         setStorage(obj);
     }
     const updateRoute = (routeBuilder) => {
-        const obj = getStorage() || {};
-        if (!obj?.routes) return;
+        const obj = getStorage();
+        if (!obj.routes) return;
         const storeRoute = routeBuilder.store();
         for (let i = 0; i < obj.routes.length; i++) {
             const route = obj.routes[i];
@@ -62,5 +73,5 @@ export const StorageHelper = (() => {
         obj.routes = obj.routes.filter(x => x.category !== category);
         setStorage(obj);
     }
-    return { listRoutes, addRoute, updateRoute, removeRoute  }
+    return { listRoutes, addRoute, updateRoute, removeRoute }
 })();
