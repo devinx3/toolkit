@@ -104,6 +104,9 @@ const UpgradeBanner = () => {
 
 // 顶级公告
 const TopBanner = () => {
+  if (global?.location?.hostname) {
+    return <></>
+  }
   return global?.location?.hostname === 'devinx3.github.io' && <Alert showIcon={false}
     message={<Typography.Text>国内镜像发布了! &nbsp;&nbsp; <Tooltip placement="right" title="需自行迁移配置">
       <Typography.Link href='https://devinx3.gitee.io/toolkit' target='_blank'>跳转 &gt;&gt;</Typography.Link></Tooltip>
