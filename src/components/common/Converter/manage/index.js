@@ -3,13 +3,13 @@ import ScriptManage from "./script"
 import CombinationManage from "./combination"
 
 
-const ManageBlock = ({ lang, category, context, buttons = {}, expandScriptButton = {}, expandCombinationButton = {}, editorHelpRender }) => {
+const ManageBlock = ({ lang, category, context, intelligent, buttons = {}, expandScriptButton = {}, expandCombinationButton = {}, editorHelpRender }) => {
     const [refresh, setRefresh] = React.useState(false);
 
     return <>
-        <ScriptManage lang={lang} category={category} context={context} basicButtons={buttons}
+        <ScriptManage lang={lang} category={category} context={context} intelligent={intelligent} basicButtons={buttons}
             expandAddButton={expandScriptButton} editorHelpRender={editorHelpRender} refreshManage={() => setRefresh(!refresh)} />
-        <CombinationManage lang={lang} category={category} context={context} basicButtons={buttons} expandAddButton={expandCombinationButton} />
+        <CombinationManage lang={lang} category={category} context={context} intelligent={intelligent} basicButtons={buttons} expandAddButton={expandCombinationButton} />
     </>
 }
 

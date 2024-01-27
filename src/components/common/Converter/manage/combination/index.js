@@ -48,7 +48,7 @@ const getScriptConfig = (category, basicButtons, configCode) => {
 }
 
 // 脚本脚本编排
-const CombinationManage = ({ lang, category, context, basicButtons, expandAddButton }) => {
+const CombinationManage = ({ lang, category, context, intelligent, basicButtons, expandAddButton }) => {
     const expandButtons = loadCombinationByCategory(category) || [];
     const [refresh, setRefresh] = React.useState(false);
     const configButtons = loadConfigByCategory(category);
@@ -95,7 +95,7 @@ const CombinationManage = ({ lang, category, context, basicButtons, expandAddBut
         </Col>
         {expandButtons.map((item, key) => {
             return <Col style={{ marginLeft: '10px' }} key={key} >
-                <ExpandManageButton category={category} combinationConfig={item} refreshManage={refreshManage} configDataSource={configDataSource} handleConvert={handleConvert} />
+                <ExpandManageButton category={category} combinationConfig={item} intelligent={intelligent} refreshManage={refreshManage} configDataSource={configDataSource} handleConvert={handleConvert} />
             </Col>
         })}
     </Row>

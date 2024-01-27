@@ -1,9 +1,41 @@
 import React from "react"
-import { LANG } from "./constants";
+import { LANG, SCRIPT_TYPE } from "./constants";
 import { ScriptNode } from "./adaptor"
 
 const ManageBlock = React.lazy(() => import("./manage"))
 const DataBlock = React.lazy(() => import("./data"))
+
+// 智能事件
+class IntelligentEvent {
+    constructor(url) {
+        const idx = url?.indexOf ? url.indexOf("?") : -1;
+        const search = new URLSearchParams(idx < 0 ? undefined : url.substring(idx + 1));
+        this.clickType = search.get("clickType");
+        this.clickCode = search.get("clickCode");
+        this.importUrl = search.get("importUrl");
+        // 解码
+        if (this.importUrl) this.importUrl = window.decodeURIComponent(this.importUrl);
+    }
+    getImportUrl() {
+        return this.importUrl;
+    }
+    canClick(type, code) {
+        if (this.clickCode !== code) return false;
+        // 默认返回节点
+        if (!this.clickType && SCRIPT_TYPE.NODE === type) return true;
+        return this.clickType === type;
+    }
+    // 清除导入
+    clearImport() {
+        this.importUrl = undefined;
+        return true;
+    }
+    // 清除点击
+    clearClick() {
+        this.clickCode = undefined;
+        this.clickType = undefined;
+    }
+}
 
 /**
  * 转换事件上下文
@@ -78,11 +110,14 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  */
 const Converter = ({ lang = "txt", category, manage, dataUseMange, handleInputObj, dataBlockRender }) => {
     const context = React.useMemo(() => new ConvertContext(), []);
+    // 智能事件
+    const intelligent = new IntelligentEvent(window.location.href);
     // 默认配置
     const manageConfig = {
         ...manage,
         lang,
         category: category || lang,
+        intelligent,
         context
     }
     const dataConfig = {

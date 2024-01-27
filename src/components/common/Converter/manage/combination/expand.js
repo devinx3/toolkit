@@ -3,6 +3,7 @@ import { Button, Input, Modal, Drawer, Tooltip, Typography, Timeline, Table, Pop
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
 import storeEditService, { requestService } from '../../store/storeEditService';
+import { SCRIPT_TYPE } from '../../constants';
 import { ScriptUtil } from '../handler';
 
 const { addCombination, updateCombination, deleteCombination } = storeEditService;
@@ -114,7 +115,7 @@ const ConfigTableModal = ({ visible, setVisible, handleAddConfig, configDataSour
 
 
 // 扩展按钮
-export const ExpandManageButton = ({ category, combinationConfig, refreshManage, handleConvert, configDataSource }) => {
+export const ExpandManageButton = ({ category, combinationConfig, intelligent, refreshManage, handleConvert, configDataSource }) => {
     const [visible, setVisible] = React.useState(false);
     const [frameVisible, setFrameVisible] = React.useState(false);
     const [frameIndex, setFrameIndex] = React.useState(false);
@@ -122,7 +123,11 @@ export const ExpandManageButton = ({ category, combinationConfig, refreshManage,
     const [combinationName, setCombinationName] = React.useState(combinationConfig.name);
     const [combinationDesc, setCombinationDesc] = React.useState(combinationConfig.description);
     const [combinationConfigCodeList, setCombinationConfigCodeList] = React.useState([...combinationConfig.combination]);
-
+    // 自动执行
+    if (intelligent.canClick(SCRIPT_TYPE.ARRANGE, combinationConfig.code)) {
+        intelligent.clearClick();
+        setTimeout(() => handleConvert(combinationConfig, combinationConfig.combination), 0);
+    }
     // 待处理数据
     const configDataObj = convertConfigDataSource(configDataSource);
     const timelineItemList = combinationConfigCodeList.map((code, index) => {

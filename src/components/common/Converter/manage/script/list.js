@@ -3,6 +3,7 @@ import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, m
 import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined, CloseOutlined } from '@ant-design/icons';
 import storeEditService, { requestService } from '../../store/storeEditService';
 import { ScriptUtil, dynamicConfig, SIMPLE_SECRET_STRATEGY } from '../handler';
+import CopyButton from '../../../CopyButton';
 import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
 import GlobalUtil from '../../../../../utils/GlobalUtil'
@@ -23,7 +24,7 @@ const EXPORT_SECRET_STRATEGY_NAME = 'ss';
 // 密钥
 const SECRET_KEY_NAME = 'secretKey';
 // 从url中获取数据
-const importFromUrl = (url, handleCallback, handleClear) => {
+const importFromUrl = (url, secretKey, handleCallback, handleClear) => {
     jsonp(url, {
         name: CONFIG_CALLBACK_NAME,
         timeout: 30000
@@ -36,8 +37,9 @@ const importFromUrl = (url, handleCallback, handleClear) => {
             throw new Error("数据格式异常");
         }
         const itemConfig = data[EXPORT_CONFIG_NAME];
-        if (itemConfig && !(typeof (itemConfig) === 'object')) {
-            throw new Error("数据格式异常");
+        if (itemConfig) {
+            if (!(typeof (itemConfig) === 'object')) throw new Error("数据格式异常");
+            itemConfig.secretKey = secretKey;
         }
         handleCallback(scriptContent, itemConfig);
     }).catch(e => {
@@ -55,7 +57,7 @@ const convertURL = (urlString) => {
     }
 }
 
-const ExpandManageList = ({ category, dataSource, refreshScript }) => {
+const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) => {
 
     const [visible, setVisible] = React.useState(false);
 
@@ -75,8 +77,8 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     const handleChangeImportConfigUrl = (e) => {
         const url = e.target.value?.trim();
         setImportConfigUrl(url);
-        const secretKey = GlobalUtil.getSearchParams(url).get(SECRET_KEY_NAME)?.trim();
-        if (secretKey) setSecretKey(secretKey);
+        const _secretKey = GlobalUtil.getSearchParams(url).get(SECRET_KEY_NAME)?.trim();
+        setSecretKey(_secretKey || '');
     }
 
     // 列表页勾选项
@@ -202,7 +204,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     // 导入浏览器中
     const startImport = () => setImporting(false);
     const completeImport = () => setImporting(false);
-    const handleImportConfigCallback = (importData, importConofig) => {
+    const handleImportConfigCallback = (importData, importConfig) => {
         if (!importData) {
             completeImport();
             return;
@@ -214,7 +216,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
             const importContext = {}
             importContext[CONFIG_CALLBACK_NAME] = obj => {
                 importData = obj[EXPORT_DATA_NAME];
-                importConofig = obj[EXPORT_CONFIG_NAME];
+                importConfig = obj[EXPORT_CONFIG_NAME];
             }
             try {
                 const execFun = new Fun(importContextName, importContextName + '.' + importData);
@@ -225,11 +227,11 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
                 return;
             }
         }
-        if (!importConofig) {
-            importConofig = {};
+        if (!importConfig) {
+            importConfig = {};
         }
         try {
-            newList = JSON.parse(dynamicConfig.convertImportData(importData, importConofig[EXPORT_SECRET_STRATEGY_NAME], secretKey));
+            newList = JSON.parse(dynamicConfig.convertImportData(importData, importConfig[EXPORT_SECRET_STRATEGY_NAME], importConfig.secretKey || secretKey));
         } catch (e) {
             message.error("导入失败, 异常消息: " + e.message);
             completeImport();
@@ -257,7 +259,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
             } else if (dbList?.length > 1) {
                 return "导入失败: 存在多个相同的编码: " + config.code + ";";
             } else {
-                config.name = config.name + config.code ? '' : '(by import)';
+                config.name = config.name + (config.code ? '' : '(by import)');
             }
             try {
                 addConfig(category, config, true)
@@ -280,19 +282,20 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
         });
     }
     // 导入节点
-    const handleImportConfig = (file) => {
+    const handleImportConfig = (file, customUrl, customSecretKey) => {
         if (importing) {
             message.warn("正在导入中, 请等待");
             return false;
         }
-        if (importConfigUrl?.length > 0) {
-            const matchURL = convertURL(importConfigUrl);
+        const newImportConfigUrl = customUrl?.length ? customUrl : importConfigUrl;
+        if (newImportConfigUrl.length > 0) {
+            const matchURL = convertURL(newImportConfigUrl);
             if (!matchURL) {
                 message.error("无效的导入地址");
                 return false;
             }
             startImport();
-            importFromUrl(importConfigUrl, handleImportConfigCallback, completeImport);
+            importFromUrl(newImportConfigUrl, customSecretKey, handleImportConfigCallback, completeImport);
         } else {
             startImport();
             FileUtil.readAsText({
@@ -302,6 +305,21 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
             });
         }
         return false;
+    }
+    if (intelligent.getImportUrl()) {
+        let url = intelligent.getImportUrl();
+        const secretKey = GlobalUtil.getSearchParams(url).get(SECRET_KEY_NAME)?.trim();
+        intelligent.clearImport();
+        handleImportConfig(null, url, secretKey)
+    }
+    const handleGenerageShareLink = () => {
+        if (!(importConfigUrl?.length > 0)) {
+            message.warning("请输入导入链接");
+            return;
+        }
+        const newUrl = window.location.href.substring(0, window.location.href.indexOf("?")) + "?importUrl=" + window.encodeURIComponent(importConfigUrl);
+        StrUtil.copyToClipboard(newUrl);
+        message.success("已复制到粘贴板");
     }
     // 打开弹出框
     const handleOpenScriptContentModal = (content) => {
@@ -340,16 +358,20 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
                 </Spin>)}
                 footer={<Spin spinning={importing}>
                     <Input style={{marginTop: "3px"}} type='url' placeholder='导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
-                    <Input style={{marginTop: "3px"}} type='text' addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
+                    <Input style={{marginTop: "3px"}} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
                     <Space style={{marginTop: "3px"}}>
                         {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
                             <Button icon={<ImportOutlined />}>导入</Button>
                         </Upload>)}
+                        <Button onClick={handleGenerageShareLink}>生成分享链接</Button>
                     </Space>
                 </Spin>}
                 renderItem={(item) => (
                     <List.Item
-                        actions={[<Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>]}
+                        actions={[
+                        <CopyButton type='link' tipTitle="复制节点编码" onClick={() => StrUtil.copyToClipboard(item.code)} ></CopyButton>,
+                        <Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>
+                    ]}
                     >
                         <Skeleton loading={false}>
                             <List.Item.Meta

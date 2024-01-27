@@ -2,7 +2,7 @@ import React from 'react';
 import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
-import { SCRIPT_CODE_PREFIX } from '../../constants'
+import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
 import { EditOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
@@ -160,7 +160,7 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
 }
 
 // 扩展管理按钮
-export const ExpandManageButton = ({ category, config, handleConvert, editorHelpRender, refreshScript }) => {
+export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, refreshScript }) => {
     const handleHiddenConfig = () => {
         requestService(hiddenConfig, category, config.code)
             .then(() => {
@@ -177,6 +177,10 @@ export const ExpandManageButton = ({ category, config, handleConvert, editorHelp
         key: "hidden",
         label: (<Button shape="circle" type="text" onClick={e => handleHiddenConfig()} icon={<EyeInvisibleOutlined />} size="small">隐藏</Button>)
     }];
+    if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
+        intelligent.clearClick();
+        setTimeout(() => handleConvert(config), 0);
+    }
     return (<>
         <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
             <div>
