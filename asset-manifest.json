@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/toolkit/static/css/main.b7939815.css",
-    "main.js": "/toolkit/static/js/main.d8a8ba0f.js",
+    "main.js": "/toolkit/static/js/main.5240380e.js",
     "static/js/364.5e37e7dd.chunk.js": "/toolkit/static/js/364.5e37e7dd.chunk.js",
     "static/js/600.62678d3d.chunk.js": "/toolkit/static/js/600.62678d3d.chunk.js",
     "static/js/173.a28cc374.chunk.js": "/toolkit/static/js/173.a28cc374.chunk.js",
@@ -41,6 +41,6 @@
   },
   "entrypoints": [
     "static/css/main.b7939815.css",
-    "static/js/main.d8a8ba0f.js"
+    "static/js/main.5240380e.js"
   ]
 }
