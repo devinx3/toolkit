@@ -314,7 +314,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
     }
     const handleGenerageShareLink = () => {
         if (!(importConfigUrl?.length > 0)) {
-            message.warning("请输入导入链接");
+            message.warning("请输入导入文件地址");
             return;
         }
         const idx = window.location.href.indexOf("?");
