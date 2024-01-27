@@ -178,11 +178,13 @@ export const ExpandManageButton = ({ category, config, handleConvert, editorHelp
         label: (<Button shape="circle" type="text" onClick={e => handleHiddenConfig()} icon={<EyeInvisibleOutlined />} size="small">隐藏</Button>)
     }];
     return (<>
-        <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
-            <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
-                <Button type="dashed" onClick={e => handleConvert(config)}>{config.name}</Button>
-            </Dropdown>
-        </Tooltip>
+        <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
+            {/* <div> */}
+                <Tooltip title={config.description} mouseEnterDelay={tipMouseEnterDelay}>
+                    <Button type="dashed" onClick={e => handleConvert(config)}>{config.name}</Button>
+                </Tooltip>
+            {/* </div> */}
+        </Dropdown>
         <ExpandManageModal category={category} config={config} visible={visible} setVisible={setVisible}
             editorHelpRender={editorHelpRender} refreshScript={refreshScript} />
     </>);
