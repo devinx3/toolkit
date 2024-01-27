@@ -44,7 +44,7 @@ const ScriptManage = ({ lang, category, context, basicButtons, expandAddButton, 
                     editorHelpRender={editorHelpRender} refreshScript={refreshManage} />
             </Col> : null}
         </Row>
-        {expandButtons.length > 0 && (<Row style={{ marginTop: '10px' }}>
+        <Row style={{ marginTop: '10px' }}>
             <ExpandManageList category={category} dataSource={expandButtons} refreshScript={refreshManage} />
             {expandButtons.filter(item => !item.hidden).map((item, key) => {
                 return (<Col key={item.code + "-" + key} style={{ marginLeft: '10px', marginTop: '5px' } }>
@@ -52,7 +52,7 @@ const ScriptManage = ({ lang, category, context, basicButtons, expandAddButton, 
                         refreshScript={refreshManage} handleConvert={handleConvert} />
                 </Col>)
             })}
-        </Row>)}
+        </Row>
     </>
 }
 

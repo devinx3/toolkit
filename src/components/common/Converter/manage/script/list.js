@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin, Drawer, Space } from 'antd';
-import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined, CloseOutlined } from '@ant-design/icons';
 import storeEditService, { requestService } from '../../store/storeEditService';
 import { ScriptUtil, dynamicConfig, SIMPLE_SECRET_STRATEGY } from '../handler';
 import FileUtil from '../../../../../utils/FileUtil'
@@ -315,7 +315,8 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
     }
     return (<>
         <Button type='link' style={{ marginTop: '5px' }} onClick={() => setVisible(true)}>脚本节点</Button>
-        <Drawer title={"脚本节点"} open={visible} placement={"left"} footer={null} onClose={() => setVisible(false)} >
+        <Drawer title={"脚本节点"} open={visible} placement={"left"} footer={null} onClose={() => setVisible(false)}
+            closeIcon={null} extra={<CloseOutlined className='ant-drawer-close' onClick={() => setVisible(false)}></CloseOutlined>}>
             <List
                 itemLayout="horizontal"
                 dataSource={dataSource}
@@ -353,7 +354,7 @@ const ExpandManageList = ({ category, dataSource, refreshScript }) => {
                         <Skeleton loading={false}>
                             <List.Item.Meta
                                 avatar={<Checkbox value={item.code} checked={checkedList.indexOf(item.code) >= 0} onChange={onChangeConfigItem} />}
-                                title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
+                                title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text title={item.code} style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
                                 description={item.description}
                             />
                         </Skeleton>
