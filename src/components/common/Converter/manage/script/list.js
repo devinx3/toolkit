@@ -317,7 +317,9 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
             message.warning("请输入导入链接");
             return;
         }
-        const newUrl = window.location.href.substring(0, window.location.href.indexOf("?")) + "?importUrl=" + window.encodeURIComponent(importConfigUrl);
+        const idx = window.location.href.indexOf("?");
+        let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
+        newUrl = newUrl  + "?importUrl=" + window.encodeURIComponent(importConfigUrl);
         StrUtil.copyToClipboard(newUrl);
         message.success("已复制到粘贴板");
     }
