@@ -1,7 +1,10 @@
 import CuszIcons from '../icons'
-import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined  } from '@ant-design/icons'
+import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined } from '@ant-design/icons'
 import React from 'react'
 import dynamicRoue from '../components/Customization/Template/route'
+import HomeNotFound from '../pages/notFound'
+import CustomizationNotFound from '../components/Customization/notFound'
+
 
 
 const Home = React.lazy(() => import('../pages/Home'))
@@ -73,5 +76,18 @@ const routes = [
     ],
   }
 ];
+
+const notFoundList = [{
+  key: "customize",
+  path: '/customize/*',
+  component: CustomizationNotFound
+},
+{
+  key: "index",
+  path: '/*',
+  component: HomeNotFound
+}]
+
+notFoundList.forEach(route => routes.push({ ...route, key: route.key + "-404", menu: false }));
 
 export default routes;
