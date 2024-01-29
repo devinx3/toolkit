@@ -202,7 +202,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         }
     }
     // 导入浏览器中
-    const startImport = () => setImporting(false);
+    const startImport = (callback) => setImporting(true) & setTimeout(callback, 0);
     const completeImport = () => setImporting(false);
     const handleImportConfigCallback = (importData, importConfig) => {
         if (!importData) {
@@ -294,15 +294,13 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
                 message.error("无效的导入地址");
                 return false;
             }
-            startImport();
-            importFromUrl(newImportConfigUrl, customSecretKey, handleImportConfigCallback, completeImport);
+            startImport(() => importFromUrl(newImportConfigUrl, customSecretKey, handleImportConfigCallback, completeImport));
         } else {
-            startImport();
-            FileUtil.readAsText({
+            startImport(() => FileUtil.readAsText({
                 file,
                 handleRead: handleImportConfigCallback,
                 handleError: completeImport
-            });
+            }));
         }
         return false;
     }
@@ -337,54 +335,54 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         <Button type='link' style={{ marginTop: '5px' }} onClick={() => setVisible(true)}>脚本节点</Button>
         <Drawer title={"脚本节点"} open={visible} placement={"left"} footer={null} onClose={() => setVisible(false)}
             closeIcon={null} extra={<CloseOutlined className='ant-drawer-close' onClick={() => setVisible(false)}></CloseOutlined>}>
-            <List
-                itemLayout="horizontal"
-                dataSource={dataSource}
-                rowKey='code'
-                header={(<Spin spinning={importing}>
-                    <Checkbox indeterminate={indeterminate}
-                        disabled={dataSource.length === 0}
-                        checked={checkAllConfig}
-                        onChange={onCheckAllChangeConfigItem}>
-                        全选
-                    </Checkbox>
-                    <Button type='text' disabled={checkedList.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
-                    <Button type='text' disabled={checkedList.length === 0} icon={<ExportOutlined />}
-                         onClick={handleExportUrlConfig}>导出</Button>
-                    <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(true)} icon={<EyeInvisibleOutlined />}>隐藏</Button>
-                    <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(false)} icon={<EyeOutlined />}>显示</Button>
-                    <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
-                        <Button type='text' disabled={checkedList.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON节点</Button>    
-                    </Tooltip>
-
-                </Spin>)}
-                footer={<Spin spinning={importing}>
-                    <Input style={{marginTop: "3px"}} type='url' placeholder='导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
-                    <Input style={{marginTop: "3px"}} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
-                    <Space style={{marginTop: "3px"}}>
-                        {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} beforeUpload={(file) => handleImportConfig(file)} >
-                            <Button icon={<ImportOutlined />}>导入</Button>
-                        </Upload>)}
-                        <Button onClick={handleGenerageShareLink}>生成分享链接</Button>
-                    </Space>
-                </Spin>}
-                renderItem={(item) => (
-                    <List.Item
-                        actions={[
-                        <CopyButton type='link' tipTitle="复制节点编码" onClick={() => StrUtil.copyToClipboard(item.code)} ></CopyButton>,
-                        <Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>
-                    ]}
-                    >
-                        <Skeleton loading={false}>
-                            <List.Item.Meta
-                                avatar={<Checkbox value={item.code} checked={checkedList.indexOf(item.code) >= 0} onChange={onChangeConfigItem} />}
-                                title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text title={item.code} style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
-                                description={item.description}
-                            />
-                        </Skeleton>
-                    </List.Item>
-                )}
-            />
+            <Spin spinning={importing}>
+                <List
+                    itemLayout="horizontal"
+                    dataSource={dataSource}
+                    rowKey='code'
+                    header={(<>
+                        <Checkbox indeterminate={indeterminate}
+                            disabled={dataSource.length === 0}
+                            checked={checkAllConfig}
+                            onChange={onCheckAllChangeConfigItem}>
+                            全选
+                        </Checkbox>
+                        <Button type='text' disabled={checkedList.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
+                        <Button type='text' disabled={checkedList.length === 0} icon={<ExportOutlined />}
+                            onClick={handleExportUrlConfig}>导出</Button>
+                        <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(true)} icon={<EyeInvisibleOutlined />}>隐藏</Button>
+                        <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(false)} icon={<EyeOutlined />}>显示</Button>
+                        <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
+                            <Button type='text' disabled={checkedList.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON节点</Button>    
+                        </Tooltip>
+                    </>)}
+                    footer={<>
+                        <Input style={{marginTop: "3px"}} type='url' placeholder='导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
+                        <Input style={{marginTop: "3px"}} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
+                        <Space style={{marginTop: "3px"}}>
+                            {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} showUploadList={false} beforeUpload={(file) => handleImportConfig(file)} >
+                                <Button icon={<ImportOutlined />}>导入</Button>
+                            </Upload>)}
+                            <Button onClick={handleGenerageShareLink}>生成分享链接</Button>
+                        </Space>
+                    </>}
+                    renderItem={(item) => (
+                        <List.Item
+                            actions={[
+                            <CopyButton type='link' tipTitle="复制节点编码" onClick={() => StrUtil.copyToClipboard(item.code)} ></CopyButton>,
+                            <Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>
+                        ]} >
+                            <Skeleton loading={false}>
+                                <List.Item.Meta
+                                    avatar={<Checkbox value={item.code} checked={checkedList.indexOf(item.code) >= 0} onChange={onChangeConfigItem} />}
+                                    title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text title={item.code} style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
+                                    description={item.description}
+                                />
+                            </Skeleton>
+                        </List.Item>
+                    )}
+                />
+            </Spin>
         </Drawer>
         <Modal title="脚本内容" open={scriptVisible} width="60%" footer={null} onCancel={handleCloseScriptContentModal} >
             <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{scriptModalContent}</Typography.Paragraph></div>
