@@ -57,19 +57,18 @@ const DataBlockRender = ({ state, context, manageBlock, getCurrentNode }) => {
     let currentNode = getCurrentNode();
     const OutputEle = StrUtil.isBlank(errorMsg) ? convertOuput(outputData) : [];
     let alertMessage = StrUtil.isBlank(errorMsg) && !OutputEle ? "" : errorMsg;
-    if (outputData && !StrUtil.isBlank(alertMessage)) alertMessage = "无渲染组件";
     let children = null;
     if (StrUtil.isBlank(alertMessage)) {
         children = (OutputEle instanceof Function ? React.createElement(OutputEle) : (OutputEle ? OutputEle : null));
         if (!children) {
-            children = React.cloneElement(manageBlock)
+            children = !outputData ? manageBlock : <>{manageBlock}<div style={{ margin: '15px'}}><Row><Col span={8}><Alert message={"无渲染组件"} type="error" /></Col></Row></div></>;
             currentNode = null;
         }
     } else {
-        children = <>{React.cloneElement(manageBlock)}<div style={{ margin: '15px' }}><Row><Col span={8}><Alert message={alertMessage} type="error" /></Col></Row></div></>;
+        children = <>{manageBlock}<div style={{ margin: '15px' }}><Row><Col><Alert message={<pre style={{marginBottom: 0, minWidth:"28vw"}}>{alertMessage}</pre>} type="error" /></Col></Row></div></>;
         currentNode = null;
     }
-    return <TabPanel updateItem={!!currentNode} items={getItems(context.category, currentNode, children)} />
+    return <TabPanel updateItem={!!currentNode} items={getItems(context.category, currentNode, children, manageBlock)} />
 }
 
 // 获取选项卡内容
@@ -87,12 +86,13 @@ const getItems = (() => {
         }
         return cache[k];
     }
-    return (category, node, children) => {
+    return (category, node, children, manageBlock) => {
         const _items = get(category);
         if (!node) {
             _items[0].children = children;
             return _items;
         }
+        _items[0].children = manageBlock || _items[0].children;
         let add = true;
         const newItem = {
             key: node.code,

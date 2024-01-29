@@ -31,6 +31,8 @@ const DataBlock = ({ lang, category, context, manageBlock, dataBlockRender, hand
             return;
         }
         setLoading(true)
+        setOutputData('');
+        setErrorMsg('');
         setTimeout(() => {
             // 异步线程执行
             const pass = dataBlockContext.onCheckInputData(inputData);

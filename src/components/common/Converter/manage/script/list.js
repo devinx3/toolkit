@@ -288,7 +288,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
             return false;
         }
         const newImportConfigUrl = customUrl?.length ? customUrl : importConfigUrl;
-        if (newImportConfigUrl.length > 0) {
+        if (newImportConfigUrl?.length > 0) {
             const matchURL = convertURL(newImportConfigUrl);
             if (!matchURL) {
                 message.error("无效的导入地址");
