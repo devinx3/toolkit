@@ -109,36 +109,36 @@ const DataBlockRender = ({ state, setCheckInputData }) => {
 }
 // 删除值为null 的方法
 const delNullProperty = (obj) => {
-    for (let i in obj) {//遍历对象中的属性
-        if (obj[i] === undefined || obj[i] === null || obj[i] === "") {//首先除去常规空数据，用delete关键字
-            delete obj[i]
-        } else if (obj[i].constructor === Object) {//如果发现该属性的值还是一个对象，再判空后进行迭代调用
-            if (Object.keys(obj[i]).length === 0) delete obj[i]//判断对象上是否存在属性，如果为空对象则删除
-            delNullProperty(obj[i])
-        } else if (obj[i].constructor === Array) {//对象值如果是数组，判断是否为空数组后进入数据遍历判空逻辑
-            if (Array.prototype.isPrototypeOf(obj[i]) && obj[i].length === 0) {
-                delete obj[i]
-            } else {
-                for (let index = 0; index < obj[i].length; index++) {//遍历数组
-                    if (obj[i][index] === undefined || obj[i][index] === null || obj[i][index] === "" || JSON.stringify(obj[i][index]) === "{}") {
-                        obj[i].splice(index, 1)//如果数组值为以上空值则修改数组长度，移除空值下标后续值依次提前
-                        index--//由于数组当前下标内容已经被替换成下一个值，所以计数器需要自减以抵消之后的自增
-                    }
-                    if (obj[i][index].constructor === Object || obj[i][index].constructor === Array) {//如果发现数组值中有对象，则再次进入迭代
-                        delNullProperty(obj[i][index])
+    const _delNullProperty = _obj => {
+        for (let i in _obj) {//遍历对象中的属性
+            if (_obj[i] === undefined || _obj[i] === null || _obj[i] === "") {//首先除去常规空数据，用delete关键字
+                delete _obj[i]
+            } else if (_obj[i].constructor === Object) {//如果发现该属性的值还是一个对象，再判空后进行迭代调用
+                if (Object.keys(_obj[i]).length === 0) delete _obj[i]//判断对象上是否存在属性，如果为空对象则删除
+                _delNullProperty(_obj[i])
+            } else if (_obj[i].constructor === Array) {//对象值如果是数组，判断是否为空数组后进入数据遍历判空逻辑
+                if (Array.prototype.isPrototypeOf(_obj[i]) && _obj[i].length === 0) {
+                    delete _obj[i]
+                } else {
+                    for (let index = 0; index < _obj[i].length; index++) {//遍历数组
+                        if (_obj[i][index] === undefined || _obj[i][index] === null || _obj[i][index] === "" || JSON.stringify(_obj[i][index]) === "{}") {
+                            _obj[i].splice(index, 1)//如果数组值为以上空值则修改数组长度，移除空值下标后续值依次提前
+                            index--//由于数组当前下标内容已经被替换成下一个值，所以计数器需要自减以抵消之后的自增
+                        }
+                        if (_obj[i][index].constructor === Object || _obj[i][index].constructor === Array) {//如果发现数组值中有对象，则再次进入迭代
+                            _delNullProperty(_obj[i][index])
+                        }
                     }
                 }
             }
         }
+        return _obj;
     }
-    return obj;
+    return _delNullProperty(obj);
 }
 // 下划线转驼峰
 const underlineToHump = (obj) => {
-    if (obj === undefined || obj === null) {
-        return obj;
-    }
-    const convert = source => {
+    const _convert = source => {
         const result = {};
         for (let key in source) {
             const newKey = key.replace(/_(\w)/g, function (all, letter) {
@@ -148,24 +148,30 @@ const underlineToHump = (obj) => {
         }
         return result;
     }
-    //如果发现数组值中有对象，则再次进入迭代
-    if (obj.constructor === Array) {
-        for (let index = 0; index < obj.length; index++) {
-            obj[index] = underlineToHump(obj[index], convert)
+    const _underlineToHump = (_obj) => {
+        if (_obj === undefined || _obj === null) {
+            return _obj;
         }
-        return obj;
-    } else if (obj.constructor === Object) {
-        obj = convert(obj);
-        if (obj === undefined || obj === null) {
-            return;
-        }
-        for (let key in obj) {
-            if (obj[key] && (obj[key].constructor === Object || obj[key].constructor === Array)) {
-                obj[key] = underlineToHump(obj[key], convert)
+        //如果发现数组值中有对象，则再次进入迭代
+        if (_obj.constructor === Array) {
+            for (let index = 0; index < _obj.length; index++) {
+                _obj[index] = _underlineToHump(_obj[index], _convert)
+            }
+            return _obj;
+        } else if (_obj.constructor === Object) {
+            _obj = _convert(_obj);
+            if (_obj === undefined || _obj === null) {
+                return;
+            }
+            for (let key in _obj) {
+                if (_obj[key] && (_obj[key].constructor === Object || _obj[key].constructor === Array)) {
+                    _obj[key] = _underlineToHump(_obj[key], _convert)
+                }
             }
         }
+        return _obj;
     }
-    return obj;
+    return _underlineToHump(obj);
 }
 // 编辑页面
 const JsonEdit = () => {
@@ -181,12 +187,12 @@ const JsonEdit = () => {
                         code: "delNullProperty",
                         name: "删除空字段",
                         description: "删除值为空的字段",
-                        scriptContent: `const _INNER_ = ${delNullProperty.toString()};return _INNER_(inputObj);`
+                        scriptContent: `return (${delNullProperty.toString()})(inputObj);`
                     }, {
                         code: "underlineToHump",
                         name: "下划线转驼峰",
                         description: "JSON key 下划线转驼峰",
-                        scriptContent: `const _INNER_ = ${underlineToHump.toString()};return _INNER_(inputObj);`
+                        scriptContent: `return (${underlineToHump.toString()})(inputObj);`
                     }
                 ],
                 // 自定义按钮描述默认值
