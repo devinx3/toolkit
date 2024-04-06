@@ -231,6 +231,7 @@ export class ScriptExector {
                 this.context.setInputData(inputData);
                 const { before, after, convertMedian, transform, getUtil } = this.handler;
                 const taskParamUtil = getUtil ? getUtil() || {} : {};
+                taskParamUtil.getContext = () => this.context.get();
                 // 前置
                 const { handleInputObj } = before(this.root, inputData) || {};
                 // 任务执行
