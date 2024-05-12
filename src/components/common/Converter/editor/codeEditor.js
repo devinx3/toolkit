@@ -1,9 +1,21 @@
 import React from 'react';
-import { Input, Radio, Space } from 'antd';
+import { Input, Radio, Space, Button, Drawer } from 'antd';
+
 import MonacoEditor from '@monaco-editor/react';
 import loadEditor from './loadEditor';
 
-const CodeEditor = ({ path, value, onChange, editorHelpRender }) => {
+const AiView = ({ aiRender }) => {
+    const [enableAI, setEnableAI] = React.useState(false);
+    return <>
+        <Button size="small" onClick={() => setEnableAI(!enableAI)} type="link">AI</Button>
+        <Drawer title="AI" open={enableAI} width={"30vw"}
+            onClose={() => setEnableAI(false)} footer={null} >
+            {aiRender()}
+        </Drawer>
+    </>
+}
+
+const CodeEditor = ({ path, value, onChange, editorHelpRender, aiRender }) => {
     const [enableMonaco, setEnableMonaco] = React.useState(true);
     const handleChangeEditor = (() => setEnableMonaco(!enableMonaco));
     return (<>
@@ -16,6 +28,7 @@ const CodeEditor = ({ path, value, onChange, editorHelpRender }) => {
                 options={[{ label: 'monaco', value: "1" }, { label: 'input', value: "0" }]}
                 value={enableMonaco ? "1" : "0"}
             />
+            {aiRender ? <AiView aiRender={aiRender} /> : null}
         </Space>
         {enableMonaco ?
             <MonacoEditor height="66vh" language="javascript" theme="vs-dark" path={path} value={value} onChange={onChange} beforeMount={loadEditor} />

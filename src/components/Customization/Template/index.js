@@ -5,6 +5,7 @@ import { ScriptResult } from '../../common/Converter/adaptor/index';
 import { LANG } from '../../common/Converter/constants';
 import StrUtil from '../../../utils/StrUtil'
 import CodeHelpView from './codeHelp';
+import AIView from './AIView';
 
 const { Title } = Typography;
 
@@ -156,7 +157,9 @@ const TemplatePage = ({ category, name }) => {
                     scriptContent: "return <div>Hello, World!</div>;"
                 },
                 // 编辑器帮助文档
-                editorHelpRender: CodeHelpView
+                editorHelpRender: CodeHelpView,
+                // 智能窗口
+                aiRender: AIView
             }}
             dataUseMange={true}
             // 数据区

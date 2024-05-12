@@ -53,7 +53,7 @@ const nextSeed = (() => {
     return () => version++;
 })();
 // 按钮组的扩展按钮
-export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender }) => {
+export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender, aiRender }) => {
     const [visible, setVisible] = React.useState(false);
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
     const handleCancel = () => {
@@ -87,13 +87,13 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
                     <Col><Button key="convert" type="primary" onClick={handleConfirm}>执行</Button></Col>
                 </Space>
             </Row>} >
-            <CodeEditor path={`${category}|${SCRIPT_CODE_PREFIX.EXPAND_ADD}CONVERT|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
+            <CodeEditor path={`${category}|${SCRIPT_CODE_PREFIX.EXPAND_ADD}CONVERT|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
         </Drawer>
     </>);
 }
 
 // 扩展管理弹出框
-const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRender, refreshScript }) => {
+const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRender, aiRender, refreshScript }) => {
     const [configName, setConfigName] = React.useState(config.name);
     const [configDesc, setConfigDesc] = React.useState(config.description);
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
@@ -155,12 +155,12 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
         </Row>} >
         <Input addonBefore={'节点名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
         <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        <CodeEditor path={`${category}|${config.code}|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} />
+        <CodeEditor path={`${category}|${config.code}|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
     </Drawer>)
 }
 
 // 扩展管理按钮
-export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, refreshScript }) => {
+export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, aiRender, refreshScript }) => {
     const handleHiddenConfig = () => {
         requestService(hiddenConfig, category, config.code)
             .then(() => {
@@ -190,6 +190,6 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
             </div>
         </Dropdown>
         <ExpandManageModal category={category} config={config} visible={visible} setVisible={setVisible}
-            editorHelpRender={editorHelpRender} refreshScript={refreshScript} />
+            editorHelpRender={editorHelpRender} aiRender={aiRender} refreshScript={refreshScript} />
     </>);
 }

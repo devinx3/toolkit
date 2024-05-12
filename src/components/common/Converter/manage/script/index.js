@@ -19,7 +19,7 @@ const loadScriptByCategory = (category) => {
 }
 
 // 脚本管理
-const ScriptManage = ({ lang, category, context, intelligent, basicButtons, expandAddButton, editorHelpRender, refreshManage }) => {
+const ScriptManage = ({ lang, category, context, intelligent, basicButtons, expandAddButton, editorHelpRender, aiRender, refreshManage }) => {
     basicButtons = ScriptUtil.convertBasicButtons(basicButtons);
     const expandButtons = expandAddButton ? loadScriptByCategory(category) : [];
     /**
@@ -41,14 +41,15 @@ const ScriptManage = ({ lang, category, context, intelligent, basicButtons, expa
             })}
             {expandAddButton ? <Col style={{ marginLeft: '10px' }}>
                 <ExpandAddButton category={category} context={context} config={expandAddButton}
-                    editorHelpRender={editorHelpRender} refreshScript={refreshManage} />
+                    editorHelpRender={editorHelpRender} aiRender={aiRender} refreshScript={refreshManage} />
             </Col> : null}
         </Row>
         <Row style={{ marginTop: '10px' }}>
             <ExpandManageList category={category} dataSource={expandButtons} intelligent={intelligent} refreshScript={refreshManage} />
             {expandButtons.filter(item => !item.hidden).map((item, key) => {
                 return (<Col key={item.code + "-" + key} style={{ marginLeft: '10px', marginTop: '5px' } }>
-                    <ExpandManageButton category={category} config={item} intelligent={intelligent} editorHelpRender={editorHelpRender}
+                    <ExpandManageButton category={category} config={item} intelligent={intelligent} 
+                        editorHelpRender={editorHelpRender} aiRender={aiRender}
                         refreshScript={refreshManage} handleConvert={handleConvert} />
                 </Col>)
             })}
