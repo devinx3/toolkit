@@ -159,7 +159,7 @@ const App = () => {
               textAlign: 'center',
             }}
           >
-            Devinx3 Toolkit ©2022 Created by Devinx3
+            Devinx3 Toolkit ©2022-2024 Created by Devinx3
           </Footer>
         </Layout>
       </Layout>
