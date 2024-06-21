@@ -1,5 +1,5 @@
 import CuszIcons from '../icons'
-import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined } from '@ant-design/icons'
+import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined, InfoOutlined, InteractionOutlined } from '@ant-design/icons'
 import React from 'react'
 import dynamicRoue from '../components/Customization/Template/route'
 import HomeNotFound from '../pages/notFound'
@@ -7,11 +7,12 @@ import CustomizationNotFound from '../components/Customization/notFound'
 
 
 
-const Home = React.lazy(() => import('../pages/Home'))
+const Home = React.lazy(() => import('../pages/Home'));
 const Encrypt = React.lazy(() => import('../components/Text/Encrypt'));
 const TextEdit = React.lazy(() => import('../components/Text/Edit'));
 const JsonEdit = React.lazy(() => import('../components/Json/Edit'));
 const CustomizeManage = React.lazy(() => import('../components/Customization/Manage'));
+const ScriptIntroduce = React.lazy(() => import('../pages/About/scriptIntroduce'));
 
 const routes = [
   {
@@ -74,7 +75,21 @@ const routes = [
       },
       ...dynamicRoue()
     ],
-  }
+  }, 
+  {
+    key: 'about',
+    name: '关于',
+    icon: <InfoOutlined />,
+    routes: [
+      {
+        key: 'script-introduce',
+        name: '脚本介绍',
+        icon: <InteractionOutlined />,
+        path: '/about/script-introduce',
+        component: ScriptIntroduce,
+      }
+    ],
+  },
 ];
 
 const notFoundList = [{
