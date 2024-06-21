@@ -5,10 +5,6 @@ const upgrade1 = (v) => {
         return { upgrade: false };
     }
     const currentTime = new Date().getTime();
-    // 2024-06-01
-    if (currentTime > 1717200000000) {
-        return { upgrade: true, message: "当前版本已过期, 已强制升级; 若出现问题请联系作者" };
-    }
     const prefix = parseInt(currentTime, 10).toString(16);
     const sufLen = 32 - prefix.length;
     const idConvertCode = id => prefix + ('' + id).padStart(sufLen, '0')
