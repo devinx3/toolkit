@@ -8,7 +8,7 @@ import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
 import GlobalUtil from '../../../../../utils/GlobalUtil'
 import dayjs from 'dayjs'
-import jsonp from '../../../../../utils/jsonp'
+import axios from 'axios';
 
 const { addConfig, queryConfigByCode, updateConfig, hiddenConfig, batchDeleteConfig } = storeEditService;
 
@@ -16,8 +16,21 @@ const { addConfig, queryConfigByCode, updateConfig, hiddenConfig, batchDeleteCon
 const tipMouseEnterDelay = 1;
 // 配置报表
 const CONFIG_VERSION = 101;
-// 配置回调方法
-const CONFIG_CALLBACK_NAME = '__devinx3_call_231125__';
+(() => {
+    // 2025-06-01 删除此函数
+    // 配置回调方法
+    const CONFIG_CALLBACK_NAME = '__devinx3_call_231125__';
+    window[CONFIG_CALLBACK_NAME] = (obj) => {
+        let result = JSON.stringify(obj);
+        return {
+            remark: "转换成新版本的导入数据(2025-06-01 删除此函数)",
+            result,
+            download: () => {
+                FileUtil.download(result, 'download-v2.txt')
+            }
+        }
+    }
+})();
 const EXPORT_DATA_NAME = 'd';
 const EXPORT_CONFIG_NAME = 'c';
 const EXPORT_SECRET_STRATEGY_NAME = 'ss';
@@ -25,10 +38,9 @@ const EXPORT_SECRET_STRATEGY_NAME = 'ss';
 const SECRET_KEY_NAME = 'secretKey';
 // 从url中获取数据
 const importFromUrl = (url, secretKey, handleCallback, handleClear) => {
-    jsonp(url, {
-        name: CONFIG_CALLBACK_NAME,
-        timeout: 30000
-    }).then(function (data) {
+    axios.get(url)
+    .then(function (res) {
+        const data = res.data
         if (!data) {
             throw new Error("数据格式异常");
         }
@@ -148,18 +160,13 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
     const handleExportData = (source, config) => {
         const secretStrategy = secretKey ? SIMPLE_SECRET_STRATEGY : undefined;
         const data = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION, secretStrategy, secretKey);
-        if (!config) {
-            return data;
-        }
-        if (secretStrategy) config[EXPORT_SECRET_STRATEGY_NAME] = secretStrategy;
-        let exportData = CONFIG_CALLBACK_NAME;
-        exportData = exportData + '({'
-        exportData = exportData + `${EXPORT_DATA_NAME}:"${data}"`
+        if (config && secretStrategy) config[EXPORT_SECRET_STRATEGY_NAME] = secretStrategy;
+        let exportData = {};
+        exportData[EXPORT_DATA_NAME] = data;
         if (config instanceof Object && Object.keys(config).length > 0) {
-            exportData = exportData + `,${EXPORT_CONFIG_NAME}:${JSON.stringify(config)}`
+            exportData[EXPORT_CONFIG_NAME] = config;
         }
-        exportData = exportData + '})';
-        return exportData;
+        return JSON.stringify(exportData);
     }
     let doubleExportTimer = null;
     // 导出 URL 文件节点
@@ -209,27 +216,16 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
             completeImport();
             return;
         }
-        let newList = null;
-        if (importData?.startsWith(CONFIG_CALLBACK_NAME)) {
-            const Fun = Function;
-            const importContextName = 'importContext';
-            const importContext = {}
-            importContext[CONFIG_CALLBACK_NAME] = obj => {
-                importData = obj[EXPORT_DATA_NAME];
-                importConfig = obj[EXPORT_CONFIG_NAME];
-            }
-            try {
-                const execFun = new Fun(importContextName, importContextName + '.' + importData);
-                execFun(importContext);
-            } catch (e) {
-                message.error("导入失败, 异常消息: " + e.message);
-                completeImport();
-                return;
-            }
+        try {
+            let obj = JSON.parse(importData);
+            importData = obj[EXPORT_DATA_NAME];
+            importConfig = obj[EXPORT_CONFIG_NAME];
+        } catch (e) {
         }
         if (!importConfig) {
             importConfig = {};
         }
+        let newList = null;
         try {
             newList = JSON.parse(dynamicConfig.convertImportData(importData, importConfig[EXPORT_SECRET_STRATEGY_NAME], importConfig.secretKey || secretKey));
         } catch (e) {
