@@ -52,7 +52,7 @@ const AddConfigButton = ({ category, config, name, description, scriptContent, o
             message.info("已复制分享链接")
         }
     }
-    return (<>
+    return (<Space>
         <Button onClick={handleShare}>分享</Button>
         <Popconfirm icon={null} cancelText='取消' okText='确认'
             onConfirm={handleAddConfig}
@@ -62,7 +62,7 @@ const AddConfigButton = ({ category, config, name, description, scriptContent, o
             </>} >
             <Button>添加自定义节点</Button>
         </Popconfirm>
-    </>);
+    </Space>);
 }
 
 // 种子
@@ -208,7 +208,8 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
 }
 
 const generateShareUrl = (shareData) => {
-    let shareDataParam = lzString.compressToEncodedURIComponent(JSON.stringify(shareData));
+    let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent}
+    let shareDataParam = lzString.compressToEncodedURIComponent(JSON.stringify(newShareData));
     const idx = window.location.href.indexOf("?");
     let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
     return newUrl  + "?shareData=" + shareDataParam;
