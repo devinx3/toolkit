@@ -31,9 +31,9 @@ const CONFIG_VERSION = 101;
         }
     }
 })();
-const EXPORT_DATA_NAME = 'd';
-const EXPORT_CONFIG_NAME = 'c';
-const EXPORT_SECRET_STRATEGY_NAME = 'ss';
+const BACKUP_DATA_NAME = 'd';
+const BACKUP_CONFIG_NAME = 'c';
+const BACKUP_SECRET_STRATEGY_NAME = 'ss';
 // 密钥
 const SECRET_KEY_NAME = 'secretKey';
 // 从url中获取数据
@@ -44,11 +44,11 @@ const importFromUrl = (url, secretKey, handleCallback, handleClear) => {
         if (!data) {
             throw new Error("数据格式异常");
         }
-        const scriptContent = data[EXPORT_DATA_NAME];
+        const scriptContent = data[BACKUP_DATA_NAME];
         if (!(typeof (scriptContent) === 'string')) {
             throw new Error("数据格式异常");
         }
-        const itemConfig = data[EXPORT_CONFIG_NAME];
+        const itemConfig = data[BACKUP_CONFIG_NAME];
         if (itemConfig) {
             if (!(typeof (itemConfig) === 'object')) throw new Error("数据格式异常");
             itemConfig.secretKey = secretKey;
@@ -157,36 +157,36 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
             .catch(reason => message.error("删除失败, 原因是: " + reason))
     }
     // 构造导出数据
-    const handleExportData = (source, config) => {
+    const handleBackupData = (source, config) => {
         const secretStrategy = secretKey ? SIMPLE_SECRET_STRATEGY : undefined;
-        const data = dynamicConfig.convertExportData(JSON.stringify(source), CONFIG_VERSION, secretStrategy, secretKey);
-        if (config && secretStrategy) config[EXPORT_SECRET_STRATEGY_NAME] = secretStrategy;
-        let exportData = {};
-        exportData[EXPORT_DATA_NAME] = data;
+        const data = dynamicConfig.convertBackupData(JSON.stringify(source), CONFIG_VERSION, secretStrategy, secretKey);
+        if (config && secretStrategy) config[BACKUP_SECRET_STRATEGY_NAME] = secretStrategy;
+        let backupData = {};
+        backupData[BACKUP_DATA_NAME] = data;
         if (config instanceof Object && Object.keys(config).length > 0) {
-            exportData[EXPORT_CONFIG_NAME] = config;
+            backupData[BACKUP_CONFIG_NAME] = config;
         }
-        return JSON.stringify(exportData);
+        return JSON.stringify(backupData);
     }
-    let doubleExportTimer = null;
-    // 导出 URL 文件节点
-    const handleExportUrlConfig = () => {
-        clearTimeout(doubleExportTimer);
-        doubleExportTimer = setTimeout(() => {
-            clearTimeout(doubleExportTimer);
-            handleExportConfig({});
+    let doubleBackupTimer = null;
+    // 备份 URL 文件节点
+    const handleBackupUrlConfig = () => {
+        clearTimeout(doubleBackupTimer);
+        doubleBackupTimer = setTimeout(() => {
+            clearTimeout(doubleBackupTimer);
+            handleBackupConfig({});
         }, 555);
     }
-    // 导出节点
-    const handleExportConfig = (config) => {
+    // 备份节点
+    const handleBackupConfig = (config) => {
         if (checkedList.length === 0) {
             message.info("没有选中任何行, 无需导出")
             return;
         }
         const source = getCheckConfigItem();
-        const exportData = handleExportData(source, config);
+        const backupData = handleBackupData(source, config);
         const fileName = 'config-' + category + "-" + dayjs().format('MMDDHHmmss');
-        FileUtil.download(exportData, fileName);
+        FileUtil.download(backupData, fileName);
     }
     const hanldeHidden = (checkedScriptHidden) => {
         requestService(hiddenConfig, category, checkedList, checkedScriptHidden)
@@ -218,8 +218,8 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         }
         try {
             let obj = JSON.parse(importData);
-            importData = obj[EXPORT_DATA_NAME];
-            importConfig = obj[EXPORT_CONFIG_NAME];
+            importData = obj[BACKUP_DATA_NAME];
+            importConfig = obj[BACKUP_CONFIG_NAME];
         } catch (e) {
         }
         if (!importConfig) {
@@ -227,7 +227,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         }
         let newList = null;
         try {
-            newList = JSON.parse(dynamicConfig.convertImportData(importData, importConfig[EXPORT_SECRET_STRATEGY_NAME], importConfig.secretKey || secretKey));
+            newList = JSON.parse(dynamicConfig.convertOriginData(importData, importConfig[BACKUP_SECRET_STRATEGY_NAME], importConfig.secretKey || secretKey));
         } catch (e) {
             message.error("导入失败, 异常消息: " + e.message);
             completeImport();
@@ -306,9 +306,9 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         intelligent.clearImport();
         handleImportConfig(null, url, secretKey)
     }
-    const handleGenerageShareLink = () => {
+    const handleGenerageBackupLink = () => {
         if (!(importConfigUrl?.length > 0)) {
-            message.warning("请输入导入文件地址");
+            message.warning("请输入备份文件地址");
             return;
         }
         const idx = window.location.href.indexOf("?");
@@ -345,7 +345,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
                         </Checkbox>
                         <Button type='text' disabled={checkedList.length === 0} icon={<DeleteOutlined />} onClick={handleDeleteConfig}>删除</Button>
                         <Button type='text' disabled={checkedList.length === 0} icon={<ExportOutlined />}
-                            onClick={handleExportUrlConfig}>导出</Button>
+                            onClick={handleBackupUrlConfig}>备份</Button>
                         <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(true)} icon={<EyeInvisibleOutlined />}>隐藏</Button>
                         <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(false)} icon={<EyeOutlined />}>显示</Button>
                         <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
@@ -353,13 +353,13 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
                         </Tooltip>
                     </>)}
                     footer={<>
-                        <Input style={{marginTop: "3px"}} type='url' placeholder='导入文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
+                        <Input style={{marginTop: "3px"}} type='url' placeholder='备份文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
                         <Input style={{marginTop: "3px"}} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
                         <Space style={{marginTop: "3px"}}>
                             {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} showUploadList={false} beforeUpload={(file) => handleImportConfig(file)} >
                                 <Button icon={<ImportOutlined />}>导入</Button>
                             </Upload>)}
-                            <Button onClick={handleGenerageShareLink}>生成分享链接</Button>
+                            <Button onClick={handleGenerageBackupLink}>生成导入链接</Button>
                         </Space>
                     </>}
                     renderItem={(item) => (

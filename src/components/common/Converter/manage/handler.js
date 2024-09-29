@@ -70,9 +70,9 @@ class DynamicConfig {
     removeSecret(str, index) {
         return str.slice(0, index) + str.slice(index + 1);
     }
-    // 转换导出数据
-    convertExportData(originalStr, verion, secretStrategy, dynamicSecretKey) {
-        const str = secretContext(secretStrategy).encrypt(originalStr, dynamicSecretKey);
+    // 转换备份数据
+    convertBackupData(originData, verion, secretStrategy, dynamicSecretKey) {
+        const str = secretContext(secretStrategy).encrypt(originData, dynamicSecretKey);
         // 秘钥组成
         // 以 devinx3 开头
         // 后面接长度以l/S结束(仅仅当默认密码时为S, 否则为l)(这里的值不要和特征前缀存在相同字符)
@@ -109,13 +109,13 @@ class DynamicConfig {
         }
         return processPrefix + processLen + processSuffix + newEncryptData;
     }
-    // 转换导入数据
-    convertImportData(str, secretStrategy, dynamicSecretKey) {
-        if (!str) {
+    // 转换为原始数据
+    convertOriginData(backupData, secretStrategy, dynamicSecretKey) {
+        if (!backupData) {
             throw new Error('数据不能为空');
         }
         // 匹配特征前缀
-        const processPrefix = str.slice(0, this.featurePrefix.length);
+        const processPrefix = backupData.slice(0, this.featurePrefix.length);
         if (processPrefix !== this.featurePrefix) {
             // 匹配特征前缀异常
             throw new Error('匹配特征前缀异常');
@@ -123,26 +123,26 @@ class DynamicConfig {
         // 特征后缀
         const maxfeatureSuffixIndex = processPrefix.length + 10;
         let processSuffix = 'l';
-        let processSuffixIndex = str.indexOf(processSuffix);
+        let processSuffixIndex = backupData.indexOf(processSuffix);
         if (processSuffixIndex < 0 || processSuffixIndex >= maxfeatureSuffixIndex) {
             processSuffix = 'S';
-            processSuffixIndex = str.indexOf(processSuffix);
+            processSuffixIndex = backupData.indexOf(processSuffix);
             if (processSuffixIndex < 0 || processSuffixIndex >= maxfeatureSuffixIndex) {
                 // 匹配特征后缀异常
                 throw new Error('匹配特征后缀异常');
             }
         }
         // 批量长度
-        let processLen = Number(str.slice(processPrefix.length, processSuffixIndex));
+        let processLen = Number(backupData.slice(processPrefix.length, processSuffixIndex));
         if (!processLen) {
             // 匹配数据长度异常
             throw new Error('匹配数据长度异常');
         }
         const secretIndex = this.getFeatureSecretIndex(processLen);
-        const encryptData = str.slice(processSuffixIndex + 1);
+        const encryptData = backupData.slice(processSuffixIndex + 1);
         let exportStr = '';
         if (secretIndex === -1) {
-            exportStr = this.encrypt(str, encryptData);
+            exportStr = this.encrypt(backupData, encryptData);
         } else {
             let newEncryptData = encryptData;
             let secret = '';
