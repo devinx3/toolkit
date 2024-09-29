@@ -15,6 +15,7 @@ class IntelligentEvent {
         this.importUrl = search.get("importUrl");
         // 解码
         if (this.importUrl) this.importUrl = window.decodeURIComponent(this.importUrl);
+        this.shareData = search.get("shareData");
     }
     getImportUrl() {
         return this.importUrl;
@@ -25,6 +26,9 @@ class IntelligentEvent {
         if (!this.clickType && SCRIPT_TYPE.NODE === type) return true;
         return this.clickType === type;
     }
+    getShareData() {
+        return this.shareData
+    }
     // 清除导入
     clearImport() {
         this.importUrl = undefined;
@@ -34,6 +38,10 @@ class IntelligentEvent {
     clearClick() {
         this.clickCode = undefined;
         this.clickType = undefined;
+    }
+    // 清除分享
+    clearShareData() {
+        this.shareData = undefined
     }
 }
 

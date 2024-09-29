@@ -41,7 +41,7 @@ const ScriptManage = ({ lang, category, context, intelligent, basicButtons, expa
             })}
             {expandAddButton ? <Col style={{ marginLeft: '10px' }}>
                 <ExpandAddButton category={category} context={context} config={expandAddButton}
-                    editorHelpRender={editorHelpRender} aiRender={aiRender} refreshScript={refreshManage} />
+                    editorHelpRender={editorHelpRender} aiRender={aiRender} intelligent={intelligent} refreshScript={refreshManage} />
             </Col> : null}
         </Row>
         <Row style={{ marginTop: '10px' }}>

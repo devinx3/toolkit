@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
 import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
-import { EditOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined } from '@ant-design/icons';
+import StrUtil from '../../../../../utils/StrUtil';
+import lzString from 'lz-string'
 
 const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
 const { Text } = Typography;
@@ -12,11 +14,11 @@ const { Text } = Typography;
 const tipMouseEnterDelay = 1;
 
 // 扩展添加节点按钮
-const AddConfigButton = ({ category, config, scriptContent, onAddSuccess }) => {
+const AddConfigButton = ({ category, config, name, description, scriptContent, onAddSuccess }) => {
     const defaultConfigName = config.name;
     const defaultConfigDesc = config.description || defaultConfigName;
-    const [configName, setConfigName] = React.useState();
-    const [configDesc, setConfigDesc] = React.useState();
+    const [configName, setConfigName] = React.useState(name);
+    const [configDesc, setConfigDesc] = React.useState(description);
     const handleAddConfig = () => {
         if (!scriptContent) {
             message.warn("脚本内容不能为空");
@@ -36,15 +38,31 @@ const AddConfigButton = ({ category, config, scriptContent, onAddSuccess }) => {
             })
             .catch(reason => message.error("添加节点失败, 失败原因: " + reason));
     }
-
-    return (<Popconfirm icon={null} cancelText='取消' okText='确认'
-        onConfirm={handleAddConfig}
-        title={<>
-            <Input addonBefore={'节点名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName(e.target.value)} />
-            <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} placeholder={defaultConfigDesc} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        </>} >
-        <Button>添加自定义节点</Button>
-    </Popconfirm>);
+    const handleShare = () => {
+        if (!scriptContent) {
+            message.warn("脚本内容不能为空");
+            return false;
+        }
+        let shareUrl = generateShareUrl({
+            name: configName || defaultConfigName, 
+            description: configDesc || configName || defaultConfigDesc,
+            scriptContent: scriptContent
+        });
+        if (StrUtil.copyToClipboard(shareUrl)) {
+            message.info("已复制分享链接")
+        }
+    }
+    return (<>
+        <Button onClick={handleShare}>分享</Button>
+        <Popconfirm icon={null} cancelText='取消' okText='确认'
+            onConfirm={handleAddConfig}
+            title={<>
+                <Input addonBefore={'节点名称'} placeholder={defaultConfigName} value={configName} onChange={e => setConfigName(e.target.value)} />
+                <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} placeholder={defaultConfigDesc} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
+            </>} >
+            <Button>添加自定义节点</Button>
+        </Popconfirm>
+    </>);
 }
 
 // 种子
@@ -52,13 +70,41 @@ const nextSeed = (() => {
     let version = 100;
     return () => version++;
 })();
+const getShareData = (intelligent) => {
+    if (intelligent.getShareData()) {
+        let data = lzString.decompressFromEncodedURIComponent(intelligent.getShareData());
+        intelligent.clearShareData();
+        let jsonData = {}
+        try {
+            jsonData = JSON.parse(data)
+        } catch(e) {
+            message.error("分享数据格式异常");   
+            return undefined;
+        }
+        return {
+            name: jsonData.name,
+            description: jsonData.description,
+            scriptContent: jsonData.scriptContent,
+        };
+    }
+    return undefined;
+}
 // 按钮组的扩展按钮
-export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender, aiRender }) => {
+export const ExpandAddButton = ({ category, context, config, refreshScript, editorHelpRender, intelligent, aiRender }) => {
     const [visible, setVisible] = React.useState(false);
+    const [refData, setRefData] = React.useState({})
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
     const handleCancel = () => {
         setVisible(false);
     };
+    useEffect(() => {
+        let newData = getShareData(intelligent);
+        if (newData) {
+            setRefData(newData);
+            setScriptContent(newData.scriptContent);
+            setVisible(true);
+        }
+    }, [intelligent]);
     const handleConfirm = () => {
         if (!scriptContent) {
             message.warn("脚本内容不能为空")
@@ -83,7 +129,9 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
             onClose={handleCancel}
             footer={<Row justify="end">
                 <Space>
-                    <Col><AddConfigButton key='add' category={category} config={config} scriptContent={scriptContent} onAddSuccess={handleAddSuccess} /></Col>
+                    <Col><AddConfigButton key='add' category={category} config={config}
+                        name={refData.name} description={refData.description} scriptContent={scriptContent}
+                        onAddSuccess={handleAddSuccess} /></Col>
                     <Col><Button key="convert" type="primary" onClick={handleConfirm}>执行</Button></Col>
                 </Space>
             </Row>} >
@@ -159,6 +207,12 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
     </Drawer>)
 }
 
+const generateShareUrl = (shareData) => {
+    let shareDataParam = lzString.compressToEncodedURIComponent(JSON.stringify(shareData));
+    const idx = window.location.href.indexOf("?");
+    let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
+    return newUrl  + "?shareData=" + shareDataParam;
+}
 // 扩展管理按钮
 export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, aiRender, refreshScript }) => {
     const handleHiddenConfig = () => {
@@ -169,6 +223,12 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
             })
             .catch(reason => console.log(reason) & message.error("更新节点失败, 失败原因: " + reason));
     }
+    // 分享数据
+    const handleShareData = () => {
+        if (StrUtil.copyToClipboard(generateShareUrl(config))) {
+            message.info("已复制分享链接")
+        }
+    }
     const [visible, setVisible] = React.useState(false);
     const menus = [{
         key: "edit",
@@ -176,6 +236,9 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
     }, {
         key: "hidden",
         label: (<Button shape="circle" type="text" onClick={e => handleHiddenConfig()} icon={<EyeInvisibleOutlined />} size="small">隐藏</Button>)
+    }, {
+        key: "share",
+        label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
     }];
     if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
         intelligent.clearClick();
