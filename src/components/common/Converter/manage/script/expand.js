@@ -3,7 +3,7 @@ import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, 
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
 import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
-import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined, ReadOutlined } from '@ant-design/icons';
 import StrUtil from '../../../../../utils/StrUtil';
 import lzString from 'lz-string'
 
@@ -44,7 +44,7 @@ const AddConfigButton = ({ category, config, name, description, scriptContent, o
             return false;
         }
         let shareUrl = generateShareUrl({
-            name: configName || defaultConfigName, 
+            name: configName || defaultConfigName,
             description: configDesc || configName || defaultConfigDesc,
             scriptContent: scriptContent
         });
@@ -77,8 +77,8 @@ const getShareData = (intelligent) => {
         let jsonData = {}
         try {
             jsonData = JSON.parse(data)
-        } catch(e) {
-            message.error("分享数据格式异常");   
+        } catch (e) {
+            message.error("分享数据格式异常");
             return undefined;
         }
         return {
@@ -110,7 +110,7 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
             message.warn("脚本内容不能为空")
             return;
         }
-        const version = nextSeed(); 
+        const version = nextSeed();
         const code = SCRIPT_CODE_PREFIX.EXPAND_ADD + "CONVERT";
         context.onConvert(context.createScriptEvent(code, config.name, scriptContent, version));
         setVisible(false);
@@ -135,7 +135,7 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
                     <Col><Button key="convert" type="primary" onClick={handleConfirm}>执行</Button></Col>
                 </Space>
             </Row>} >
-            <CodeEditor path={`${category}|${SCRIPT_CODE_PREFIX.EXPAND_ADD}CONVERT|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
+            <CodeEditor category={category} path={`${category}|${SCRIPT_CODE_PREFIX.EXPAND_ADD}CONVERT|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
         </Drawer>
     </>);
 }
@@ -203,16 +203,16 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
         </Row>} >
         <Input addonBefore={'节点名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
         <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        <CodeEditor path={`${category}|${config.code}|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
+        <CodeEditor category={category} path={`${category}|${config.code}|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
     </Drawer>)
 }
 
 const generateShareUrl = (shareData) => {
-    let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent}
+    let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent }
     let shareDataParam = lzString.compressToEncodedURIComponent(JSON.stringify(newShareData));
     const idx = window.location.href.indexOf("?");
     let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
-    return newUrl  + "?shareData=" + shareDataParam;
+    return newUrl + "?shareData=" + shareDataParam;
 }
 // 扩展管理按钮
 export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, aiRender, refreshScript }) => {
@@ -241,6 +241,18 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
     }];
+    if (config.code && category?.startsWith && category.startsWith("customize")) {
+        menus.push({
+            key: "preview",
+            label: (<Button shape="circle" type="text"
+                onClick={e => {
+                    const idx = window.location.href.indexOf("?");
+                    const url = idx === -1 ? window.location.href : window.location.href.substring(0, idx);
+                    window.open(url + '?clickType=node&clickCode=' + config.code);
+                }}
+                icon={<ReadOutlined />} size="small">预览</Button>)
+        });
+    }
     if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
         intelligent.clearClick();
         setTimeout(() => handleConvert(config), 0);
