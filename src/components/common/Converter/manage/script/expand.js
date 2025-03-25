@@ -3,7 +3,7 @@ import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, 
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
 import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
-import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined, ReadOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined } from '@ant-design/icons';
 import StrUtil from '../../../../../utils/StrUtil';
 import lzString from 'lz-string'
 
@@ -145,6 +145,8 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
     const [configName, setConfigName] = React.useState(config.name);
     const [configDesc, setConfigDesc] = React.useState(config.description);
     const [scriptContent, setScriptContent] = React.useState(config.scriptContent);
+    const handleSaveCode = React.useRef(null);
+    const handleRunCode = React.useRef(null);
     // 取消
     const handleCancel = () => setVisible(false);
     // 重置
@@ -191,6 +193,33 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
     const configChangeFlag = () => {
         return configName !== config.name || configDesc !== config.description || scriptContent !== config.scriptContent;
     }
+    React.useEffect(() => {
+        if (category.startsWith("customize") && config.code) {
+            handleSaveCode.current = (code, callback) => {
+                const newConfig = {
+                    code: config.code,
+                    name: config.name,
+                    description: config.description,
+                    scriptContent: code
+                }
+                requestService(updateConfig, category, newConfig)
+                    .then(() => {
+                        if (callback) {
+                            callback();
+                        }
+                    })
+                    .catch(reason => console.log(reason) & message.error("保存代码失败, 失败原因: " + reason));
+            }
+            handleRunCode.current = () => {
+                const idx = window.location.href.indexOf("?");
+                const url = idx === -1 ? window.location.href : window.location.href.substring(0, idx);
+                window.open(url + '?clickType=node&clickCode=' + config.code);
+            }
+        } else {
+            handleRunCode.current = null;
+            handleSaveCode.current = null;
+        }
+    }, [category, config]);
     return (<Drawer open={visible} width='75%' onCancel={handleCancel}
         title={configChangeFlag() ? <Text style={{ color: "#1890ff" }} strong >编辑节点 *</Text> : <Text>编辑节点</Text>}
         onClose={handleCancel}
@@ -203,7 +232,9 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
         </Row>} >
         <Input addonBefore={'节点名称'} value={configName} onChange={e => setConfigName(e.target.value)} />
         <Input style={{ marginTop: '3px' }} addonBefore={'节点作用'} value={configDesc} onChange={e => setConfigDesc(e.target.value)} />
-        <CodeEditor category={category} path={`${category}|${config.code}|script`} value={scriptContent} onChange={setScriptContent} editorHelpRender={editorHelpRender} aiRender={aiRender} />
+        <CodeEditor category={category} path={`${category}|${config.code}|script`} value={scriptContent}
+            onChange={setScriptContent} onRunCode={handleRunCode.current} onSaveCode={handleSaveCode.current}
+            editorHelpRender={editorHelpRender} aiRender={aiRender} />
     </Drawer>)
 }
 
@@ -241,18 +272,6 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
     }];
-    if (config.code && category?.startsWith && category.startsWith("customize")) {
-        menus.push({
-            key: "preview",
-            label: (<Button shape="circle" type="text"
-                onClick={e => {
-                    const idx = window.location.href.indexOf("?");
-                    const url = idx === -1 ? window.location.href : window.location.href.substring(0, idx);
-                    window.open(url + '?clickType=node&clickCode=' + config.code);
-                }}
-                icon={<ReadOutlined />} size="small">预览</Button>)
-        });
-    }
     if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
         intelligent.clearClick();
         setTimeout(() => handleConvert(config), 0);

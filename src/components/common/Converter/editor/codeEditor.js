@@ -18,7 +18,7 @@ const AiView = ({ prompt }) => {
     </>
 }
 
-const CodeEditor = ({ category, path, value, onChange, editorHelpRender, aiRender }) => {
+const CodeEditor = ({ category, path, value, onChange, editorHelpRender, onSaveCode, onRunCode }) => {
     const [enableEditorType, setEnableEditorType] = React.useState("1");
     return (<>
         {editorHelpRender && editorHelpRender()}<br />
@@ -33,12 +33,12 @@ const CodeEditor = ({ category, path, value, onChange, editorHelpRender, aiRende
             {getPrompt(category) ? <AiView prompt={getPrompt(category)} /> : null}
         </Space>
         {enableEditorType === "1" ?
-            <MonacoContainer category={category} path={path} value={value} onChange={onChange} beforeMount={loadEditor} />
+            <MonacoContainer category={category} path={path} value={value} onChange={onChange} onSaveCode={onSaveCode} onRunCode={onRunCode} beforeMount={loadEditor} />
             : <Input.TextArea placeholder="请输入脚本" rows={8} value={value} onChange={e => onChange(e.target.value)} />}
     </>)
 }
 
-const MonacoContainer = ({ category, path, value, onChange, beforeMount }) => {
+const MonacoContainer = ({ category, path, value, onChange, onSaveCode, onRunCode, beforeMount }) => {
     const [enableAi, setEnableAi] = React.useState(false);
     if (!enableAi) {
         return <>
@@ -57,6 +57,7 @@ const MonacoContainer = ({ category, path, value, onChange, beforeMount }) => {
         onClose={handleClose}
         open={true}
         keyboard={false}
+        push={false}
         style={{
             position: 'absolute', // 使用绝对定位
             top: 0,
@@ -70,7 +71,7 @@ const MonacoContainer = ({ category, path, value, onChange, beforeMount }) => {
                 padding: 0,
             }
         }} >
-        <AiCodeEditor category={category} path={path} value={value} onChange={onChange} beforeMount={beforeMount} onExit={handleClose} />
+        <AiCodeEditor category={category} path={path} value={value} onChange={onChange} onSaveCode={onSaveCode} onRunCode={onRunCode} beforeMount={beforeMount} onExit={handleClose} />
     </Drawer>
 }
 

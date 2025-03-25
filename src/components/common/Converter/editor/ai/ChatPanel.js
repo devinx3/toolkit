@@ -53,11 +53,11 @@ const CodeView = ({ codeRange, value, language, originEditor }) => {
     }
     return (<>
         <div style={{ backgroundColor: '#222222', padding: '10px', borderRadius: '4px' }}>
-            <Row>
-                <Col offset={1}>
-                    script.js
+            <Row gutter={16}>
+                <Col flex={2}>
+                    脚本
                 </Col>
-                <Col span={2} offset={18}>
+                <Col flex="right">
                     <Text copyable={{ text: value }} />
                     <Space />
                     <Tooltip placement="topRight" title="应用">
@@ -77,7 +77,6 @@ const CodeView = ({ codeRange, value, language, originEditor }) => {
                             onClick={() => setDiffFlag(true)}
                         />
                     </Tooltip>
-
                 </Col>
             </Row>
             <Row>
@@ -384,7 +383,11 @@ const ChatPanel = ({ category, monaco, editor }) => {
         if (loading) return;
         if (inputMessage.trim().length === 0) return;
         if (!favoriteModel) {
-            message.warning("先选择模型");
+            if (!(modelOptions.length > 0)) {
+                message.warning("请配置模型");
+            } else {
+                message.warning("请选择模型");
+            }
             return;
         }
         const callback = async () => {
@@ -420,7 +423,7 @@ const ChatPanel = ({ category, monaco, editor }) => {
         <div className="devinx3-chat">
             <div className="devinx3-chat-header">
                 <Text>AI 助手</Text>
-                <Button style={{ color: 'white' }} icon={<PlusOutlined />} onClick={() => startChat(favoriteModel)} />
+                <Button style={{ color: 'white' }} icon={<PlusOutlined />} disabled={loading} onClick={() => startChat(favoriteModel)} />
             </div>
 
             <div className="devinx3-chat-message-list">

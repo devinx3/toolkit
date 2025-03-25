@@ -1,21 +1,47 @@
 import React, { useState } from 'react';
-import { Divider, Menu, Typography } from "antd";
+import { Divider, Menu, Typography, message } from "antd";
 import Editor from '@monaco-editor/react';
 import ChatPanel from './ChatPanel';
 import './CodeEditor.css';
 
 const { Text } = Typography;
 
-const AiCodeEditor = ({ category, path, value, onChange, onExit, beforeMount }) => {
+const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, onExit, beforeMount }) => {
     const [monacoInstance, setMonacoInstance] = useState(null);
     const [editorInstance, setEditorInstance] = useState(null);
     const containerRef = React.useRef(null);
 
+    const handleRunCode = () => {
+        if (editorInstance && onRunCode) {
+            const code = editorInstance.getValue();
+            if (onSaveCode) {
+                onSaveCode(code, () => onRunCode(code));
+            } else {
+                onRunCode(code);
+            }
+        } else {
+            message.warning("暂不支持运行");
+        }
+    }
+    const handleSave = () => {
+        if (editorInstance && onSaveCode) {
+            onSaveCode(editorInstance.getValue(), () => message.success("保存成功"));
+        } else {
+            message.warning("暂不支持保存");
+        }
+    }
     const handleEditorDidMount = (editor, monaco) => {
         setEditorInstance(editor);
         setMonacoInstance(monaco);
-        if (editor && monaco) {
+        if (monaco && editor) {
             editor.addCommand(monaco.KeyCode.Escape, onExit);
+            editor.addAction({
+                id: 'exit',
+                label: '退出',
+                keybindings: [monaco.KeyCode.Escape],
+                contextMenuGroupId: 'z_devinx3CustomizeGroup50',
+                run: onExit
+            });
         }
     };
 
@@ -27,12 +53,21 @@ const AiCodeEditor = ({ category, path, value, onChange, onExit, beforeMount }) 
                     mode="horizontal"
                     items={[{
                         key: 'file',
-                        label: <Text className='devinx3-label'>File</Text>,
+                        label: <Text className='devinx3-label'>文件</Text>,
                         children: [{
+                            key: 'save',
+                            label: '保存',
+                            onClick: handleSave
+                        }, {
                             key: 'exit',
-                            label: 'Exit',
-                            onClick: () => onExit()
+                            label: '退出',
+                            onClick: onExit
                         }]
+                    },
+                    {
+                        key: 'run',
+                        label: <Text className='devinx3-label'>运行</Text>,
+                        onClick: handleRunCode
                     }]}
                 />
             </div>
