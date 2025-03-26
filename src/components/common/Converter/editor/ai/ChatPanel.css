@@ -3,8 +3,6 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    color: #d4d4d4;
-    background-color: #1e1e1e;
 }
 
 .devinx3-chat-header {
@@ -13,18 +11,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-.devinx3-chat-header .ant-typography {
-    margin: 0;
-    color: #d4d4d4;
-    flex: 1;
-    text-align: left;
-}
-
-.devinx3-chat-header .ant-btn {
-    background-color: #1e1e1e !important;
-    border: none !important;
 }
 
 .devinx3-chat-message-list {
@@ -39,12 +25,10 @@
 .devinx3-chat-message-list::-webkit-scrollbar {
     width: 6px;
 }
-
 .devinx3-chat-message-list::-webkit-scrollbar-thumb {
     background-color: #555;
     border-radius: 3px;
 }
-
 .devinx3-chat-message-list::-webkit-scrollbar-track {
     background: transparent;
 }
@@ -73,137 +57,3 @@
     text-align: left;
     justify-content: flex-start;
 }
-
-.devinx3-chat-input-area {
-    border-top: 1px solid #333;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background-color: #252525;
-}
-
-/* 输入框样式 */
-.devinx3-chat-input-area .ant-input {
-    background-color: transparent !important;
-    color: #d4d4d4 !important;
-    border: none !important;
-    border-radius: 0;
-    padding: 8px 0;
-    font-size: 14px;
-    resize: none;
-}
-
-.devinx3-chat-input-area .ant-input::placeholder {
-    color: #888 !important;
-    opacity: 0.7;
-}
-
-.devinx3-chat-input-area .ant-input:focus {
-    box-shadow: none;
-}
-
-/* 工具栏样式 */
-.devinx3-chat-toolbar {
-    width: 100%;
-    padding-top: 8px;
-    border-top: 1px solid #333;
-}
-
-.devinx3-chat .ant-select.model-select {
-    width: 120px;
-    cursor: pointer;
-}
-.devinx3-chat .ant-select.code-select {
-    width: 100px;
-    cursor: pointer;
-}
-
-/* 下拉框样式 */
-.devinx3-chat .ant-select.model-select .ant-select-selector,
-.devinx3-chat .ant-select.code-select .ant-select-selector {
-    background-color: #2d2d2d !important;
-    color: #d4d4d4 !important;
-    border: none !important;
-    border-radius: 4px;
-    height: 32px !important;
-    padding: 0 8px !important;
-}
-
-.devinx3-chat .ant-select.model-select .ant-select-arrow {
-    color: #d4d4d4 !important;
-    opacity: 0.7;
-}
-
-.devinx3-chat .ant-select.model-select .ant-select-selection-item {
-    color: #d4d4d4 !important;
-    line-height: 30px !important;
-}
-
-.devinx3-chat .ant-select.model-select:hover .ant-select-selector {
-    background-color: #383838 !important;
-}
-
-/* 下拉面板样式 */
-.devinx3-chat .ant-select-dropdown,
-.devinx3-chat .ant-tabs-dropdown {
-    background-color: #1e1e1e !important;
-    border: none !important;
-    padding: 4px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* 下拉列表项样式 */
-.devinx3-chat .ant-select-item,
-.devinx3-chat .ant-tabs-dropdown .ant-tabs-dropdown-menu-item {
-    color: #d4d4d4 !important;
-    background: transparent !important;
-    border-radius: 2px !important;
-    padding: 5px 8px !important;
-    transition: all 0.2s ease !important;
-}
-
-.devinx3-chat .ant-select-item-option-active,
-.devinx3-chat .ant-select-item-option-selected,
-.devinx3-chat .ant-tabs-dropdown .ant-tabs-dropdown-menu-item:hover,
-.devinx3-chat .ant-tabs-dropdown .ant-tabs-dropdown-menu-item-selected {
-    background-color: #2d2d2d !important;
-    font-weight: normal !important;
-}
-
-/* 设置按钮样式 */
-.devinx3-chat-toolbar .model-setting-btn {
-    background-color: #2d2d2d !important;
-    border: none !important;
-    color: #d4d4d4 !important;
-    width: 30px !important;
-    height: 30px !important;
-    padding: 0 !important;
-    /* display: flex !important; */
-    /* align-items: center !important; */
-    /* justify-content: center !important; */
-    border-radius: 4px !important;
-    transition: background-color 0.2s ease !important;
-    cursor: pointer;
-}
-
-.devinx3-chat-toolbar .model-setting-btn:hover {
-    background-color: #383838 !important;
-}
-
-/* 发送按钮样式 */
-.devinx3-chat-input-area .ant-btn {
-    background-color: #2d2d2d !important;
-    border: none !important;
-    color: #d4d4d4 !important;
-    box-shadow: none !important;
-    padding: 4px 12px;
-    height: 32px;
-    transition: background-color 0.3s;
-    cursor: pointer;
-}
-
-.devinx3-chat-input-area .ant-btn:hover {
-    background-color: #383838 !important;
-} 

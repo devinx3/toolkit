@@ -6,12 +6,6 @@ import './CodeEditor.css';
 
 const { Text } = Typography;
 
-const menuItemStyle = {
-    // fontSize: 12,
-    // color: '#999999;',
-    // height: '20px'
-}
-
 const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, onExit, beforeMount }) => {
     const [monacoInstance, setMonacoInstance] = useState(null);
     const [editorInstance, setEditorInstance] = useState(null);

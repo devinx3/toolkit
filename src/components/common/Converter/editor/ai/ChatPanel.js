@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Input, Button, Select, Typography, Row, Col, Tooltip, Drawer, Space, Menu, Form, message } from 'antd';
+import { Alert, Input, Button, Select, Typography, Row, Col, Tooltip, Drawer, Space, Menu, Form, message, ConfigProvider, theme } from 'antd';
 import { SendOutlined, SettingOutlined, LoadingOutlined, CaretRightOutlined, DiffOutlined, PlusOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import Editor, { DiffEditor } from '@monaco-editor/react';
@@ -188,7 +188,7 @@ const ModelSetting = ({ usedModelKey, setModelOptions }) => {
     };
 
     return (<>
-        <Button className="model-setting-btn" onClick={() => setOpen(true)}>
+        <Button onClick={() => setOpen(true)}>
             <SettingOutlined />
         </Button>
         {open ?
@@ -445,114 +445,118 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
         callback().finally(() => setLoading(false));
     };
     return (
-        <div className="devinx3-chat">
-            <div className="devinx3-chat-header">
-                <Text>AI 助手</Text>
-                <Button style={{ color: 'white' }} size='small' icon={<PlusOutlined />} disabled={loading} onClick={() => startChat(favoriteModel)} />
-            </div>
+        <ConfigProvider
+            theme={{
+                algorithm: theme.darkAlgorithm,
+            }}
+        >
+            <div className="devinx3-chat">
+                <div className="devinx3-chat-header">
+                    <Text>AI 助手</Text>
+                    <Button type='link' style={{ color: 'white' }} size='small' icon={<PlusOutlined />} disabled={loading} onClick={() => startChat(favoriteModel)} />
+                </div>
 
-            <div className="devinx3-chat-message-list">
-                {messages.map((msg, index) => (
-                    <div
-                        key={index}
-                        className={`devinx3-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`}
-                    >
-                        {msg.sender === 'user' ? (
-                            <div>{msg.text}</div>
-                        ) : (
-                            <div>
-                                <ReactMarkdown
-                                    components={{
-                                        code: ({ node, inline, className, children, ...props }) => {
-                                            const language = className ? className.replace('language-', '') : '';
-                                            const value = String(children).trimEnd("\n");
-                                            return value.includes('\n') ? (
-                                                <CodeView codeRange={msg.codeRange} language={language} value={value} originEditor={editor} />
-                                            ) : (
-                                                <code {...props}>{children}</code>
-                                            );
-                                        }
-                                    }}
-                                >
-                                    {msg.text}
-                                </ReactMarkdown>
-                            </div>
-                        )}
-                    </div>
-                ))}
-                {loading ? <Button style={{ backgroundColor: 'transparent', borderColor: 'transparent' }} icon={<LoadingOutlined style={{ color: 'white' }} />} /> : null}
-                {errorMessage ? <Alert type="error" style={{ fontSize: "12px" }} message={errorMessage} /> : null}
-
-                <div ref={messagesEndRef} />
-            </div>
-            <div className="devinx3-chat-input-area">
-                <TextArea
-                    style={{ fontSize: "12px" }}
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage();
-                        }
-                    }}
-                    placeholder="输入问题..."
-                    autoSize={{ minRows: 3, maxRows: 6 }}
-                    disabled={loading}
-                />
-                <Row className="devinx3-chat-toolbar" align="middle" justify="space-between">
-                    <Col>
-                        <Row gutter={8} align="middle">
-                            <Col>
-                                <ModelSetting usedModelKey={favoriteModel} setModelOptions={setModelOptions} />
-                                <Select
-                                    className="model-select"
-                                    value={favoriteModel}
-                                    onChange={(val) => {
-                                        setFavoriteModel(val);
-                                        dataStore.updateFavoriteModel(val);
-                                        startChat(val);
-                                    }}
-                                    placement="topLeft"
-                                    options={
-                                        modelOptions.map(x => ({
-                                            value: x,
-                                            label: x
-                                        }))
-                                    }
-                                    disabled={loading}
-                                />
-                            </Col>
-                            <Col>
-
-                                <Select
-                                    className="code-select"
-                                    value={codeSelect}
-                                    onChange={setCodeSelect}
-                                    placement="topLeft"
-                                    options={[
-                                        { value: 'code', label: '全文' },
-                                        { value: 'selection', label: '选中区' }
-                                    ]}
-                                    allowClear
-                                    disabled={loading}
-                                />
-                            </Col>
-                        </Row>
-                    </Col>
-                    <Col>
-                        <Button
-                            type="primary"
-                            icon={<SendOutlined />}
-                            onClick={handleSendMessage}
-                            loading={loading}
+                <div className="devinx3-chat-message-list">
+                    {messages.map((msg, index) => (
+                        <div
+                            key={index}
+                            className={`devinx3-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`}
                         >
-                            发送
-                        </Button>
-                    </Col>
-                </Row>
+                            {msg.sender === 'user' ? (
+                                <div>{msg.text}</div>
+                            ) : (
+                                <div>
+                                    <ReactMarkdown
+                                        components={{
+                                            code: ({ node, inline, className, children, ...props }) => {
+                                                const language = className ? className.replace('language-', '') : '';
+                                                const value = String(children).trimEnd("\n");
+                                                return value.includes('\n') ? (
+                                                    <CodeView codeRange={msg.codeRange} language={language} value={value} originEditor={editor} />
+                                                ) : (
+                                                    <code {...props}>{children}</code>
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        {msg.text}
+                                    </ReactMarkdown>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {loading ? <Button style={{ backgroundColor: 'transparent', borderColor: 'transparent' }} icon={<LoadingOutlined style={{ color: 'white' }} />} /> : null}
+                    {errorMessage ? <Alert type="error" style={{ fontSize: "12px" }} message={errorMessage} /> : null}
+
+                    <div ref={messagesEndRef} />
+                </div>
+                <div>
+                    <TextArea
+                        style={{ fontSize: "12px" }}
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                            }
+                        }}
+                        placeholder="输入问题..."
+                        autoSize={{ minRows: 5, maxRows: 10 }}
+                        disabled={loading}
+                    />
+                    <Row style={{marginTop: '5px', marginBottom: '5px'}} align="middle" justify="space-between">
+                        <Col>
+                            <Row gutter={8} align="middle">
+                                <Col>
+                                    <ModelSetting usedModelKey={favoriteModel} setModelOptions={setModelOptions} />
+                                    <Select
+                                        value={favoriteModel}
+                                        onChange={(val) => {
+                                            setFavoriteModel(val);
+                                            dataStore.updateFavoriteModel(val);
+                                            startChat(val);
+                                        }}
+                                        placement="topLeft"
+                                        options={
+                                            modelOptions.map(x => ({
+                                                value: x,
+                                                label: x
+                                            }))
+                                        }
+                                        disabled={loading}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Select
+                                        style={{width: '90px'}}
+                                        value={codeSelect}
+                                        onChange={setCodeSelect}
+                                        placement="topLeft"
+                                        options={[
+                                            { value: 'code', label: '全文' },
+                                            { value: 'selection', label: '选中区' }
+                                        ]}
+                                        allowClear
+                                        disabled={loading}
+                                    />
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col>
+                            <Button
+                                // type="primary"
+                                icon={<SendOutlined />}
+                                onClick={handleSendMessage}
+                                loading={loading}
+                            >
+                                发送
+                            </Button>
+                        </Col>
+                    </Row>
+                </div>
             </div>
-        </div>
+        </ConfigProvider>
     );
 };
 
