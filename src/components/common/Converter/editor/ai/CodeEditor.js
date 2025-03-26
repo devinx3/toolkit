@@ -6,6 +6,12 @@ import './CodeEditor.css';
 
 const { Text } = Typography;
 
+const menuItemStyle = {
+    // fontSize: 12,
+    // color: '#999999;',
+    // height: '20px'
+}
+
 const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, onExit, beforeMount }) => {
     const [monacoInstance, setMonacoInstance] = useState(null);
     const [editorInstance, setEditorInstance] = useState(null);
@@ -51,6 +57,7 @@ const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, 
                 <Menu
                     className='devinx3-editor-header-menu'
                     mode="horizontal"
+                    theme='dark'
                     items={[{
                         key: 'file',
                         label: <Text className='devinx3-label'>文件</Text>,
@@ -77,7 +84,7 @@ const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, 
                     <Editor
                         language="javascript"
                         theme="vs-dark"
-                        path={path}
+                        path={`${path}_innerAiEditor`}
                         value={value}
                         onChange={onChange}
                         options={{
@@ -95,6 +102,7 @@ const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, 
                 </div>
                 <EditorSider
                     category={category}
+                    path={path}
                     containerWidth={containerRef.current?.offsetWidth || 0}
                     monacoInstance={monacoInstance}
                     editorInstance={editorInstance}
@@ -106,7 +114,7 @@ const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, 
 
 const minEditorWidthRatio = 0.3; // 编辑器最小宽度 30%
 const maxEditorWidthRatio = 0.7; // 编辑器最大宽度 70%
-const EditorSider = ({ category, monacoInstance, editorInstance }) => {
+const EditorSider = ({ category, path, monacoInstance, editorInstance }) => {
     const containerWidth = document.body.offsetWidth;
     const [width, setWidth] = useState(document.body.offsetWidth * minEditorWidthRatio); // 初始化侧边栏宽度
     const handleMouseDown = (e) => {
@@ -160,6 +168,7 @@ const EditorSider = ({ category, monacoInstance, editorInstance }) => {
             <div className="devinx3-editor-sider" style={{ width: width }}>
                 <ChatPanel
                     category={category}
+                    path={path}
                     monaco={monacoInstance}
                     editor={editorInstance}
                 />

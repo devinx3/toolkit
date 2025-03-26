@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input, Radio, Space, Button, Drawer, FloatButton, Typography } from 'antd';
-import { CustomerServiceOutlined } from '@ant-design/icons';
+import { ExpandOutlined } from '@ant-design/icons';
 import MonacoEditor from '@monaco-editor/react';
 import loadEditor from './loadEditor';
 import AiCodeEditor from './ai/CodeEditor';
@@ -42,7 +42,7 @@ const MonacoContainer = ({ category, path, value, onChange, onSaveCode, onRunCod
     const [enableAi, setEnableAi] = React.useState(false);
     if (!enableAi) {
         return <>
-            <FloatButton icon={<CustomerServiceOutlined />} onClick={() => setEnableAi(true)} type="primary">AI</FloatButton>
+            <FloatButton icon={<ExpandOutlined />} onClick={() => setEnableAi(true)} type="primary">AI</FloatButton>
             <MonacoEditor height="66vh" language="javascript" theme="vs-dark" path={path} value={value} onChange={onChange} beforeMount={loadEditor} />
         </>;
     }

@@ -36,9 +36,7 @@ const CodeView = ({ codeRange, value, language, originEditor }) => {
             message.error("编辑器不存在");
             return;
         }
-        console.log("codeRange", codeRange)
         if (codeRange) {
-            debugger
             originEditor.executeEdits("", [
                 {
                     range: codeRange,
@@ -49,7 +47,6 @@ const CodeView = ({ codeRange, value, language, originEditor }) => {
         } else {
             originEditor.setValue(val)
         }
-
     }
     return (<>
         <div style={{ backgroundColor: '#222222', padding: '10px', borderRadius: '4px' }}>
@@ -301,16 +298,44 @@ const ModelSettingForm = ({ usedModelKey, updateKey, model, data }) => {
     );
 }
 
-const ChatPanel = ({ category, monaco, editor }) => {
-    const [messages, setMessages] = React.useState([]);
-    const [inputMessage, setInputMessage] = React.useState('');
+const chatCache = {
+    path: undefined,
+    defaultData: {
+        messages: [],
+        conversation: null,
+        inputMessage: '',
+        errorMessage: '',
+        codeSelect: 'code'
+    },
+    data: null
+}
+
+const updateChatData = (path, data) => {
+    chatCache.path = path;
+    chatCache.data = data;
+}
+const getChatData = (path) => {
+    if (path != chatCache.path) {
+        return chatCache.defaultData;
+    }
+    return chatCache.data || chatCache.defaultData;
+}
+
+const ChatPanel = ({ path, category, monaco, editor }) => {
+    const chatCacheData = getChatData(path);
+    const [messages, setMessages] = React.useState(chatCacheData.messages);
+    const [inputMessage, setInputMessage] = React.useState(chatCacheData.inputMessage);
     const [favoriteModel, setFavoriteModel] = React.useState(dataStore.getFavoriteModel());
     const [modelOptions, setModelOptions] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState('');
+    const [errorMessage, setErrorMessage] = React.useState(chatCacheData.errorMessage);
     const messagesEndRef = React.useRef(null);
-    const [conversation, setConversation] = React.useState(null);
-    const [codeSelect, setCodeSelect] = React.useState('code');
+    const [conversation, setConversation] = React.useState(chatCacheData.conversation);
+    const [codeSelect, setCodeSelect] = React.useState(chatCacheData.codeSelect);
+
+    React.useEffect(() => {
+        updateChatData(path, { messages, inputMessage, errorMessage, conversation, codeSelect })
+    }, [messages, inputMessage, errorMessage, conversation, codeSelect]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -423,7 +448,7 @@ const ChatPanel = ({ category, monaco, editor }) => {
         <div className="devinx3-chat">
             <div className="devinx3-chat-header">
                 <Text>AI 助手</Text>
-                <Button style={{ color: 'white' }} icon={<PlusOutlined />} disabled={loading} onClick={() => startChat(favoriteModel)} />
+                <Button style={{ color: 'white' }} size='small' icon={<PlusOutlined />} disabled={loading} onClick={() => startChat(favoriteModel)} />
             </div>
 
             <div className="devinx3-chat-message-list">
