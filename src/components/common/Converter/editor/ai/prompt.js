@@ -11,16 +11,22 @@ function buildContent(content) {
 }
 
 const headPrefix = "\n\n";
-function buildPrompt({ framework, dependent, componentRules, input, output, codeQuality }) {
-  let content = "【开发框架】" + buildContent(framework);
+function buildPrompt({ header, framework, needDesc, dependent, componentRules, output, codeQuality }) {
+  let content = header || "";
+  if (framework) {
+    if (header) {
+      content += headPrefix;
+    }
+    content += "【开发框架】" + buildContent(framework);
+  }
+  if (needDesc) {
+    content += headPrefix + "【核心需求】\n请生成符合以下约束条件的 JavaScript 代码片段：" + buildContent(needDesc);
+  }
   if (dependent) {
     content += headPrefix + "【依赖管理】" + buildContent(dependent);
   }
   if (componentRules) {
     content += headPrefix + "【组件规范】" + buildContent(componentRules);
-  }
-  if (input) {
-    content += headPrefix + "【输入格式规范】" + buildContent(input);
   }
   if (output) {
     content += headPrefix + "【输出格式规范】" + buildContent(output);
@@ -43,19 +49,25 @@ let basicCodeQuality = ["必须通过ESLint校验", "保持最小依赖原则", 
 
 const prompt = {
   json: buildPrompt({
-    framework: "使用JavaScript的ES6语法开发",
+    header: "JavaScript 代码生成指令",
+    needDesc: ["代码将被注入 function anonymous(inputData, inputObj, Util) { /* 此处 */ return inputObj; } 函数体",
+      "inputData 是JSON字符串, inputObj 是JSON对象",
+      "必须兼容现代浏览器环境",
+      "返回值类型需为JSON对象或JSON字符串"
+    ],
     dependent: basicDependent,
     componentRules: basicComponentRules,
-    input: `输入数据通过inputData参数传递, 仅支持JSON对象`,
-    output: `代码必须严格遵循以下结构(return 对象必须是JSON对象)：return inputData;`,
     codeQuality: basicCodeQuality
   }),
   txt: buildPrompt({
-    framework: "使用JavaScript的ES6语法开发",
+    header: "JavaScript 代码生成指令",
+    needDesc: ["代码将被注入 function anonymous(inputData, Util) { /* 此处 */ return inputData; } 函数体",
+      "inputData 是多行文本",
+      "必须兼容现代浏览器环境",
+      "返回值类型需为字符串"
+    ],
     dependent: basicDependent,
     componentRules: basicComponentRules,
-    input: `输入数据通过inputData参数传递, 支持多行文本`,
-    output: `代码必须严格遵循以下结构(return 对象必须是字符串)：return inputData;`,
     codeQuality: basicCodeQuality
   }),
   customize: buildPrompt({
