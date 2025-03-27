@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Divider, Menu, Typography, message } from "antd";
+import { Button, ConfigProvider, message, theme } from "antd";
 import Editor from '@monaco-editor/react';
 import ChatPanel from './ChatPanel';
 import './CodeEditor.css';
-
-const { Text } = Typography;
 
 const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, onExit, beforeMount }) => {
     const [monacoInstance, setMonacoInstance] = useState(null);
@@ -47,32 +45,16 @@ const AiCodeEditor = ({ category, path, value, onChange, onSaveCode, onRunCode, 
 
     return (
         <div className="devinx3-editor-container">
-            <div className='devinx3-editor-header'>
-                <Menu
-                    className='devinx3-editor-header-menu'
-                    mode="horizontal"
-                    theme='dark'
-                    items={[{
-                        key: 'file',
-                        label: <Text className='devinx3-label'>文件</Text>,
-                        children: [{
-                            key: 'save',
-                            label: '保存',
-                            onClick: handleSave
-                        }, {
-                            key: 'exit',
-                            label: '退出',
-                            onClick: onExit
-                        }]
-                    },
-                    {
-                        key: 'run',
-                        label: <Text className='devinx3-label'>运行</Text>,
-                        onClick: handleRunCode
-                    }]}
-                />
-            </div>
-            <Divider style={{ height: '1px', margin: '3px' }} />
+            <ConfigProvider theme={{ algorithm: theme.darkAlgorithm }}                >
+                <div className='devinx3-editor-header'>
+
+                    <Button type='text' onClick={onExit}>退出</Button>
+                    {onSaveCode ? <Button type='text' onClick={handleSave}>保存</Button> : null}
+                    {onRunCode ? <Button type='text' onClick={handleRunCode}>运行</Button> : null}
+
+                </div>
+            </ConfigProvider>
+            {/* <Divider style={{ height: '1px', margin: '3px' }} /> */}
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
                 <div ref={containerRef} className="devinx3-editor-content" style={{ flex: 1 }}>
                     <Editor

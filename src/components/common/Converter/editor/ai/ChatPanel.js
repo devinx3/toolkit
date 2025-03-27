@@ -315,7 +315,7 @@ const updateChatData = (path, data) => {
     chatCache.data = data;
 }
 const getChatData = (path) => {
-    if (path != chatCache.path) {
+    if (path !== chatCache.path) {
         return chatCache.defaultData;
     }
     return chatCache.data || chatCache.defaultData;
@@ -335,7 +335,7 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
 
     React.useEffect(() => {
         updateChatData(path, { messages, inputMessage, errorMessage, conversation, codeSelect })
-    }, [messages, inputMessage, errorMessage, conversation, codeSelect]);
+    }, [path, messages, inputMessage, errorMessage, conversation, codeSelect]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

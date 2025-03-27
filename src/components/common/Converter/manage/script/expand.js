@@ -203,11 +203,7 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
                     scriptContent: code
                 }
                 requestService(updateConfig, category, newConfig)
-                    .then(() => {
-                        if (callback) {
-                            callback();
-                        }
-                    })
+                    .then(() => callback && callback())
                     .catch(reason => console.log(reason) & message.error("保存代码失败, 失败原因: " + reason));
             }
             handleRunCode.current = () => {

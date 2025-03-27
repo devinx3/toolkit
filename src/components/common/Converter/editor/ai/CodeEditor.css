@@ -4,87 +4,17 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #1e1e1e;
+    background-color: #1e1e11;
     overflow: hidden;
 }
 
 /* 编辑器头部样式 */
 .devinx3-editor-header {
-    background-color: #1e1e1e;
+    padding: 5px;
 }
 
-.devinx3-editor-header {
-    padding: '10px';
-    margin-left: '3px';
-    color: '#fff';
-    border-bottom: '1px solid #333';
-}
-
-.devinx3-editor-header-menu .devinx3-label {
-    color: '#999'
-}
-
-.devinx3-editor-header .ant-menu {
-    background-color: #1e1e1e;
-    border-bottom: none;
-    color: #fff;
-}
-
-.devinx3-editor-header .ant-menu-item:hover,
-.devinx3-editor-header .ant-menu-submenu:hover {
-    background-color: #2a2a2a !important;
-}
-
-.devinx3-editor-header .ant-menu-submenu-title:hover {
-    color: #fff !important;
-}
-
-/* 子菜单样式 */
-.devinx3-editor-header .ant-menu-submenu .ant-menu {
-    background-color: #1e1e1e !important;
-    padding: 4px 0;
-}
-
-.devinx3-editor-header .ant-menu-submenu .ant-menu-item {
-    color: #fff !important;
-    background-color: #1e1e1e !important;
-    height: 32px !important;
-    line-height: 32px !important;
-    font-size: 13px;
-}
-
-.devinx3-editor-header .ant-menu-submenu .ant-menu-item:hover {
-    background-color: #2a2a2a !important;
-}
-
-.devinx3-editor-header .ant-menu-submenu-popup {
-    background-color: #1e1e1e;
-}
-
-.devinx3-editor-header .ant-menu-item-selected {
-    background-color: #2a2a2a !important;
-}
-
-.devinx3-editor-header-menu {
-    height: '100%';
-    border-right: 0;
-    background-color: '#1e1e1e' !important;
-    color: '#fff' !important;
-    border-bottom: 'none'
-}
-
-/* 修改下划线颜色 */
-.devinx3-editor-header .ant-menu-horizontal::after {
-    border-bottom-color: #333 !important;
-}
-
-.devinx3-editor-header .ant-menu-horizontal>.ant-menu-item::after,
-.devinx3-editor-header .ant-menu-horizontal>.ant-menu-submenu::after {
-    border-bottom-color: #333 !important;
-}
-
-.devinx3-label {
-    color: #999;
+.devinx3-editor-header button {
+    font-size: 12px;
 }
 
 /* 编辑器内容区域 */

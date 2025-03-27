@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 
 const modelStorage = "devinx3.toolkit.ai.setting.model";
-const favoriteModelStorage = "devinx3.toolkit.ai.setting.model.favorite";
+const favoriteModelStorage = modelStorage + ".favorite";
 
 // 加密
 function encrypt(str) {
