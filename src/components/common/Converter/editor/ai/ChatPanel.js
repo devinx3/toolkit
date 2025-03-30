@@ -1,10 +1,10 @@
 import React from 'react';
 import { Alert, Input, Button, Select, Typography, Row, Col, Tooltip, Drawer, Space, Menu, Form, message, ConfigProvider, theme } from 'antd';
-import { SendOutlined, SettingOutlined, LoadingOutlined, CaretRightOutlined, DiffOutlined, PlusOutlined } from '@ant-design/icons';
+import { SendOutlined, SettingOutlined, LoadingOutlined, CaretRightOutlined, DiffOutlined, PlusOutlined, BorderOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import './ChatPanel.css';
-import { createConversation } from './AiAgent';
+import { createConversation, isCancelError } from './AiAgent';
 import { getPrompt } from './prompt'
 import DataStore from './dataStore'
 
@@ -17,6 +17,20 @@ const defaultModelConfig = {
     model: 'deepseek-chat',
     secretKey: 'sk-********************************'
 }
+
+const ReactMarkdownView = React.memo(({ msg, editor }) => {
+    const CodeComponent = React.useMemo(() => {
+        return ({ node, inline, className, children, ...props }) => {
+            const language = className ? className.replace('language-', '') : '';
+            const value = String(children).trimEnd("\n");
+
+            return value.includes('\n') ?
+                <CodeView codeRange={msg.codeRange} language={language} value={value} originEditor={editor} />
+                : <code {...props}>{children}</code>
+        }
+    }, [msg.codeRange, editor]);
+    return <ReactMarkdown components={{ code: CodeComponent }} >{msg.text}</ReactMarkdown>
+});
 
 const CodeView = ({ codeRange, value, language, originEditor }) => {
     const [diffFlag, setDiffFlag] = React.useState(false);
@@ -338,7 +352,9 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
     }, [path, messages, inputMessage, errorMessage, conversation, codeSelect]);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
     };
 
     const startChat = (val) => {
@@ -400,9 +416,20 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
             const res = await conversation.chat({ range });
             return { ...res, range };
         } catch (error) {
-            throw new Error('API 请求失败: ' + error.message);
+            if (isCancelError(error)) {
+                throw error;
+            } else {
+                console.error('请求数据失败:', error);
+                throw new Error('请求失败: ' + error.message);
+            }
         }
     };
+
+    const handleCancelMessage = () => {
+        if (!loading) return;
+        conversation.cancel();
+        setLoading(true);
+    }
 
     const handleSendMessage = () => {
         if (loading) return;
@@ -435,8 +462,11 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                     time: new Date()
                 }]);
             } catch (error) {
-                console.error('请求数据失败:', error);
-                setErrorMessage('抱歉，发生了错误，请稍后重试。');
+                if (isCancelError(error)) {
+                    setErrorMessage('');
+                } else {
+                    setErrorMessage(error.message);
+                }
             }
         }
         setErrorMessage('');
@@ -465,29 +495,12 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                             {msg.sender === 'user' ? (
                                 <div>{msg.text}</div>
                             ) : (
-                                <div>
-                                    <ReactMarkdown
-                                        components={{
-                                            code: ({ node, inline, className, children, ...props }) => {
-                                                const language = className ? className.replace('language-', '') : '';
-                                                const value = String(children).trimEnd("\n");
-                                                return value.includes('\n') ? (
-                                                    <CodeView codeRange={msg.codeRange} language={language} value={value} originEditor={editor} />
-                                                ) : (
-                                                    <code {...props}>{children}</code>
-                                                );
-                                            }
-                                        }}
-                                    >
-                                        {msg.text}
-                                    </ReactMarkdown>
-                                </div>
+                                <div><ReactMarkdownView msg={msg} editor={editor} /></div>
                             )}
                         </div>
                     ))}
                     {loading ? <Button style={{ backgroundColor: 'transparent', borderColor: 'transparent' }} icon={<LoadingOutlined style={{ color: 'white' }} />} /> : null}
                     {errorMessage ? <Alert type="error" style={{ fontSize: "12px" }} message={errorMessage} /> : null}
-
                     <div ref={messagesEndRef} />
                 </div>
                 <div>
@@ -503,9 +516,8 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                         }}
                         placeholder="输入问题..."
                         autoSize={{ minRows: 5, maxRows: 10 }}
-                        disabled={loading}
                     />
-                    <Row style={{marginTop: '5px', marginBottom: '5px'}} align="middle" justify="space-between">
+                    <Row style={{ marginTop: '5px', marginBottom: '5px' }} align="middle" justify="space-between">
                         <Col>
                             <Row gutter={8} align="middle">
                                 <Col>
@@ -529,7 +541,7 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                                 </Col>
                                 <Col>
                                     <Select
-                                        style={{width: '90px'}}
+                                        style={{ width: '90px' }}
                                         value={codeSelect}
                                         onChange={setCodeSelect}
                                         placement="topLeft"
@@ -544,14 +556,8 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                             </Row>
                         </Col>
                         <Col>
-                            <Button
-                                // type="primary"
-                                icon={<SendOutlined />}
-                                onClick={handleSendMessage}
-                                loading={loading}
-                            >
-                                发送
-                            </Button>
+                            {loading ? <Button icon={<BorderOutlined />} onClick={handleCancelMessage} title='取消' />
+                                : <Button icon={<SendOutlined />} onClick={handleSendMessage} title='发送' />}
                         </Col>
                     </Row>
                 </div>

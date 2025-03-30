@@ -7,6 +7,7 @@ export function createConversation(config) {
     });
 
     const messages = [];
+    let abortController = null;
     return {
         config: config,
         system: message => {
@@ -16,12 +17,35 @@ export function createConversation(config) {
             messages.push({ role: 'user', content: message });
         },
         chat: async () => {
-            const response = await client.post("/chat/completions", { model: config.model, messages });
-            const content = response.data.choices[0].message.content;
-            messages.push({ role: 'assistant', content });
-            return { content };
+            // Cancel any existing request
+            if (abortController) {
+                abortController.abort();
+            }
+            abortController = new AbortController();
+
+            try {
+                const response = await client.post("/chat/completions", 
+                    { model: config.model, messages },
+                    { signal: abortController.signal }
+                );
+                const content = response.data.choices[0].message.content;
+                messages.push({ role: 'assistant', content });
+                return { content };
+            } finally {
+                abortController = null;
+            }
+        },
+        cancel: () => {
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+            }
         },
         isEmpty: () => messages.length === 0,
         clear: () => messages.length = 0
     }
+}
+
+export function isCancelError(error) {
+    return error.name === "CanceledError";
 }
