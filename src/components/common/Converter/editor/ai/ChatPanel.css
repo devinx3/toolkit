@@ -45,7 +45,6 @@
     align-self: flex-end;
     background-color: #2d2d2d;
     color: #d4d4d4;
-    text-align: right;
     justify-content: flex-end;
 }
 
@@ -54,6 +53,5 @@
     font-size: 12px;
     align-self: flex-start;
     color: #d4d4d4;
-    text-align: left;
     justify-content: flex-start;
 }

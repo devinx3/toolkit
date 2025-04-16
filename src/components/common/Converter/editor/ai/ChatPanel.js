@@ -493,7 +493,7 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                             className={`devinx3-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`}
                         >
                             {msg.sender === 'user' ? (
-                                <div>{msg.text}</div>
+                                <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>
                             ) : (
                                 <div><ReactMarkdownView msg={msg} editor={editor} /></div>
                             )}
@@ -515,7 +515,7 @@ const ChatPanel = ({ path, category, monaco, editor }) => {
                             }
                         }}
                         placeholder="输入问题..."
-                        autoSize={{ minRows: 5, maxRows: 10 }}
+                        autoSize={{ minRows: 6, maxRows: 30 }}
                     />
                     <Row style={{ marginTop: '5px', marginBottom: '5px' }} align="middle" justify="space-between">
                         <Col>
