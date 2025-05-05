@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Popover, Typography } from 'antd';
+import { Button, Drawer, Typography } from 'antd';
 
 const functionCode = `function anonymous(Util, React) {
     // 处理逻辑
@@ -58,7 +58,7 @@ const toolDocument = (<>
     </Typography.Paragraph>
     <Typography.Paragraph>
         <Typography.Title level={5}>导入插件(异步)</Typography.Title>
-        <Typography.Text code copyable>{`const { importPlugin } = Util`}</Typography.Text>
+        <Typography.Text code copyable>{`const { importPlugin } = Util`}</Typography.Text><br />
         <Typography.Text code copyable>{`const { Button } = await importPlugin("antd")`}</Typography.Text>
     </Typography.Paragraph>
 </>)
@@ -102,20 +102,27 @@ return async () => {
 
 // 样例文档
 const DemoDocument = ({ title, codeDemo }) => {
-    const content = (<>
+    return (<>
         <Typography.Title level={3}>{title}</Typography.Title>
         <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{codeDemo}</Typography.Paragraph></div>
     </>)
-    return <Popover placement="rightTop" content={content} title={null} trigger="click">
-        <Button type='link'>{title}</Button>
-    </Popover>
+}
+
+const HelpDrawer = ({ title, content }) => {
+    const [open, setOpen] = React.useState(false);
+    return <>
+        <Button type='link' onClick={() => setOpen(true)}>{title}</Button>
+        <Drawer title={null} placement="right" width={800} onClose={() => setOpen(false)} closeIcon={null} open={open}>
+            {content}
+        </Drawer>
+    </>
 }
 
 const CodeHelpView = () => {
     return (<>
-        <Popover placement="rightTop" content={helpDocument} title={null} trigger="click"><Button type='link'>帮助文档</Button></Popover>
-        <Popover placement="rightTop" content={toolDocument} title={null} trigger="click"><Button type='link'>常用工具</Button></Popover>
-        <DemoDocument title={"Form 案例文档"} codeDemo={FormDemo} />
+        <HelpDrawer title="帮助文档" content={helpDocument} />
+        <HelpDrawer title="常用工具" content={toolDocument} />
+        <HelpDrawer title="Form 示例文档" content={<DemoDocument title="Form 示例文档" codeDemo={FormDemo} />} />
     </>)
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Popover, Typography } from 'antd';
+import { Button, Typography, Drawer } from 'antd';
 
 const functionCode = `function anonymous(inputData, Util) {
     // 处理逻辑
@@ -62,7 +62,7 @@ const toolDocument = (<>
 
 // 文件读取工具
 const FileDemo =
-`const { XLSX } = Util;
+    `const { XLSX } = Util;
 const readExcel = (file, callbackWorkbook) => {
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -100,7 +100,7 @@ const FileDocument = (<>
 
 // 多文件案例文档
 const MutiFileDemo =
-`const { XLSX } = Util;
+    `const { XLSX } = Util;
 const readExcel = (file, callbackWorkbook) => {
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -141,12 +141,65 @@ const MutiFileDocument = (<>
     <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{MutiFileDemo}</Typography.Paragraph></div>
 </>);
 
+// worker 
+const WorkerDemo =
+    `// 检查 Worker 可用性
+if (!window.Worker) {
+    throw new Error('Web Workers are not supported in this browser');
+}
+const createWorker = (functionRef) => {
+    const blob = new Blob([\`(\${functionRef.toString()})()\`],{ type: 'application/javascript' });
+    const worker = new Worker(URL.createObjectURL(blob));
+    return {
+        ref: worker,
+        getResult: (data) => {
+            return new Promise((resolve, reject) => {
+                worker.postMessage(data);
+                worker.onmessage = (e) => {
+                    resolve(e.data);
+                    worker.terminate();
+                };
+                worker.onerror = (error) => {
+                    reject(error);
+                    worker.terminate();
+                };
+            });
+        }
+    }
+}
+const worker = createWorker(() => {
+    self.onmessage = function (e) {
+        // worker 处理逻辑
+        const data = e.data;
+        const result = data.split("\\n").map(line => \`\${line}\`).join(",");
+        self.postMessage(result);
+    };
+});
+return worker.getResult(inputData);`
+
+// Worker 使用文档
+const WorkerDocument = (<>
+    <Typography.Title level={3}>使用样例</Typography.Title>
+    <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{WorkerDemo}</Typography.Paragraph></div>
+</>);
+
+const HelpDrawer = ({ title, content }) => {
+    const [open, setOpen] = React.useState(false);
+    return <>
+        <Button type='link' onClick={() => setOpen(true)}>{title}</Button>
+        <Drawer title={null} placement="right" width={800} onClose={() => setOpen(false)} closeIcon={null} open={open}>
+            {content}
+        </Drawer>
+    </>
+}
+
 const CodeHelpView = () => {
     return (<>
-        <Popover placement="rightTop" content={helpDocument} title={null} trigger="click"><Button type='link'>帮助文档</Button></Popover>
-        <Popover placement="rightTop" content={toolDocument} title={null} trigger="click"><Button type='link'>常用工具</Button></Popover>
-        <Popover placement="rightTop" content={FileDocument} title={null} trigger="click"><Button type='link'>文件读取样例</Button></Popover>
-        <Popover placement="rightTop" content={MutiFileDocument} title={null} trigger="click"><Button type='link'>多文件读取样例</Button></Popover>
+        <HelpDrawer title="帮助文档" content={helpDocument} />
+        <HelpDrawer title="常用工具" content={toolDocument} />
+        <HelpDrawer title="文件读取样例" content={FileDocument} />
+        <HelpDrawer title="多文件读取样例" content={MutiFileDocument} />
+        <HelpDrawer title="Worker 使用样例" content={WorkerDocument} />
     </>)
 }
 
