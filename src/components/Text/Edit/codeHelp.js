@@ -13,7 +13,6 @@ const helpDocument = (<>
     <Typography.Paragraph>方法的入参为: inputData, Util</Typography.Paragraph>
     <Typography.Paragraph>方法的返回值: 支持返回 Promise 对象, resolve方法的参数即为返回值, reject方法的参数即为报错提示</Typography.Paragraph>
     <Typography.Paragraph><Typography.Text code copyable>inputData</Typography.Text>: 输入数据</Typography.Paragraph>
-    <Typography.Paragraph><Typography.Text code copyable>inputObj</Typography.Text>: 输入数据转换的Json对象</Typography.Paragraph>
     <Typography.Paragraph><Typography.Text code copyable>Util</Typography.Text>: 内置的工具类</Typography.Paragraph>
     <Typography.Paragraph>使用者仅仅需要实现<b>方法体</b></Typography.Paragraph>
     <Typography.Title level={5}>转换方法样例</Typography.Title>
@@ -179,7 +178,7 @@ return worker.getResult(inputData);`
 
 // Worker 使用文档
 const WorkerDocument = (<>
-    <Typography.Title level={3}>使用样例</Typography.Title>
+    <Typography.Title level={3}>Worker 使用</Typography.Title>
     <div style={{ whiteSpace: 'pre-wrap' }}><Typography.Paragraph code copyable>{WorkerDemo}</Typography.Paragraph></div>
 </>);
 
@@ -197,9 +196,9 @@ const CodeHelpView = () => {
     return (<>
         <HelpDrawer title="帮助文档" content={helpDocument} />
         <HelpDrawer title="常用工具" content={toolDocument} />
-        <HelpDrawer title="文件读取样例" content={FileDocument} />
-        <HelpDrawer title="多文件读取样例" content={MutiFileDocument} />
-        <HelpDrawer title="Worker 使用样例" content={WorkerDocument} />
+        <HelpDrawer title="文件读取" content={FileDocument} />
+        <HelpDrawer title="多文件读取" content={MutiFileDocument} />
+        <HelpDrawer title="Worker 使用" content={WorkerDocument} />
     </>)
 }
 

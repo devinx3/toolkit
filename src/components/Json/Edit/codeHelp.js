@@ -103,7 +103,7 @@ const CodeHelpView = () => {
     return (<>
         <HelpDrawer title="帮助文档" content={helpDocument} />
         <HelpDrawer title="常用工具" content={toolDocument} />
-        <HelpDrawer title="遍历对象样例" content={traverseDocument} />
+        <HelpDrawer title="遍历对象" content={traverseDocument} />
     </>)
 }
 
