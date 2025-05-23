@@ -17,25 +17,43 @@ const createSearch = (url) => {
 }
 const search = createSearch(window.location.href);
 
+const getFirstScriptByUrl = async (url, secretKey) => {
+    const response = await axios.get(url, { responseType: 'text' });
+    if (response.status !== 200) {
+        throw new Error(response.statusText);
+    }
+    let newList = restoreByImportData(response.data, secretKey);
+    if (newList.length !== 1) {
+        console.log(`前有${newList.length}个组件, 仅仅渲染了第1个组件`);
+    }
+    return newList[0];
+}
 const getScript = async () => {
     let shareData = search.get("shareData");
     if (shareData) {
         return restoreByShareData(shareData);
     }
+    let secretKey = search.get("secretKey");
     let importUrl = search.get("importUrl");
     if (importUrl) {
         importUrl = window.decodeURIComponent(importUrl);
-        const secretKey = search.get("secretKey") || createSearch(importUrl).get("secretKey")?.trim();
-        const response = await axios.get(importUrl, { responseType: 'text' });
-        const data = response.data;
-        if (!data) {
-            throw new Error("数据格式异常");
+        secretKey = secretKey || createSearch(importUrl).get("secretKey")?.trim();
+        return getFirstScriptByUrl(importUrl, secretKey);
+    }
+
+    let gist = search.get("githubGist");
+    if (gist) {
+        let username = search.get("username") || "devinx3";
+        let gistUrl = 'https://gist.githubusercontent.com/' + username + '/' + gist;
+        if (!gist.includes("/")) {
+            gistUrl += '/raw';
         }
-        let newList = restoreByImportData(data, secretKey);
-        if (newList.length !== 1) {
-            console.log(`前有${newList.length}个组件, 仅仅渲染了第1个组件`);
-        }
-        return newList[0];
+        return getFirstScriptByUrl(gistUrl, secretKey);
+    }
+
+    let dpasteItemId = search.get("dpasteItemId");
+    if (dpasteItemId) {
+        return getFirstScriptByUrl(`https://dpaste.com/${dpasteItemId}.txt`, secretKey);
     }
     return null;
 }
@@ -79,7 +97,7 @@ const CustomizationPage = () => {
             }
         }).catch(e => {
             console.error("获取脚本失败", e);
-            message.error("获取脚本失败: " + (e?.message || ''));
+            message.error("获取脚本失败: " + (e.message || ''), 0);
         });
     }, [context]);
     const dataConfig = {
