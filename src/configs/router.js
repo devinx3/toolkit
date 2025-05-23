@@ -12,6 +12,7 @@ const Encrypt = React.lazy(() => import('../components/Text/Encrypt'));
 const TextEdit = React.lazy(() => import('../components/Text/Edit'));
 const JsonEdit = React.lazy(() => import('../components/Json/Edit'));
 const CustomizeManage = React.lazy(() => import('../components/Customization/Manage'));
+const CustomizePage = React.lazy(() => import('../components/Customization/Page'));
 const ScriptIntroduce = React.lazy(() => import('../pages/About/scriptIntroduce'));
 
 const routes = [
@@ -62,6 +63,12 @@ const routes = [
     ],
   },
   {
+    menu: false,
+    key: 'customize-page',
+    path: '/customize/page',
+    component: CustomizePage,
+  },
+  {
     key: 'customize',
     name: '定制化',
     icon: <ContainerOutlined />,
@@ -75,7 +82,7 @@ const routes = [
       },
       ...dynamicRoue()
     ],
-  }, 
+  },
   {
     key: 'about',
     name: '关于',

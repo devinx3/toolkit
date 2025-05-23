@@ -10,7 +10,7 @@ import AIView from './AIView';
 const { Title } = Typography;
 
 // 解析输出元素
-const convertOuput = (outputData) => {
+export const convertOuput = (outputData) => {
     let outputEle = outputData instanceof ScriptResult ? outputData.get() : outputData;
     if (!React.isValidElement(outputEle) && !(outputEle instanceof Function)) outputEle = undefined;
     return outputEle;
@@ -92,7 +92,7 @@ const TabPanel = ({ items }) => {
     return <Tabs type="editable-card" animated={true} hideAdd={true} size='small' tabBarGutter={0} activeKey={currentKey} items={currentItems} onChange={setCurrentKey} onEdit={handleRemove} />;
 }
 
-class ScriptErrorBoundary extends React.Component {
+export class ScriptErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
         this.state = { didCatch: false };

@@ -6,6 +6,7 @@ import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
 import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined } from '@ant-design/icons';
 import StrUtil from '../../../../../utils/StrUtil';
 import lzString from 'lz-string'
+import { backup2ShareData } from '../backup';
 
 const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
 const { Text } = Typography;
@@ -236,7 +237,7 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
 
 const generateShareUrl = (shareData) => {
     let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent }
-    let shareDataParam = lzString.compressToEncodedURIComponent(JSON.stringify(newShareData));
+    let shareDataParam = backup2ShareData(newShareData);
     const idx = window.location.href.indexOf("?");
     let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
     return newUrl + "?shareData=" + shareDataParam;

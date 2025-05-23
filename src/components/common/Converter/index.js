@@ -48,7 +48,7 @@ class IntelligentEvent {
 /**
  * 转换事件上下文
  */
-class ConvertContext {
+export class ConvertContext {
     constructor() {
         this.convertHandler = null;
     }

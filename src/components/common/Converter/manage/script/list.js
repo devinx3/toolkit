@@ -2,7 +2,8 @@ import React from 'react';
 import { Button, Modal, Tooltip, List, Skeleton, Checkbox, Typography, Upload, message, Input, Spin, Drawer, Space } from 'antd';
 import { DeleteOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined, CloseOutlined } from '@ant-design/icons';
 import storeEditService, { requestService } from '../../store/storeEditService';
-import { ScriptUtil, dynamicConfig, SIMPLE_SECRET_STRATEGY } from '../handler';
+import { ScriptUtil } from '../handler';
+import { backup2ImportData, restoreByImportData } from '../backup';
 import CopyButton from '../../../CopyButton';
 import FileUtil from '../../../../../utils/FileUtil'
 import StrUtil from '../../../../../utils/StrUtil'
@@ -14,8 +15,7 @@ const { addConfig, queryConfigByCode, updateConfig, hiddenConfig, batchDeleteCon
 
 // 鼠标移入后延时多少才显示 Tooltip，单位：秒
 const tipMouseEnterDelay = 1;
-// 配置报表
-const CONFIG_VERSION = 101;
+
 (() => {
     // 2025-06-01 删除此函数
     // 配置回调方法
@@ -31,34 +31,18 @@ const CONFIG_VERSION = 101;
         }
     }
 })();
-const BACKUP_DATA_NAME = 'd';
-const BACKUP_CONFIG_NAME = 'c';
-const BACKUP_SECRET_STRATEGY_NAME = 'ss';
 // 密钥
 const SECRET_KEY_NAME = 'secretKey';
 // 从url中获取数据
 const importFromUrl = (url, secretKey, handleCallback, handleClear) => {
-    axios.get(url)
-    .then(function (res) {
-        const data = res.data
-        if (!data) {
-            throw new Error("数据格式异常");
-        }
-        const scriptContent = data[BACKUP_DATA_NAME];
-        if (!(typeof (scriptContent) === 'string')) {
-            throw new Error("数据格式异常");
-        }
-        const itemConfig = data[BACKUP_CONFIG_NAME];
-        if (itemConfig) {
-            if (!(typeof (itemConfig) === 'object')) throw new Error("数据格式异常");
-            itemConfig.secretKey = secretKey;
-        }
-        handleCallback(scriptContent, itemConfig);
-    }).catch(e => {
-        handleClear();
-        message.error("加载失败: " + url)
-        console.debug('加载失败', e)
-    }).finally(() => handleClear(undefined))
+    axios.get(url, { responseType: 'text' })
+        .then(function (res) {
+            handleCallback(res.data, secretKey);
+        }).catch(e => {
+            handleClear();
+            message.error("加载失败: " + url)
+            console.debug('加载失败', e)
+        }).finally(() => handleClear(undefined))
 }
 // 是否由有效的 url 路径
 const convertURL = (urlString) => {
@@ -158,15 +142,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
     }
     // 构造导出数据
     const handleBackupData = (source, config) => {
-        const secretStrategy = secretKey ? SIMPLE_SECRET_STRATEGY : undefined;
-        const data = dynamicConfig.convertBackupData(JSON.stringify(source), CONFIG_VERSION, secretStrategy, secretKey);
-        if (config && secretStrategy) config[BACKUP_SECRET_STRATEGY_NAME] = secretStrategy;
-        let backupData = {};
-        backupData[BACKUP_DATA_NAME] = data;
-        if (config instanceof Object && Object.keys(config).length > 0) {
-            backupData[BACKUP_CONFIG_NAME] = config;
-        }
-        return JSON.stringify(backupData);
+        return backup2ImportData(source, { secretKey, ...config });
     }
     let doubleBackupTimer = null;
     // 备份 URL 文件节点
@@ -190,11 +166,11 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
     }
     const hanldeHidden = (checkedScriptHidden) => {
         requestService(hiddenConfig, category, checkedList, checkedScriptHidden)
-        .then(() => {
-            message.success("隐藏成功")
-            clearCheckAll();
-            refreshScript()
-        }).catch(err => message.error("隐藏失败"));
+            .then(() => {
+                message.success("隐藏成功")
+                clearCheckAll();
+                refreshScript()
+            }).catch(err => message.error("隐藏失败"));
     }
 
     // 复制JSON节点
@@ -211,23 +187,15 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
     // 导入浏览器中
     const startImport = (callback) => setImporting(true) & setTimeout(callback, 0);
     const completeImport = () => setImporting(false);
-    const handleImportConfigCallback = (importData, importConfig) => {
+    const handleImportConfigCallback = (importData, configSecretKey) => {
         if (!importData) {
             completeImport();
             return;
         }
-        try {
-            let obj = JSON.parse(importData);
-            importData = obj[BACKUP_DATA_NAME];
-            importConfig = obj[BACKUP_CONFIG_NAME];
-        } catch (e) {
-        }
-        if (!importConfig) {
-            importConfig = {};
-        }
+        debugger
         let newList = null;
         try {
-            newList = JSON.parse(dynamicConfig.convertOriginData(importData, importConfig[BACKUP_SECRET_STRATEGY_NAME], importConfig.secretKey || secretKey));
+            newList = restoreByImportData(importData, configSecretKey || secretKey);
         } catch (e) {
             message.error("导入失败, 异常消息: " + e.message);
             completeImport();
@@ -313,7 +281,7 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
         }
         const idx = window.location.href.indexOf("?");
         let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
-        newUrl = newUrl  + "?importUrl=" + window.encodeURIComponent(importConfigUrl);
+        newUrl = newUrl + "?importUrl=" + window.encodeURIComponent(importConfigUrl);
         StrUtil.copyToClipboard(newUrl);
         message.success("已复制到粘贴板");
     }
@@ -349,13 +317,13 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
                         <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(true)} icon={<EyeInvisibleOutlined />}>隐藏</Button>
                         <Button type='text' disabled={checkedList.length === 0} onClick={() => hanldeHidden(false)} icon={<EyeOutlined />}>显示</Button>
                         <Tooltip title="不支持导入" mouseEnterDelay={tipMouseEnterDelay * 2}>
-                            <Button type='text' disabled={checkedList.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON节点</Button>    
+                            <Button type='text' disabled={checkedList.length === 0} icon={<CopyOutlined />} onClick={handleCopyConfig}>复制JSON节点</Button>
                         </Tooltip>
                     </>)}
                     footer={<>
-                        <Input style={{marginTop: "3px"}} type='url' placeholder='备份文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
-                        <Input style={{marginTop: "3px"}} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
-                        <Space style={{marginTop: "3px"}}>
+                        <Input style={{ marginTop: "3px" }} type='url' placeholder='备份文件地址' value={importConfigUrl} onChange={handleChangeImportConfigUrl} allowClear />
+                        <Input style={{ marginTop: "3px" }} type='text' disabled={importConfigUrl?.length > 0} addonBefore={`${SECRET_KEY_NAME}=`} placeholder='密钥' value={secretKey} onChange={(e) => setSecretKey(e.target.value)} allowClear />
+                        <Space style={{ marginTop: "3px" }}>
                             {importConfigUrl?.length > 0 ? (<Button onClick={handleImportConfig} icon={<ImportOutlined />}>导入</Button>) : (<Upload maxCount={1} showUploadList={false} beforeUpload={(file) => handleImportConfig(file)} >
                                 <Button icon={<ImportOutlined />}>导入</Button>
                             </Upload>)}
@@ -365,13 +333,13 @@ const ExpandManageList = ({ category, intelligent, dataSource, refreshScript }) 
                     renderItem={(item) => (
                         <List.Item
                             actions={[
-                            <CopyButton type='link' tipTitle="复制节点编码" onClick={() => StrUtil.copyToClipboard(item.code)} ></CopyButton>,
-                            <Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>
-                        ]} >
+                                <CopyButton type='link' tipTitle="复制节点编码" onClick={() => StrUtil.copyToClipboard(item.code)} ></CopyButton>,
+                                <Button type='link' key="list-item-srcipt" onClick={() => handleOpenScriptContentModal(item.scriptContent)}>脚本</Button>
+                            ]} >
                             <Skeleton loading={false}>
                                 <List.Item.Meta
                                     avatar={<Checkbox value={item.code} checked={checkedList.indexOf(item.code) >= 0} onChange={onChangeConfigItem} />}
-                                    title={(<>{ item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined  />}<Typography.Text title={item.code} style={{marginLeft: "3px"}}><b>{item.name}</b></Typography.Text></>)}
+                                    title={(<>{item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined />}<Typography.Text title={item.code} style={{ marginLeft: "3px" }}><b>{item.name}</b></Typography.Text></>)}
                                     description={item.description}
                                 />
                             </Skeleton>
