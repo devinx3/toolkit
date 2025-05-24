@@ -204,4 +204,29 @@ const Util = {
 }
 ```
 
+## 独立页面
+[示例](#/customize/page?shareData=N4IgdghgtgpiBcJAG8oX00AUhTc0FeBgwJUNVyAlCADQgAmMAzgMYBOAlgA4Au9A9mAsiiSDQywDCHZjDDMutGMwCutMAAIAPGXoA3AHwAJGABtdbYgoDqbWrrIBCJQHpVmgNwgAvkA)
 
+#### 不同数据来源的 URI 参数
+#### 分享数据
+  - shareData 共享的脚本数据
+
+#### 备份数据
+  - importUrl: 备份数据地址(仅支持 HTTP GET 请求)
+  - secretKey(可选): 密钥
+
+#### [Github Gist](https://gist.github.com/devinx3)
+  - githubGist: 备份数据地址
+  - username(可选， 默认为devinx3): Github 用户名
+  - secretKey(可选): 密钥
+示例
+- 元数据: https://gist.github.com/devinx3/b1c069c65fa32fa5d7cc68a9a42d85c2
+- URI 参数: githubGist=b1c069c65fa32fa5d7cc68a9a42d85c2
+- URI 参数(完整): githubGist=b1c069c65fa32fa5d7cc68a9a42d85c2&username=devinx3&secretKey=
+
+#### [dpaste](https://dpaste.com)
+  - dpasteItemId: dpaste 网站 ITEM_ID
+  - secretKey(可选): 密钥
+示例
+- 元数据: https://dpaste.com/FXX8WGGJF
+- URI 参数: dpasteItemId=FXX8WGGJF
