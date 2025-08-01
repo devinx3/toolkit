@@ -15,6 +15,12 @@ const CustomizeManage = React.lazy(() => import('../components/Customization/Man
 const CustomizePage = React.lazy(() => import('../components/Customization/Page'));
 const ScriptIntroduce = React.lazy(() => import('../pages/About/scriptIntroduce'));
 
+const pages = [{
+  key: 'page',
+  path: '/page',
+  component: CustomizePage,
+}];
+
 const routes = [
   {
     menu: false,
@@ -112,4 +118,4 @@ const notFoundList = [{
 
 notFoundList.forEach(route => routes.push({ ...route, key: route.key + "-404", menu: false }));
 
-export default routes;
+export { routes, pages };

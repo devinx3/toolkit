@@ -3,7 +3,7 @@ import Icon from '@ant-design/icons'
 import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip } from 'antd'
 import React, { Suspense, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
-import routes from '../../configs/router'
+import { routes, pages } from '../../configs/router'
 import { HashRouter, Route, NavLink, Switch } from 'react-router-dom'
 import upgrade from './upgradation';
 
@@ -62,6 +62,7 @@ const getPath = () => {
   if (path[0] === '/') {
     path = path.substring(1);
   }
+  path = path.split("?")[0];
   return path.split('/').filter(val => val !== '');
 }
 const getDefaultSelectedKeys = () => {
@@ -117,52 +118,76 @@ const TopBanner = () => {
   />
 }
 
-const App = () => {
+const AppMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [itemSelectKey, setItemSelectKey] = useState();
   const handleMenuClick = (e) => {
     setItemSelectKey(e.key);
   }
+  return <Layout
+    style={{
+      minHeight: '100vh',
+    }}
+  >
+    <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+      <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])} />
+      <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
+        onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+    </Sider>
+    <Layout className="site-layout">
+      <Content
+        style={{
+          margin: '10px 16px',
+        }}
+      >
+        <div
+          className="site-layout-background"
+          style={{
+            padding: 24,
+            minHeight: 600,
+          }}
+        >
+          {/* {renderRoutes(routes)} */}
+          <RouterList />
+        </div>
+      </Content>
+      <Footer
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        Devinx3 Toolkit ©2022-2024 Created by Devinx3
+      </Footer>
+    </Layout>
+  </Layout>
+}
+
+const AppPage = () => {
+  return <Switch>
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" /></div>}>
+      {pages.map(route => <Route exact path={route.path} key={route.key} component={route.component} />)}
+    </Suspense>
+  </Switch>
+}
+
+const pageMenu = (() => {
+  let path = "/" + getPath().join("/");
+  console.log(path, path)
+  for (let route of pages) {
+    console.log(route.path)
+    if (route.path === path) {
+      return true;
+    }
+  }
+  return false;
+})();
+
+const App = () => {
   return (<>
     <TopBanner />
     <UpgradeBanner />
     <HashRouter>
-      <Layout
-        style={{
-          minHeight: '100vh',
-        }}
-      >
-        <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-          <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])} />
-          <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
-            onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
-        </Sider>
-        <Layout className="site-layout">
-          <Content
-            style={{
-              margin: '10px 16px',
-            }}
-          >
-            <div
-              className="site-layout-background"
-              style={{
-                padding: 24,
-                minHeight: 600,
-              }}
-            >
-              {/* {renderRoutes(routes)} */}
-              <RouterList />
-            </div>
-          </Content>
-          <Footer
-            style={{
-              textAlign: 'center',
-            }}
-          >
-            Devinx3 Toolkit ©2022-2024 Created by Devinx3
-          </Footer>
-        </Layout>
-      </Layout>
+      {pageMenu ? <AppPage /> : <AppMenu />}
     </HashRouter>
   </>);
 };

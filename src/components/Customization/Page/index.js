@@ -106,19 +106,9 @@ const CustomizationPage = () => {
         context,
         dataBlockRender: DataBlockRender
     };
-    return <div style={{
-        position: 'fixed',  // 固定定位
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 1,
-        backgroundColor: 'inherit',  // 白色背景
-    }}>
-        <div style={{ marginLeft: '5px', marginTop: '10px' }} >
-            <DataBlock {...dataConfig} />
-        </div>
-    </div >
+    return <div style={{ marginLeft: '5px', marginTop: '10px' }} >
+        <DataBlock {...dataConfig} />
+    </div>
 }
 
 export default CustomizationPage;

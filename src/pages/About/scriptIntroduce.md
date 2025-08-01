@@ -205,7 +205,9 @@ const Util = {
 ```
 
 ## 独立页面
-[示例](#/customize/page?shareData=N4IgdghgtgpiBcJAG8oX00AUhTc0FeBgwJUNVyAlCADQgAmMAzgMYBOAlgA4Au9A9mAsiiSDQywDCHZjDDMutGMwCutMAAIAPGXoA3AHwAJGABtdbYgoDqbWrrIBCJQHpVmgNwgAvkA)
+[示例](#/page?shareData=N4IgdghgtgpiBcJAG8oX00AUhTc0FeBgwJUNVyAlCADQgAmMAzgMYBOAlgA4Au9A9mAsiiSDQywDCHZjDDMutGMwCutMAAIAPGXoA3AHwAJGABtdbYgoDqbWrrIBCJQHpVmgNwgAvkA)
+
+[工具](#/page?githubGist=4022e29fc028ddf7f5579d2e57a6f71b)
 
 #### 不同数据来源的 URI 参数
 #### 分享数据
