@@ -172,9 +172,7 @@ const AppPage = () => {
 
 const pageMenu = (() => {
   let path = "/" + getPath().join("/");
-  console.log(path, path)
   for (let route of pages) {
-    console.log(route.path)
     if (route.path === path) {
       return true;
     }
