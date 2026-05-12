@@ -3,12 +3,12 @@
   "version": "0.3.0",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "@ant-design/nextjs-registry": "^1.0.0",
     "@ant-design/pro-components": "^2.5.11",
     "@babel/standalone": "^7.23.7",
     "@monaco-editor/react": "^4.4.6",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@svgr/webpack": "^8.1.0",
     "@uiw/react-markdown-preview": "^4.1.0",
     "antd": "^5.6.1",
     "axios": "^1.7.7",
@@ -16,40 +16,16 @@
     "dayjs": "^1.11.6",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.35.0",
+    "next": "^14.2.0",
     "pluralize": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^5.3.4",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build:prod": "GENERATE_SOURCEMAP=false PUBLIC_URL=/toolkit CI=false npm run build --if-present"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "build:prod": "next build"
   }
 }

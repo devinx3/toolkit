@@ -33,9 +33,11 @@ const Manage = () => {
                 }
             }
             StorageHelper.addRoute(route);
+            window.dispatchEvent(new CustomEvent('menu-update'))
             message.info("新增成功");
         } else {
             StorageHelper.updateRoute(route);
+            window.dispatchEvent(new CustomEvent('menu-update'))
             message.info("更新成功");
         }
         setCurrentIdx(null)
@@ -49,6 +51,7 @@ const Manage = () => {
     }
     const onRemove = () => {
         StorageHelper.removeRoute(routes[currentIdx]?.category);
+        window.dispatchEvent(new CustomEvent('menu-update'))
         setCurrentIdx(null);
         message.info("删除成功");
     }

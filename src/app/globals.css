@@ -1,0 +1,42 @@
+@import '~antd/dist/reset.css';
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.logo {
+  height: 25px;
+  margin: 20px;
+  font-size: large;
+  text-align: center;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
+/* 使侧边栏内部为 flex 列布局，折叠按钮可推至底部 */
+.ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* 侧边栏内所有滚动条隐藏，保留滑动功能 */
+.ant-layout-sider {
+  scrollbar-width: none;  /* Firefox */
+}
+.ant-layout-sider ::-webkit-scrollbar {
+  display: none;          /* Chrome/Safari */
+}

@@ -15,7 +15,7 @@ const createSearch = (url) => {
     const idx = url?.indexOf ? url.indexOf("?") : -1;
     return new URLSearchParams(idx < 0 ? undefined : url.substring(idx + 1));
 }
-const search = createSearch(window.location.href);
+const getSearch = () => createSearch(typeof window !== 'undefined' ? window.location.href : '');
 
 const getFirstScriptByUrl = async (url, secretKey) => {
     const response = await axios.get(url, { responseType: 'text' });
@@ -29,6 +29,7 @@ const getFirstScriptByUrl = async (url, secretKey) => {
     return newList[0];
 }
 const getScript = async () => {
+    const search = getSearch();
     let shareData = search.get("shareData");
     if (shareData) {
         return restoreByShareData(shareData);

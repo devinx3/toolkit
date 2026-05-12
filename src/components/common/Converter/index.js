@@ -118,8 +118,13 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  */
 const Converter = ({ lang = "txt", category, manage, dataUseMange, handleInputObj, dataBlockRender }) => {
     const context = React.useMemo(() => new ConvertContext(), []);
-    // 智能事件
-    const intelligent = new IntelligentEvent(window.location.href);
+    // 智能事件（SSR 时返回空壳，避免 window is not defined）
+    const intelligent = React.useMemo(() => {
+        if (typeof window === 'undefined') {
+            return new IntelligentEvent("");
+        }
+        return new IntelligentEvent(window.location.href);
+    }, []);
     // 默认配置
     const manageConfig = {
         ...manage,
