@@ -193,12 +193,25 @@ const useSessionRedirect = () => {
   }, []);
 };
 
+// 兼容旧 hash 路由（#/path → /path）
+const HashRedirect = () => {
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#/')) {
+      const path = hash.substring(1); // "#/customize/manage" → "/customize/manage"
+      window.history.replaceState(null, '', path);
+    }
+  }, []);
+  return null;
+};
+
 const App = () => {
   useSessionRedirect();
   return (<>
     <TopBanner />
     <UpgradeBanner />
     <BrowserRouter basename={basePath}>
+      <HashRedirect />
       {pageMenu ? <AppPage /> : <AppMenu />}
     </BrowserRouter>
   </>);
