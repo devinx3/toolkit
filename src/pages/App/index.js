@@ -1,10 +1,10 @@
 import './index.css'
 import Icon from '@ant-design/icons'
 import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip } from 'antd'
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import { routes, pages } from '../../configs/router'
-import { HashRouter, Route, NavLink, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, NavLink, Switch } from 'react-router-dom'
 import upgrade from './upgradation';
 
 const { Content, Footer, Sider } = Layout;
@@ -51,13 +51,13 @@ function generageItems() {
   });
   return list;
 };
+
+const basePath = process.env.PUBLIC_URL || '';
 const getPath = () => {
-  let path = window.location.hash;
-  if (!path) {
-    return [];
-  }
-  if (path[0] === '#') {
-    path = path.substring(1);
+  let path = window.location.pathname;
+  // Strip basename prefix for internal route matching
+  if (basePath && path.startsWith(basePath)) {
+    path = path.substring(basePath.length);
   }
   if (path[0] === '/') {
     path = path.substring(1);
@@ -180,13 +180,27 @@ const pageMenu = (() => {
   return false;
 })();
 
+// GitHub Pages 降级恢复：从 404 页面重定向回来
+const useSessionRedirect = () => {
+  useEffect(() => {
+    const redirect = sessionStorage.getItem('devinx3.toolkit.redirect');
+    if (redirect) {
+      sessionStorage.removeItem('devinx3.toolkit.redirect');
+      if (redirect !== window.location.href) {
+        window.history.replaceState(null, '', redirect);
+      }
+    }
+  }, []);
+};
+
 const App = () => {
+  useSessionRedirect();
   return (<>
     <TopBanner />
     <UpgradeBanner />
-    <HashRouter>
+    <BrowserRouter basename={basePath}>
       {pageMenu ? <AppPage /> : <AppMenu />}
-    </HashRouter>
+    </BrowserRouter>
   </>);
 };
 export default App;

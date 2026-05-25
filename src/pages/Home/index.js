@@ -6,7 +6,7 @@ import GlobalUtil from '../../utils/GlobalUtil'
 
 // 激活高级功能
 const active = () => {
-    if (window.location.hash.lastIndexOf(GlobalUtil.getAdvanceKey()) !== -1) {
+    if (window.location.search && window.location.search ===  "?" + GlobalUtil.getAdvanceKey()) {
         GlobalUtil.setAdvance();
     }
 }

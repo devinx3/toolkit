@@ -22,6 +22,8 @@ jobs:
       - run: cp -f README.md src/pages/Home/home.md
       - run: npm install
       - run: npm run build:prod
+      # GitHub Pages SPA fallback: 让直接访问子路径时不报 404
+      - run: cp build/index.html build/404.html
 
       - name: deploy pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
