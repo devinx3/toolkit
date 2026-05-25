@@ -105,17 +105,12 @@ const UpgradeBanner = () => {
   // 如果都没有内容，不渲染
   if (!msg && !showHashMigration) return null;
 
-  // 替换当前 URL 中的 #/ → ，并触发浏览器路由重新匹配
+  // 替换当前 URL 中的 #/ → ，并刷新页面
   const handleReplaceHash = (e) => {
     e.preventDefault();
     const hash = window.location.hash;
-    
-    if (hash && hash.startsWith('#/') && (pathname === '/' || pathname.startsWith(basePath))) {
-      const pathname = window.location.pathname;
-      if (pathname === basePath ? true : pathname === '/' && basePath == '') {
-
-      }
-      
+    const pathname = window.location.pathname;
+    if (hash && hash.startsWith('#/') && (pathname === basePath ? true : pathname === '/' && basePath == '')) {
       const newPath = basePath + hash.substring(1);
       window.history.replaceState(null, '', newPath);
       window.location.reload();
