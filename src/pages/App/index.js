@@ -1,6 +1,6 @@
 import './index.css'
 import Icon from '@ant-design/icons'
-import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip } from 'antd'
+import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip, Space } from 'antd'
 import React, { Suspense, useEffect, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import { routes, pages } from '../../configs/router'
@@ -100,7 +100,44 @@ const RouterList = () => {
 // 升级公告
 const UpgradeBanner = () => {
   const msg = upgrade(VERSION);
-  return msg ? <Alert showIcon={false} message={<Typography.Text>{msg}</Typography.Text>} tooltip="升级公告" banner closable /> : <></>
+  const showHashMigration = !!window.location.hash;
+
+  // 如果都没有内容，不渲染
+  if (!msg && !showHashMigration) return null;
+
+  // 替换当前 URL 中的 #/ → ，并触发浏览器路由重新匹配
+  const handleReplaceHash = (e) => {
+    e.preventDefault();
+    const hash = window.location.hash;
+    
+    if (hash && hash.startsWith('#/') && (pathname === '/' || pathname.startsWith(basePath))) {
+      const pathname = window.location.pathname;
+      if (pathname === basePath ? true : pathname === '/' && basePath == '') {
+
+      }
+      
+      const newPath = basePath + hash.substring(1);
+      window.history.replaceState(null, '', newPath);
+      window.location.reload();
+    }
+  };
+
+  const content = msg
+    ? (showHashMigration
+        ? <Space direction="vertical" size={0}>
+            <div>{msg}</div>
+            <div>路由策略已升级，可手工替换当前链接中的 <strong>#/</strong> 并刷新页面或者点击
+              <Typography.Link onClick={handleReplaceHash} style={{ marginLeft: 8 }}>更新当前链接</Typography.Link>
+            </div>
+          </Space>
+        : <Typography.Text>{msg}</Typography.Text>)
+    : (showHashMigration
+        ? <Space>
+            <Typography.Text>路由策略已升级，可手工替换当前链接中的 <strong>#/</strong> 并刷新页面或者点击</Typography.Text>
+            <Typography.Link onClick={handleReplaceHash}>更新当前链接</Typography.Link>
+          </Space>
+        : null);
+  return content ? <Alert showIcon={false} message={content} tooltip="升级公告" banner closable /> : null;
 }
 
 // 顶级公告
@@ -193,17 +230,6 @@ const useSessionRedirect = () => {
   }, []);
 };
 
-// 兼容旧 hash 路由（#/path → /path）
-const HashRedirect = () => {
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#/')) {
-      const path = hash.substring(1); // "#/customize/manage" → "/customize/manage"
-      window.history.replaceState(null, '', path);
-    }
-  }, []);
-  return null;
-};
 
 const App = () => {
   useSessionRedirect();
@@ -211,7 +237,6 @@ const App = () => {
     <TopBanner />
     <UpgradeBanner />
     <BrowserRouter basename={basePath}>
-      <HashRedirect />
       {pageMenu ? <AppPage /> : <AppMenu />}
     </BrowserRouter>
   </>);
