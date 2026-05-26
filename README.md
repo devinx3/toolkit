@@ -3,7 +3,7 @@
 收集常用的工具箱功能
 
 ## 内部链接
-[内部工具](#/page?githubGist=4022e29fc028ddf7f5579d2e57a6f71b)
+[内部工具](#PUBLIC_URL/page?githubGist=4022e29fc028ddf7f5579d2e57a6f71b)
 
 ## 文本处理
 
