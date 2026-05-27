@@ -1,4 +1,5 @@
 import './index.css'
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons'
 import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip, Space } from 'antd'
 import React, { Suspense, useEffect, useState } from 'react'
@@ -161,10 +162,19 @@ const AppMenu = () => {
       minHeight: '100vh',
     }}
   >
-    <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+    <Sider
+        theme="light"
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        trigger={null}
+    >
       <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])} />
       <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
         onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+      <div id="sider-trigger-btn" onClick={() => setCollapsed(!collapsed)}>
+        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      </div>
     </Sider>
     <Layout className="site-layout">
       <Content
