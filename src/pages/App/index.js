@@ -111,7 +111,7 @@ const UpgradeBanner = () => {
     e.preventDefault();
     const hash = window.location.hash;
     const pathname = window.location.pathname;
-    if (hash && hash.startsWith('#/') && (pathname === basePath ? true : pathname === '/' && basePath == '')) {
+    if (hash && hash.startsWith('#/') && (pathname === basePath ? true : pathname === '/' && basePath === '')) {
       const newPath = basePath + hash.substring(1);
       window.history.replaceState(null, '', newPath);
       window.location.reload();
