@@ -269,10 +269,13 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
     }];
-    if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
-        intelligent.clearClick();
-        setTimeout(() => handleConvert(config), 0);
-    }
+    // clickCode 自动触发（放在 useEffect 中，避免 render 阶段的副作用）
+    React.useEffect(() => {
+        if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
+            intelligent.clearClick();
+            setTimeout(() => handleConvert(config), 0);
+        }
+    }, []); // 仅首次渲染时执行一次
     return (<>
         <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
             <div>
