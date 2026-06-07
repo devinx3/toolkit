@@ -1,5 +1,5 @@
 import './index.css'
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons'
 import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip, Space } from 'antd'
 import React, { Suspense, useEffect, useState } from 'react'
@@ -198,7 +198,7 @@ const AppMenu = () => {
           textAlign: 'center',
         }}
       >
-        Devinx3 Toolkit ©2022-2024 Created by Devinx3
+        <NavLink to={'/'} style={{ color: 'inherit' }}><Icon component={() => <LogoSvg height="1em" width="1em" style={{ verticalAlign: 'middle', marginRight: 4, opacity: 0.75 }} />} /></NavLink> Devinx3 Toolkit ©2022-2026 Created by <Typography.Link href="https://github.com/devinx3" style={{ color: 'inherit' }} target="_blank">devinx3 <GithubOutlined /> </Typography.Link>
       </Footer>
     </Layout>
   </Layout>
