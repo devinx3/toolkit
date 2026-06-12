@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, Input, Modal, Drawer, Tooltip, Typography, Timeline, Table, Popconfirm, Row, Col, Space, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
@@ -129,7 +129,7 @@ export const ExpandManageButton = ({ category, combinationConfig, intelligent, r
             intelligent.clearClick();
             setTimeout(() => handleConvert(combinationConfig, combinationConfig.combination), 0);
         }
-    }, []); // 仅首次渲染时执行一次
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
     // 待处理数据
     const configDataObj = convertConfigDataSource(configDataSource);
     const timelineItemList = combinationConfigCodeList.map((code, index) => {
