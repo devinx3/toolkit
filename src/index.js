@@ -4,6 +4,15 @@ import './index.css';
 import App from './pages/App';
 import reportWebVitals from './reportWebVitals';
 
+// 兼容旧 hash 路由（#/path?query → /path?query）
+// 必须在 BrowserRouter 初始化之前执行，因为 replaceState 不触发 popstate 事件
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#/')) {
+    window.history.replaceState(null, '', hash.substring(1));
+  }
+})();
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

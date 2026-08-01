@@ -12,7 +12,7 @@ const AiView = ({ prompt }) => {
         <Button size="small" onClick={() => setEnableAI(!enableAI)} type="link">AI</Button>
         <Drawer title="AI" open={enableAI} width={"30vw"}
             onClose={() => setEnableAI(false)} footer={null} >
-            <Button href='https://www.deepseek.com/' target='_blank' type='link'>Deepseek</Button>
+            <Button href='https://chat.deepseek.com/' target='_blank' type='link'>Deepseek</Button>
             <Typography.Text copyable={{ text: prompt }} >提示词</Typography.Text>
         </Drawer>
     </>

@@ -1,7 +1,7 @@
 import CuszIcons from '../icons'
 import { FileTextOutlined, EditOutlined, ContainerOutlined, ControlOutlined, InfoOutlined, InteractionOutlined } from '@ant-design/icons'
 import React from 'react'
-import dynamicRoue from '../components/Customization/Template/route'
+import dynamicRoute from '../components/Customization/Template/route'
 import HomeNotFound from '../pages/notFound'
 import CustomizationNotFound from '../components/Customization/notFound'
 
@@ -86,7 +86,7 @@ const routes = [
         path: '/customize/manage',
         component: CustomizeManage,
       },
-      ...dynamicRoue()
+      ...dynamicRoute()
     ],
   },
   {

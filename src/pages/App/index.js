@@ -1,10 +1,11 @@
 import './index.css'
+import { GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons'
-import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip } from 'antd'
-import React, { Suspense, useState } from 'react'
+import { Layout, Menu, Col, Row, Spin, Alert, Typography, Tooltip, Space } from 'antd'
+import React, { Suspense, useEffect, useState } from 'react'
 import { ReactComponent as LogoSvg } from '../../assets/logo.svg'
 import { routes, pages } from '../../configs/router'
-import { HashRouter, Route, NavLink, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, NavLink, Switch } from 'react-router-dom'
 import upgrade from './upgradation';
 
 const { Content, Footer, Sider } = Layout;
@@ -51,13 +52,13 @@ function generageItems() {
   });
   return list;
 };
+
+const basePath = process.env.PUBLIC_URL || '';
 const getPath = () => {
-  let path = window.location.hash;
-  if (!path) {
-    return [];
-  }
-  if (path[0] === '#') {
-    path = path.substring(1);
+  let path = window.location.pathname;
+  // Strip basename prefix for internal route matching
+  if (basePath && path.startsWith(basePath)) {
+    path = path.substring(basePath.length);
   }
   if (path[0] === '/') {
     path = path.substring(1);
@@ -100,7 +101,39 @@ const RouterList = () => {
 // 升级公告
 const UpgradeBanner = () => {
   const msg = upgrade(VERSION);
-  return msg ? <Alert showIcon={false} message={<Typography.Text>{msg}</Typography.Text>} tooltip="升级公告" banner closable /> : <></>
+  const showHashMigration = !!window.location.hash;
+
+  // 如果都没有内容，不渲染
+  if (!msg && !showHashMigration) return null;
+
+  // 替换当前 URL 中的 #/ → ，并刷新页面
+  const handleReplaceHash = (e) => {
+    e.preventDefault();
+    const hash = window.location.hash;
+    const pathname = window.location.pathname;
+    if (hash && hash.startsWith('#/') && (pathname === basePath ? true : pathname === '/' && basePath === '')) {
+      const newPath = basePath + hash.substring(1);
+      window.history.replaceState(null, '', newPath);
+      window.location.reload();
+    }
+  };
+
+  const content = msg
+    ? (showHashMigration
+        ? <Space direction="vertical" size={0}>
+            <div>{msg}</div>
+            <div>路由策略已升级，可手工替换当前链接中的 <strong>#/</strong> 并刷新页面或者点击
+              <Typography.Link onClick={handleReplaceHash} style={{ marginLeft: 8 }}>更新当前链接</Typography.Link>
+            </div>
+          </Space>
+        : <Typography.Text>{msg}</Typography.Text>)
+    : (showHashMigration
+        ? <Space>
+            <Typography.Text>路由策略已升级，可手工替换当前链接中的 <strong>#/</strong> 并刷新页面或者点击</Typography.Text>
+            <Typography.Link onClick={handleReplaceHash}>更新当前链接</Typography.Link>
+          </Space>
+        : null);
+  return content ? <Alert showIcon={false} message={content} tooltip="升级公告" banner closable /> : null;
 }
 
 // 顶级公告
@@ -129,10 +162,19 @@ const AppMenu = () => {
       minHeight: '100vh',
     }}
   >
-    <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+    <Sider
+        theme="light"
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        trigger={null}
+    >
       <Logo collapsed={collapsed} clearItemKey={() => setItemSelectKey([])} />
       <Menu defaultSelectedKeys={getDefaultSelectedKeys()} defaultOpenKeys={getDefaultOpenKeys()}
         onClick={handleMenuClick} selectedKeys={itemSelectKey} mode="inline" items={generageItems()} />
+      <div id="sider-trigger-btn" onClick={() => setCollapsed(!collapsed)}>
+        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      </div>
     </Sider>
     <Layout className="site-layout">
       <Content
@@ -156,7 +198,7 @@ const AppMenu = () => {
           textAlign: 'center',
         }}
       >
-        Devinx3 Toolkit ©2022-2024 Created by Devinx3
+        <NavLink to={'/'} style={{ color: 'inherit' }}><Icon component={() => <LogoSvg height="1em" width="1em" style={{ verticalAlign: 'middle', marginRight: 4, opacity: 0.75 }} />} /></NavLink> Devinx3 Toolkit ©2022-2026 Created by <Typography.Link href="https://github.com/devinx3" style={{ color: 'inherit' }} target="_blank">devinx3 <GithubOutlined /> </Typography.Link>
       </Footer>
     </Layout>
   </Layout>
@@ -180,13 +222,28 @@ const pageMenu = (() => {
   return false;
 })();
 
+// GitHub Pages 降级恢复：从 404 页面重定向回来
+const useSessionRedirect = () => {
+  useEffect(() => {
+    const redirect = sessionStorage.getItem('devinx3.toolkit.redirect');
+    if (redirect) {
+      sessionStorage.removeItem('devinx3.toolkit.redirect');
+      if (redirect !== window.location.href) {
+        window.history.replaceState(null, '', redirect);
+      }
+    }
+  }, []);
+};
+
+
 const App = () => {
+  useSessionRedirect();
   return (<>
     <TopBanner />
     <UpgradeBanner />
-    <HashRouter>
+    <BrowserRouter basename={basePath}>
       {pageMenu ? <AppPage /> : <AppMenu />}
-    </HashRouter>
+    </BrowserRouter>
   </>);
 };
 export default App;

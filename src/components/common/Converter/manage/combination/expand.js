@@ -123,11 +123,13 @@ export const ExpandManageButton = ({ category, combinationConfig, intelligent, r
     const [combinationName, setCombinationName] = React.useState(combinationConfig.name);
     const [combinationDesc, setCombinationDesc] = React.useState(combinationConfig.description);
     const [combinationConfigCodeList, setCombinationConfigCodeList] = React.useState([...combinationConfig.combination]);
-    // 自动执行
-    if (intelligent.canClick(SCRIPT_TYPE.ARRANGE, combinationConfig.code)) {
-        intelligent.clearClick();
-        setTimeout(() => handleConvert(combinationConfig, combinationConfig.combination), 0);
-    }
+    // 自动执行（放在 useEffect 中，避免 render 阶段的副作用）
+    React.useEffect(() => {
+        if (intelligent.canClick(SCRIPT_TYPE.ARRANGE, combinationConfig.code)) {
+            intelligent.clearClick();
+            setTimeout(() => handleConvert(combinationConfig, combinationConfig.combination), 0);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
     // 待处理数据
     const configDataObj = convertConfigDataSource(configDataSource);
     const timelineItemList = combinationConfigCodeList.map((code, index) => {

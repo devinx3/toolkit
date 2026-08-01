@@ -6,10 +6,12 @@ import GlobalUtil from '../../utils/GlobalUtil'
 
 // 激活高级功能
 const active = () => {
-    if (window.location.hash.lastIndexOf(GlobalUtil.getAdvanceKey()) !== -1) {
+    if (window.location.search && window.location.search ===  "?" + GlobalUtil.getAdvanceKey()) {
         GlobalUtil.setAdvance();
     }
 }
+
+let PUBLIC_URL = process.env.PUBLIC_URL || '';
 
 const Home = () => {
     const [source, setSource] = React.useState();
@@ -32,8 +34,12 @@ const Home = () => {
         source={source} 
         linkTarget='_blank'
         rehypeRewrite={(node, index, parent) => {
-            if (node.tagName === "a" && parent && /^h(1|2|3|4|5|6)/.test(parent.tagName)) {
-              parent.children = parent.children.slice(1)
+            if (node.tagName === "a") {
+                if (parent && /^h(1|2|3|4|5|6)/.test(parent.tagName)) {
+                    parent.children = parent.children.slice(1);
+                } else if (node.properties?.href && node.properties.href.startsWith("#PUBLIC_URL")) {
+                    node.properties.href = node.properties.href.replace("#PUBLIC_URL", PUBLIC_URL);
+                }
             }
         }}
     />);

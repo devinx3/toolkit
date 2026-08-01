@@ -118,8 +118,8 @@ handleInputObjDataSource[LANG.JSON] = data => (data instanceof Object) ? data : 
  */
 const Converter = ({ lang = "txt", category, manage, dataUseMange, handleInputObj, dataBlockRender }) => {
     const context = React.useMemo(() => new ConvertContext(), []);
-    // 智能事件
-    const intelligent = new IntelligentEvent(window.location.href);
+    // 智能事件（memoized 以避免每次重渲染都重建）
+    const intelligent = React.useMemo(() => new IntelligentEvent(window.location.href), []);
     // 默认配置
     const manageConfig = {
         ...manage,

@@ -4,19 +4,19 @@
 
 ## 介绍
 
-    通过自定义脚本节点和编排，实现根据用户输入的数据进行转换，并展示所需的信息。
+通过自定义脚本节点和编排，实现根据用户输入的数据进行转换，并展示所需的信息。
 
-    **用户输入:**  可以通过文本、文件或自定义表单(定制化支持自定义UI)
+**用户输入:**  可以通过文本、文件或自定义表单(定制化支持自定义UI)
 
-    **数据转换：** 编写 JavaScript 脚本来
+**数据转换：** 编写 JavaScript 脚本来
 
-    **信息展示：** 展示脚本结果 (定制化支持自定义UI)
+**信息展示：** 展示脚本结果 (定制化支持自定义UI)
 
 
 
 ## 文本处理
 
-        通过执行一系列脚本，从用户输入的文本(或文件)数据中提取或生成所需的结果
+通过执行一系列脚本，从用户输入的文本(或文件)数据中提取或生成所需的结果
 
 ![文本处理](#IMAGE_PREFIX/6653fb3e-5f2f-4170-af92-b9f3971d4d61.png)
 
@@ -106,9 +106,9 @@ const Util = {
 
 ### 脚本编排
 
-        串联多个脚本节点以依次执行。
+串联多个脚本节点以依次执行。
 
-        **注：**仅存在自定义脚本节点才会展示。
+**注：** 仅存在自定义脚本节点才会展示。
 
 ![文本处理](#IMAGE_PREFIX/a30053d7-29d1-47f0-a98c-9533f02186e5.png)
 
@@ -122,9 +122,9 @@ const Util = {
 
 ## JSON
 
-    通过执行一系列脚本，从用户输入的 JSON 数据中提取或生成所需的结果
+通过执行一系列脚本，从用户输入的 JSON 数据中提取或生成所需的结果
 
-    其他配置信息参考 **文本处理**
+其他配置信息参考 **文本处理**
 
 ### 脚本节点签名
 
@@ -153,11 +153,11 @@ const Util = {
 
 ## 定制化
 
-    支持在定制化管理里面，新增更新和删除分类
+支持在定制化管理里面，新增更新和删除分类
 
-    支持在分类页面的控制台标签，进行管理脚本节点和编排
+支持在分类页面的控制台标签，进行管理脚本节点和编排
 
-    其他配置信息参考 **文本处理**
+其他配置信息参考 **文本处理**
 
 ### 新建分类
 
@@ -171,7 +171,7 @@ const Util = {
 
 ![编辑脚本节点](#IMAGE_PREFIX/efa9ffca-6847-4d79-973a-9141b7debff4.png)
 
-【AI】执行 ChatGpt 提示词
+【AI】查看大模型提示词
 
 【更新节点】对节点名称和作用，以及脚本内容进行更新
 
@@ -205,9 +205,9 @@ const Util = {
 ```
 
 ## 独立页面
-[示例](#/page?shareData=N4IgdghgtgpiBcJAG8oX00AUhTc0FeBgwJUNVyAlCADQgAmMAzgMYBOAlgA4Au9A9mAsiiSDQywDCHZjDDMutGMwCutMAAIAPGXoA3AHwAJGABtdbYgoDqbWrrIBCJQHpVmgNwgAvkA)
+[示例](#PUBLIC_URL/page?shareData=N4IgdghgtgpiBcJAG8oX00AUhTc0FeBgwJUNVyAlCADQgAmMAzgMYBOAlgA4Au9A9mAsiiSDQywDCHZjDDMutGMwCutMAAIAPGXoA3AHwAJGABtdbYgoDqbWrrIBCJQHpVmgNwgAvkA)
 
-[工具](#/page?githubGist=4022e29fc028ddf7f5579d2e57a6f71b)
+[工具](#PUBLIC_URL/page?githubGist=4022e29fc028ddf7f5579d2e57a6f71b)
 
 #### 不同数据来源的 URI 参数
 #### 分享数据

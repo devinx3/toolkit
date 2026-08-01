@@ -55,3 +55,159 @@
     color: #d4d4d4;
     justify-content: flex-start;
 }
+
+/* streaming 闪烁光标 */
+.devinx3-chat-message.streaming {
+    /* 可选的微高亮，标识正在输出 */
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 停止按钮悬停提示 */
+.devinx3-chat .ant-btn-dangerous {
+    color: #ff4d4f;
+    border-color: #ff4d4f;
+}
+.devinx3-chat .ant-btn-dangerous:hover {
+    color: #fff;
+    background: #ff4d4f;
+}
+
+/* ─── Markdown 内容 ───────────────────────────────── */
+
+.devinx3-md-content {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #d4d4d4;
+    word-wrap: break-word;
+}
+.devinx3-md-content p {
+    margin: 0 0 8px;
+}
+.devinx3-md-content p:last-child {
+    margin-bottom: 0;
+}
+.devinx3-md-content ul,
+.devinx3-md-content ol {
+    padding-left: 20px;
+    margin: 4px 0;
+}
+.devinx3-md-content li {
+    margin: 2px 0;
+}
+.devinx3-md-content blockquote {
+    margin: 6px 0;
+    padding: 4px 12px;
+    border-left: 3px solid #555;
+    color: #aaa;
+    background: #1a1a1a;
+    border-radius: 0 4px 4px 0;
+}
+.devinx3-md-content a {
+    color: #4da6ff;
+    text-decoration: underline;
+}
+.devinx3-md-content h1,
+.devinx3-md-content h2,
+.devinx3-md-content h3,
+.devinx3-md-content h4 {
+    margin: 10px 0 6px;
+    color: #e0e0e0;
+}
+.devinx3-md-content hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 10px 0;
+}
+
+/* ── 行内代码 ── */
+.devinx3-md-inline-code {
+    background-color: #2d2d2d;
+    color: #ce9178;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+/* ── 代码块 ── */
+.devinx3-md-code-block {
+    margin: 8px 0;
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #1e1e1e;
+}
+.devinx3-md-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    background-color: #252526;
+    border-bottom: 1px solid #333;
+}
+.devinx3-md-code-lang {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+}
+.devinx3-md-copy-btn {
+    color: #888 !important;
+    font-size: 11px !important;
+    height: 24px !important;
+    padding: 0 8px !important;
+}
+.devinx3-md-copy-btn:hover {
+    color: #ccc !important;
+}
+.devinx3-md-code-pre {
+    margin: 0;
+    padding: 12px 16px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.5;
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #d4d4d4;
+    background: transparent;
+}
+.devinx3-md-code-pre::-webkit-scrollbar {
+    height: 5px;
+}
+.devinx3-md-code-pre::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 3px;
+}
+
+/* ── 表格 ── */
+.devinx3-md-table-wrapper {
+    overflow-x: auto;
+    margin: 8px 0;
+}
+.devinx3-md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.devinx3-md-th {
+    background-color: #252526;
+    color: #e0e0e0;
+    padding: 6px 10px;
+    border: 1px solid #444;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.devinx3-md-td {
+    padding: 5px 10px;
+    border: 1px solid #333;
+    color: #d4d4d4;
+}
+.devinx3-md-table tr:nth-child(even) td {
+    background-color: #1a1a1a;
+}
+.devinx3-md-table tr:hover td {
+    background-color: #252525;
+}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dropdown, Button, Input, Drawer, Row, Col, Space, Tooltip, Popconfirm, Typography, message } from 'antd';
 import CodeEditor from '../../editor/codeEditor';
 import storeEditService, { requestService } from '../../store/storeEditService';
@@ -98,7 +98,7 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
     const handleCancel = () => {
         setVisible(false);
     };
-    useEffect(() => {
+    React.useEffect(() => {
         let newData = getShareData(intelligent);
         if (newData) {
             setRefData(newData);
@@ -269,10 +269,13 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
     }];
-    if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
-        intelligent.clearClick();
-        setTimeout(() => handleConvert(config), 0);
-    }
+    // clickCode 自动触发（放在 useEffect 中，避免 render 阶段的副作用）
+    React.useEffect(() => {
+        if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {
+            intelligent.clearClick();
+            setTimeout(() => handleConvert(config), 0);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
     return (<>
         <Dropdown arrow={false} autoAdjustOverflow={true} menu={{ items: menus }} trigger={['contextMenu']} >
             <div>
