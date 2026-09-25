@@ -28,10 +28,26 @@ const getFirstScriptByUrl = async (url, secretKey) => {
     }
     return newList[0];
 }
+// 通过分享 ID 从服务端获取脚本数据
+const getFirstScriptByShareId = async (shareId) => {
+    const response = await axios.get('/api/storage/share/' + shareId);
+    if (response.status !== 200) {
+        throw new Error(response.data?.error || response.statusText);
+    }
+    if (!response.data?.content) {
+        throw new Error("分享数据为空");
+    }
+    // content 即分享时 backup2ShareData 生成的压缩串，直接走原有恢复逻辑
+    return restoreByShareData(response.data.content);
+}
 const getScript = async () => {
     let shareData = search.get("shareData");
     if (shareData) {
         return restoreByShareData(shareData);
+    }
+    let shareId = search.get("shareId");
+    if (shareId) {
+        return getFirstScriptByShareId(shareId);
     }
     let secretKey = search.get("secretKey");
     let importUrl = search.get("importUrl");

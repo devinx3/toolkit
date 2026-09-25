@@ -6,6 +6,7 @@ import { SCRIPT_CODE_PREFIX, SCRIPT_TYPE } from '../../constants'
 import { EditOutlined, EyeInvisibleOutlined, ShareAltOutlined } from '@ant-design/icons';
 import StrUtil from '../../../../../utils/StrUtil';
 import lzString from 'lz-string'
+import axios from 'axios';
 import { backup2ShareData } from '../backup';
 
 const { addConfig, updateConfig, hiddenConfig, deleteConfig } = storeEditService;
@@ -55,6 +56,11 @@ const AddConfigButton = ({ category, config, name, description, scriptContent, o
     }
     return (<Space>
         <Button onClick={handleShare}>分享</Button>
+        <Button onClick={e => handleShortShare({
+            name: configName || defaultConfigName,
+            description: configDesc || configName || defaultConfigDesc,
+            scriptContent: scriptContent
+        })}>临时分享</Button>
         <Popconfirm icon={null} cancelText='取消' okText='确认'
             onConfirm={handleAddConfig}
             title={<>
@@ -71,10 +77,35 @@ const nextSeed = (() => {
     let version = 100;
     return () => version++;
 })();
-const getShareData = (intelligent) => {
+const getShareData = async (intelligent) => {
     if (intelligent.getShareData()) {
         let data = lzString.decompressFromEncodedURIComponent(intelligent.getShareData());
         intelligent.clearShareData();
+        let jsonData = {}
+        try {
+            jsonData = JSON.parse(data)
+        } catch (e) {
+            message.error("分享数据格式异常");
+            return undefined;
+        }
+        return {
+            name: jsonData.name,
+            description: jsonData.description,
+            scriptContent: jsonData.scriptContent,
+        };
+    } else if (intelligent.getShareId()) {
+        let shareId = intelligent.getShareId();
+        intelligent.clearShareData();
+        const response = await axios.get('/api/storage/share/' + shareId);
+        if (response.status !== 200) {
+            message.error("分享数据获取异常：" + (response.data?.error || response.statusText));
+            return undefined;
+        }
+        if (!response.data?.content) {
+            message.error("分享数据为空");
+            return undefined;
+        }
+        let data = lzString.decompressFromEncodedURIComponent(response.data.content);
         let jsonData = {}
         try {
             jsonData = JSON.parse(data)
@@ -99,12 +130,14 @@ export const ExpandAddButton = ({ category, context, config, refreshScript, edit
         setVisible(false);
     };
     React.useEffect(() => {
-        let newData = getShareData(intelligent);
-        if (newData) {
-            setRefData(newData);
-            setScriptContent(newData.scriptContent);
-            setVisible(true);
-        }
+        getShareData(intelligent)
+        .then(newData => {
+            if (newData) {
+                setRefData(newData);
+                setScriptContent(newData.scriptContent);
+                setVisible(true);
+            }
+        })
     }, [intelligent]);
     const handleConfirm = () => {
         if (!scriptContent) {
@@ -238,9 +271,44 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
 const generateShareUrl = (shareData) => {
     let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent }
     let shareDataParam = backup2ShareData(newShareData);
-    const idx = window.location.href.indexOf("?");
-    let newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
+    let newUrl = null
+    if (window.location.pathname.startsWith("/customize/")) {
+        newUrl = `${window.location.protocol}//${window.location.host}/customize/cat/initial`
+    } else {
+        const idx = window.location.href.indexOf("?");
+        newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
+    }
     return newUrl + "?shareData=" + shareDataParam;
+}
+
+// 通过服务端存储生成分享链接（30 天有效）
+const generateShareIdUrl = async (shareData) => {
+    const newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent };
+    // 存储压缩后的 shareData，读取端直接按 ?shareData 的逻辑恢复
+    const shareDataParam = backup2ShareData(newShareData);
+    const response = await axios.post('/api/storage/share', { content: shareDataParam });
+    if (response.status !== 200 || !response.data?.shareId) {
+        throw new Error(response.data?.error || response.statusText);
+    }
+    let newUrl = null
+    if (window.location.pathname.startsWith("/customize/")) {
+        newUrl = `${window.location.protocol}//${window.location.host}/customize/cat/initial`
+    } else {
+        const idx = window.location.href.indexOf("?");
+        newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
+    }
+    return newUrl + "?shareId=" + response.data.shareId;
+}
+// 短链接分享，成功后复制链接
+const handleShortShare = (shareData) => {
+    generateShareIdUrl(shareData)
+        .then(shareUrl => {
+            const copyText = '链接：' + shareUrl + '\n复制这段内容打开「'+ window.location.hostname + '」查看分享内容';
+            if (StrUtil.copyToClipboard(copyText)) {
+                message.info("已复制分享内容(30天有效)")
+            }
+        })
+        .catch(reason => message.error("分享失败, 失败原因: " + (reason.message || reason)));
 }
 // 扩展管理按钮
 export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, aiRender, refreshScript }) => {
@@ -268,6 +336,9 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
     }, {
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
+    }, {
+        key: "share30",
+        label: (<Button shape="circle" type="text" onClick={e => handleShortShare(config)} icon={<ShareAltOutlined />} size="small">临时分享</Button>)
     }];
     // clickCode 自动触发（放在 useEffect 中，避免 render 阶段的副作用）
     React.useEffect(() => {

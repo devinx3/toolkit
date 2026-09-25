@@ -16,6 +16,7 @@ class IntelligentEvent {
         // 解码
         if (this.importUrl) this.importUrl = window.decodeURIComponent(this.importUrl);
         this.shareData = search.get("shareData");
+        this.shareId = search.get("shareId");
     }
     getImportUrl() {
         return this.importUrl;
@@ -29,6 +30,9 @@ class IntelligentEvent {
     getShareData() {
         return this.shareData
     }
+    getShareId() {
+        return this.shareId;
+    }
     // 清除导入
     clearImport() {
         this.importUrl = undefined;
@@ -41,7 +45,10 @@ class IntelligentEvent {
     }
     // 清除分享
     clearShareData() {
-        this.shareData = undefined
+        this.shareData = undefined;
+    }
+    clearShareId() {
+        this.shareId = undefined;
     }
 }
 
