@@ -1,5 +1,5 @@
 // 脚本分享存储接口：POST /api/storage/share
-// 入参: { text: string }
+// 入参: { content: string }
 // 出参: { shareId: string }
 // 逻辑见 lib.js
 
@@ -11,7 +11,7 @@ export async function onRequestPost(context) {
   let content;
   try {
     const body = await request.json();
-    content = body?.text;
+    content = body?.content;
   } catch (e) {
     return jsonResponse({ error: '请求体不是合法 JSON' }, 400);
   }
