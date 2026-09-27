@@ -333,7 +333,7 @@ const handleShortShare = (shareData) => {
         })
         .catch(reason => {
             console.error("分享失败详情:", reason);
-            message.error("分享失败, 失败原因: " + extractApiError(reason));
+            message.error(extractApiError(reason));
         });
 }
 // 扩展管理按钮
