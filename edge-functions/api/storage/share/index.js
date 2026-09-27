@@ -1,9 +1,9 @@
 // 脚本分享存储接口：POST /api/storage/share
 // 入参: { content: string }
-// 出参: { shareId: string }
-// 逻辑见 lib.js
+// 出参: { code, message, data: { shareId } }
+// 逻辑与响应规范见 lib.js
 
-import { createShare, jsonResponse } from './lib.js';
+import { createShare, okResponse, errorResponse } from './lib.js';
 
 export async function onRequestPost(context) {
   const { request } = context;
@@ -13,21 +13,21 @@ export async function onRequestPost(context) {
     const body = await request.json();
     content = body?.content;
   } catch (e) {
-    return jsonResponse({ error: '请求体不是合法 JSON' }, 400);
+    return errorResponse('BAD_REQUEST');
   }
 
   if (typeof content !== 'string' || content.length === 0) {
-    return jsonResponse({ error: '缺少参数' }, 400);
+    return errorResponse('BAD_REQUEST');
   }
 
   try {
     const result = await createShare(content);
     if (result.error) {
-      return jsonResponse({ error: result.error }, 500);
+      return errorResponse(result.error);
     }
-    return jsonResponse({ shareId: result.shareId });
+    return okResponse({ shareId: result.shareId }, '分享创建成功');
   } catch (e) {
     console.error('KV operation failed:', e);
-    return jsonResponse({ error: '分享创建失败，请重试' }, 500);
+    return errorResponse('CREATE_FAILED');
   }
 }

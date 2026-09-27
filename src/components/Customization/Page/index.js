@@ -30,15 +30,18 @@ const getFirstScriptByUrl = async (url, secretKey) => {
 }
 // 通过分享 ID 从服务端获取脚本数据
 const getFirstScriptByShareId = async (shareId) => {
-    const response = await axios.get('/api/storage/share/' + shareId);
-    if (response.status !== 200) {
-        throw new Error(response.data?.error || response.statusText);
+    // validateStatus 放行所有状态码，统一在下方做契约校验（status + code + data）
+    const response = await axios.get('/api/storage/share/' + shareId, { validateStatus: () => true });
+    const body = response.data;
+    // 统一响应规范: { code, message, data }
+    if (response.status !== 200 || body?.code !== 'OK') {
+        throw new Error(body?.message || `获取分享失败(HTTP ${response.status})`);
     }
-    if (!response.data?.content) {
+    if (!body?.data?.content) {
         throw new Error("分享数据为空");
     }
     // content 即分享时 backup2ShareData 生成的压缩串，直接走原有恢复逻辑
-    return restoreByShareData(response.data.content);
+    return restoreByShareData(body.data.content);
 }
 const getScript = async () => {
     let shareData = search.get("shareData");

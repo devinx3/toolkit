@@ -281,14 +281,37 @@ const generateShareUrl = (shareData) => {
     return newUrl + "?shareData=" + shareDataParam;
 }
 
+// 统一提取接口返回的错误信息（后端响应规范: { code, message, data? }）
+const extractApiError = (reason) => {
+    let data = reason?.response?.data;
+    // 后端报文可能以 JSON 字符串形式返回（如网关/代理未设置 Content-Type），先尝试解析
+    if (typeof data === 'string' && data) {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            data = null; // 非 JSON 报文（如 HTML 错误页），不直接展示给用户
+        }
+    }
+    // 后端统一的 code/message 报文优先
+    if (data?.message) {
+        return data.code ? `${data.message}(${data.code})` : data.message;
+    }
+    if (reason?.response?.status) {
+        return `请求失败(HTTP ${reason.response.status})`;
+    }
+    return reason?.message || String(reason);
+}
+
 // 通过服务端存储生成分享链接（30 天有效）
 const generateShareIdUrl = async (shareData) => {
     const newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent };
     // 存储压缩后的 shareData，读取端直接按 ?shareData 的逻辑恢复
     const shareDataParam = backup2ShareData(newShareData);
-    const response = await axios.post('/api/storage/share', { content: shareDataParam });
-    if (response.status !== 200 || !response.data?.shareId) {
-        throw new Error(response.data?.error || response.statusText);
+    // validateStatus 放行所有状态码，统一在下方做契约校验（status + code + data）
+    const response = await axios.post('/api/storage/share', { content: shareDataParam }, { validateStatus: () => true });
+    const body = response.data;
+    if (response.status !== 200 || body?.code !== 'OK' || !body?.data?.shareId) {
+        throw new Error(body?.message || `分享创建失败(HTTP ${response.status})`);
     }
     let newUrl = null
     if (window.location.pathname.startsWith("/customize/")) {
@@ -297,7 +320,7 @@ const generateShareIdUrl = async (shareData) => {
         const idx = window.location.href.indexOf("?");
         newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
     }
-    return newUrl + "?shareId=" + response.data.shareId;
+    return newUrl + "?shareId=" + body.data.shareId;
 }
 // 短链接分享，成功后复制链接
 const handleShortShare = (shareData) => {
@@ -308,7 +331,10 @@ const handleShortShare = (shareData) => {
                 message.info("已复制分享内容(30天有效)")
             }
         })
-        .catch(reason => message.error("分享失败, 失败原因: " + (reason.message || reason)));
+        .catch(reason => {
+            console.error("分享失败详情:", reason);
+            message.error("分享失败, 失败原因: " + extractApiError(reason));
+        });
 }
 // 扩展管理按钮
 export const ExpandManageButton = ({ category, intelligent, config, handleConvert, editorHelpRender, aiRender, refreshScript }) => {
