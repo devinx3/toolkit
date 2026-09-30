@@ -95,17 +95,20 @@ const getShareData = async (intelligent) => {
         };
     } else if (intelligent.getShareId()) {
         let shareId = intelligent.getShareId();
-        intelligent.clearShareData();
-        const response = await axios.get('/api/storage/share/' + shareId);
-        if (response.status !== 200) {
-            message.error("分享数据获取异常：" + (response.data?.error || response.statusText));
+        intelligent.clearShareId();
+        // validateStatus 放行所有状态码，统一在下方做契约校验（status + code + data）
+        const response = await axios.get('/api/storage/share/' + shareId, { validateStatus: () => true });
+        const body = response.data;
+        // 统一响应规范: { code, message, data: { content } }
+        if (response.status !== 200 || body?.code !== 'OK') {
+            message.error("分享数据获取失败：" + (body?.message || response.statusText));
             return undefined;
         }
-        if (!response.data?.content) {
+        if (!body?.data?.content) {
             message.error("分享数据为空");
             return undefined;
         }
-        let data = lzString.decompressFromEncodedURIComponent(response.data.content);
+        let data = lzString.decompressFromEncodedURIComponent(body.data.content);
         let jsonData = {}
         try {
             jsonData = JSON.parse(data)
@@ -268,12 +271,15 @@ const ExpandManageModal = ({ category, config, visible, setVisible, editorHelpRe
     </Drawer>)
 }
 
+// 站点根地址：协议 + host + PUBLIC_URL 部署子路径（如 /toolkit）
+const siteOrigin = () => `${window.location.protocol}//${window.location.host}${process.env.PUBLIC_URL || ''}`;
+
 const generateShareUrl = (shareData) => {
     let newShareData = { name: shareData.name + "(来自分享)", description: shareData.description, scriptContent: shareData.scriptContent }
     let shareDataParam = backup2ShareData(newShareData);
     let newUrl = null
-    if (window.location.pathname.startsWith("/customize/")) {
-        newUrl = `${window.location.protocol}//${window.location.host}/customize/cat/initial`
+    if (window.location.pathname.startsWith(process.env.PUBLIC_URL + "/customize/cat/")) {
+        newUrl = siteOrigin() + "/customize/cat/initial"
     } else {
         const idx = window.location.href.indexOf("?");
         newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
@@ -314,8 +320,8 @@ const generateShareIdUrl = async (shareData) => {
         throw new Error(body?.message || `分享创建失败(HTTP ${response.status})`);
     }
     let newUrl = null
-    if (window.location.pathname.startsWith("/customize/")) {
-        newUrl = `${window.location.protocol}//${window.location.host}/customize/cat/initial`
+    if (window.location.pathname.startsWith(process.env.PUBLIC_URL + "/customize/cat/")) {
+        newUrl = siteOrigin() + "/customize/cat/initial"
     } else {
         const idx = window.location.href.indexOf("?");
         newUrl = (idx === -1 ? window.location.href : window.location.href.substring(0, idx));
@@ -326,7 +332,7 @@ const generateShareIdUrl = async (shareData) => {
 const handleShortShare = (shareData) => {
     generateShareIdUrl(shareData)
         .then(shareUrl => {
-            const copyText = '链接：' + shareUrl + '\n复制这段内容打开「'+ window.location.hostname + '」查看分享内容';
+            const copyText = '链接：' + shareUrl + '\n复制这段内容打开「'+ window.location.host + (process.env.PUBLIC_URL || '') + '」查看分享内容';
             if (StrUtil.copyToClipboard(copyText)) {
                 message.info("已复制分享内容(30天有效)")
             }
