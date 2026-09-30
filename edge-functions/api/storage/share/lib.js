@@ -27,8 +27,8 @@ function jsonResponse(data, status = 200) {
 }
 
 // 统一错误响应：{ code, message, data? }，HTTP 状态码由错误定义携带
-function errorResponse(key, data) {
-  const m = MESSAGES[key] || MESSAGES.INTERNAL_ERROR;
+function errorResponse(code, data) {
+  const m = MESSAGES[code] || MESSAGES.INTERNAL_ERROR;
   return jsonResponse(
     { code: m.code, message: m.message, ...(data !== undefined ? { data } : {}) },
     m.status
@@ -85,4 +85,4 @@ export async function getShare(shareId) {
   return { content: record.content };
 }
 
-export { jsonResponse, okResponse, errorResponse, MESSAGES };
+export { okResponse, errorResponse, MESSAGES };
