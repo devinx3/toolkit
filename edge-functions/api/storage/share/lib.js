@@ -47,17 +47,16 @@ function generateShareId() {
 // 生成分享：入参为脚本内容，返回 { shareId }
 export async function createShare(content) {
   const expireDay = Math.floor(Date.now() / DAY_MS) + EXPIRE_DAYS;
-  const record = JSON.stringify({ content, expireDay });
+  const record = { content, expireDay };
 
   // 重试最多 3 次，避免 shareId 极小概率冲突
   for (let times = 0; times < 3; times++) {
     const shareId = generateShareId();
-    const key = KV_PREFIX + shareId;
-    const existing = await TOOLKIT_SHARE.get(key);
+    const existing = await shareStore.get(shareId);
     if (existing !== null && existing !== undefined) {
       continue; // key 已被占用，换一个重试
     }
-    await TOOLKIT_SHARE.put(key, record);
+    await shareStore.put(shareId, record);
     return { shareId };
   }
   return { error: 'CREATE_FAILED' };
@@ -69,7 +68,7 @@ export async function getShare(shareId) {
     return { error: 'BAD_REQUEST' };
   }
 
-  const raw = await TOOLKIT_SHARE.get(KV_PREFIX + shareId);
+  const raw = await shareStore.get(shareId);
   if (!raw) {
     return { error: 'NOT_FOUND' };
   }
@@ -78,11 +77,25 @@ export async function getShare(shareId) {
   // 过期判断按 epoch 天数：当前天数超过记录的过期天数即过期（UTC 日界）
   if (record?.expireDay && Math.floor(Date.now() / DAY_MS) > record.expireDay) {
     // 已过期：删除记录并返回 404
-    await TOOLKIT_SHARE.delete(KV_PREFIX + shareId);
+    await shareStore.delete(shareId);
     return { error: 'NOT_FOUND' };
   }
 
   return { content: record.content };
+}
+
+const shareStore = {
+  get: async (shareId) => {
+    let value = await TOOLKIT_SHARE.get(KV_PREFIX + shareId, "json");
+    return value ? { content: value.c, expireDay: value.e } : value;
+  },
+  put: async (shareId, value) => {
+    let newValue = { content: value.c, expireDay: value.e };
+    return await TOOLKIT_SHARE.put(KV_PREFIX + shareId, JSON.stringify(newValue));
+  },
+  delete: async (shareId) => {
+    return await TOOLKIT_SHARE.delete(KV_PREFIX + shareId);
+  }
 }
 
 export { okResponse, errorResponse, MESSAGES };
