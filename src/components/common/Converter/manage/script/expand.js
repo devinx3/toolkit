@@ -56,11 +56,11 @@ const AddConfigButton = ({ category, config, name, description, scriptContent, o
     }
     return (<Space>
         <Button onClick={handleShare}>分享</Button>
-        <Button onClick={e => handleShortShare({
+        {EDGE_API_ENABLED && <Button onClick={e => handleShortShare({
             name: configName || defaultConfigName,
             description: configDesc || configName || defaultConfigDesc,
             scriptContent: scriptContent
-        })}>临时分享</Button>
+        })}>临时分享</Button>}
         <Popconfirm icon={null} cancelText='取消' okText='确认'
             onConfirm={handleAddConfig}
             title={<>
@@ -77,6 +77,8 @@ const nextSeed = (() => {
     let version = 100;
     return () => version++;
 })();
+// 边缘函数分享能力开关：仅部署了 edge-functions（ENABLE_EDGE_API 生效）时开放临时分享与 shareId 解析
+const EDGE_API_ENABLED = process.env.REACT_APP_ENABLE_EDGE_API === 'true';
 const getShareData = async (intelligent) => {
     if (intelligent.getShareData()) {
         let data = lzString.decompressFromEncodedURIComponent(intelligent.getShareData());
@@ -93,7 +95,7 @@ const getShareData = async (intelligent) => {
             description: jsonData.description,
             scriptContent: jsonData.scriptContent,
         };
-    } else if (intelligent.getShareId()) {
+    } else if (EDGE_API_ENABLED && intelligent.getShareId()) {
         let shareId = intelligent.getShareId();
         intelligent.clearShareId();
         // validateStatus 放行所有状态码，统一在下方做契约校验（status + code + data）
@@ -368,10 +370,10 @@ export const ExpandManageButton = ({ category, intelligent, config, handleConver
     }, {
         key: "share",
         label: (<Button shape="circle" type="text" onClick={e => handleShareData()} icon={<ShareAltOutlined />} size="small">分享</Button>)
-    }, {
+    }, ...(EDGE_API_ENABLED ? [{
         key: "share30",
         label: (<Button shape="circle" type="text" onClick={e => handleShortShare(config)} icon={<ShareAltOutlined />} size="small">临时分享</Button>)
-    }];
+    }] : [])];
     // clickCode 自动触发（放在 useEffect 中，避免 render 阶段的副作用）
     React.useEffect(() => {
         if (intelligent.canClick(SCRIPT_TYPE.NODE, config.code)) {

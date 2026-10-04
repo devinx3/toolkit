@@ -12,6 +12,7 @@ const DAY_MS = 86400000;
 // 错误分级：参数错误 400 / 业务规则失败 422 / 系统异常 500
 const MESSAGES = {
   BAD_REQUEST: { status: 400, code: 'BAD_REQUEST', message: '请求参数不合法' },
+  NO_RESOURCE: { status: 404, code: 'NO_RESOURCE', message: '资源不存在' },
   NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: '分享不存在或已过期' },
   RULE_CONFLICT: { status: 422, code: 'RULE_CONFLICT', message: '业务规则校验失败' },
   CREATE_FAILED: { status: 500, code: 'CREATE_FAILED', message: '分享创建失败，请重试' },
@@ -88,6 +89,18 @@ function calculateDay(time = Date.now()) {
   return Math.floor(time / DAY_MS) - 20000;
 }
 
+export async function deleteAllExpireShare() {
+  let count = 0;
+  await shareStore.list(async shareId => {
+    let record = await shareStore.get(shareId);
+    if (record?.expireDay && calculateDay() > record.expireDay) {
+      await shareStore.delete(shareId);
+      count++;
+    }
+  });
+  return count;
+}
+
 const shareStore = {
   get: async (shareId) => {
     let value = await TOOLKIT_SHARE.get(KV_PREFIX + shareId, "json");
@@ -104,6 +117,19 @@ const shareStore = {
   },
   delete: async (shareId) => {
     return await TOOLKIT_SHARE.delete(KV_PREFIX + shareId);
+  },
+  list: async (callback) => {
+    let result;
+    let cursor = null;
+    do {
+      result = await TOOLKIT_SHARE.list({ prefix: TOOLKIT_SHARE, cursor: cursor });
+      cursor = result.cursor;
+      if (result?.keyes) {
+        for (const key in result.keys) {
+          await callback(key.replace(KV_PREFIX, ""));
+        }
+      }
+    } while (result && !result.complete);
   }
 }
 

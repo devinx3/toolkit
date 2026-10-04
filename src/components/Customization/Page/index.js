@@ -43,14 +43,19 @@ const getFirstScriptByShareId = async (shareId) => {
     // content 即分享时 backup2ShareData 生成的压缩串，直接走原有恢复逻辑
     return restoreByShareData(body.data.content);
 }
+// 边缘函数分享能力开关：仅部署了 edge-functions（ENABLE_EDGE_API 生效）时开放 shareId 解析
+const EDGE_API_ENABLED = process.env.REACT_APP_ENABLE_EDGE_API === 'true';
+
 const getScript = async () => {
     let shareData = search.get("shareData");
     if (shareData) {
         return restoreByShareData(shareData);
     }
-    let shareId = search.get("shareId");
-    if (shareId) {
-        return getFirstScriptByShareId(shareId);
+    if (EDGE_API_ENABLED) {
+        let shareId = search.get("shareId");
+        if (shareId) {
+            return getFirstScriptByShareId(shareId);
+        }
     }
     let secretKey = search.get("secretKey");
     let importUrl = search.get("importUrl");
