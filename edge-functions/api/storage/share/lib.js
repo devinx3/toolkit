@@ -17,6 +17,7 @@ const MESSAGES = {
   RULE_CONFLICT: { status: 422, code: 'RULE_CONFLICT', message: '业务规则校验失败' },
   CREATE_FAILED: { status: 500, code: 'CREATE_FAILED', message: '分享创建失败，请重试' },
   READ_FAILED: { status: 500, code: 'READ_FAILED', message: '读取分享失败' },
+  UNAUTHORIZED: { status: 401, code: 'UNAUTHORIZED', message: '认证失败' },
   INTERNAL_ERROR: { status: 500, code: 'INTERNAL_ERROR', message: '服务器内部错误' },
 };
 
@@ -122,12 +123,10 @@ const shareStore = {
     let result;
     let cursor = null;
     do {
-      result = await TOOLKIT_SHARE.list({ prefix: TOOLKIT_SHARE, cursor: cursor });
-      cursor = result.cursor;
-      if (result?.keyes) {
-        for (const key in result.keys) {
-          await callback(key.replace(KV_PREFIX, ""));
-        }
+      result = await TOOLKIT_SHARE.list({ prefix: KV_PREFIX, cursor: cursor });
+      cursor = result?.cursor;
+      for (const key of (result?.keys ?? [])) {
+        await callback(key.replace(KV_PREFIX, ""));
       }
     } while (result && !result.complete);
   }
