@@ -91,15 +91,18 @@ function calculateDay(time = Date.now()) {
 }
 
 export async function deleteAllExpireShare() {
-  let count = 0;
+  // 先收集后删除：边遍历边删除会移动分页游标，导致漏删
+  let expiredIds = [];
   await shareStore.list(async shareId => {
     let record = await shareStore.get(shareId);
     if (record?.expireDay && calculateDay() > record.expireDay) {
-      await shareStore.delete(shareId);
-      count++;
+      expiredIds.push(shareId);
     }
   });
-  return count;
+  for (const shareId of expiredIds) {
+    await shareStore.delete(shareId);
+  }
+  return expiredIds.length;
 }
 
 const shareStore = {
@@ -121,12 +124,20 @@ const shareStore = {
   },
   list: async (callback) => {
     let result;
-    let cursor = null;
+    let cursor;
+    const option = { prefix: KV_PREFIX };
     do {
-      result = await TOOLKIT_SHARE.list({ prefix: KV_PREFIX, cursor: cursor });
+      if (typeof cursor === 'string') {
+        option.cursor = cursor;
+      }
+      result = await TOOLKIT_SHARE.list(option);
       cursor = result?.cursor;
-      for (const key of (result?.keys ?? [])) {
-        await callback(key.replace(KV_PREFIX, ""));
+      // keys 元素可能为字符串或对象（如 { key: 'share_x' }），统一取 key 字符串
+      for (const entry of (result?.keys ?? [])) {
+        const key = entry?.key;
+        if (key?.startsWith(KV_PREFIX)) {
+          await callback(key.slice(KV_PREFIX.length));
+        }
       }
     } while (result && !result.complete);
   }
